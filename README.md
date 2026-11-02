@@ -4,14 +4,11 @@ A repository for paperback that includes both manga and comic extensions based o
 
 ## 📚 Available Sources
 
-- Batcave
 - Elftoon
-- GodaComic
 - Hentai2Read
 - HentaiCosplay
 - Hitomi
 - Kenmei
-- LeagueOfComicGeeks
 - LNORI
 - MVLEMPYR
 - MangaBall
@@ -25,8 +22,6 @@ A repository for paperback that includes both manga and comic extensions based o
 - Ososedki
 - ProjectSuki
 - Rawkuma
-- ReadAllComics
-- ReadComicsOnline
 
 ## 🚀 Installation
 

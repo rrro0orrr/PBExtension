@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-02T19:22:38.562Z",
+  "buildTime": "2026-11-02T19:28:55.200Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.91",
     "types": "1.0.0-alpha.91"
@@ -374,6 +374,27 @@
         }
       ],
       "id": "NHentai"
+    },
+    {
+      "name": "Novel Archive",
+      "description": "Extension that pulls web novels from novelarchive.cc.",
+      "version": "1.0.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "NovelArchive"
     },
     {
       "name": "NovelFire",

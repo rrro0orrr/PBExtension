@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-02T20:04:22.320Z",
+  "buildTime": "2026-11-02T20:06:23.744Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.91",
     "types": "1.0.0-alpha.91"
@@ -9,27 +9,6 @@
     "description": "Kakarot extensions for Paperback"
   },
   "sources": [
-    {
-      "name": "Batcave",
-      "description": "Extension that pulls content from batcave.biz.",
-      "version": "1.8",
-      "icon": "icon.png",
-      "language": "en",
-      "contentRating": "SAFE",
-      "badges": [],
-      "capabilities": [
-        4,
-        64,
-        1,
-        16
-      ],
-      "developers": [
-        {
-          "name": "Karrot"
-        }
-      ],
-      "id": "Batcave"
-    },
     {
       "name": "Elftoon",
       "description": "Extension that pulls content from elftoon.com (Cloudflare protected).",
@@ -50,32 +29,6 @@
         }
       ],
       "id": "Elftoon"
-    },
-    {
-      "name": "GodaComic",
-      "description": "Extension that pulls content from https://manhuascans.org/",
-      "version": "1.0.0-alpha.1",
-      "icon": "icon.png",
-      "language": "en",
-      "contentRating": "SAFE",
-      "badges": [
-        {
-          "label": "Aggregator",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#800080"
-        }
-      ],
-      "capabilities": [
-        4,
-        64,
-        1
-      ],
-      "developers": [
-        {
-          "name": "Karrot"
-        }
-      ],
-      "id": "GodaComic"
     },
     {
       "name": "Hentai2read",
@@ -170,39 +123,6 @@
         }
       ],
       "id": "Kenmei"
-    },
-    {
-      "name": "LeagueOfComicGeeks",
-      "description": "Extension that integrates with leagueofcomicgeeks.com for tracking and collection management.",
-      "version": "1.1.2",
-      "icon": "icon.png",
-      "language": "en",
-      "contentRating": "SAFE",
-      "capabilities": [
-        32,
-        4,
-        64,
-        2,
-        16
-      ],
-      "badges": [
-        {
-          "label": "Tracker",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#1E90FF"
-        },
-        {
-          "label": "Western Comics",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#C71585"
-        }
-      ],
-      "developers": [
-        {
-          "name": "Karrot"
-        }
-      ],
-      "id": "LeagueOfComicGeeks"
     },
     {
       "name": "LNORI",
@@ -550,80 +470,6 @@
         }
       ],
       "id": "Rawkuma"
-    },
-    {
-      "name": "ReadAllComics",
-      "description": "Extension that pulls content from https://readallcomics.com",
-      "version": "1.3",
-      "icon": "icon.png",
-      "language": "en",
-      "contentRating": "SAFE",
-      "badges": [
-        {
-          "label": "Aggregator",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#800080"
-        },
-        {
-          "label": "Mature",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#800080"
-        },
-        {
-          "label": "Western Comics",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#C71585"
-        }
-      ],
-      "capabilities": [
-        4,
-        64,
-        1,
-        16
-      ],
-      "developers": [
-        {
-          "name": "Karrot"
-        }
-      ],
-      "id": "ReadAllComics"
-    },
-    {
-      "name": "ReadComicsOnlineRu",
-      "description": "Extension that pulls content from readcomicsonline.ru.",
-      "version": "1.2",
-      "icon": "icon.png",
-      "language": "en",
-      "contentRating": "SAFE",
-      "badges": [
-        {
-          "label": "Aggregator",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#800080"
-        },
-        {
-          "label": "Mature",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#800080"
-        },
-        {
-          "label": "Western Comics",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#C71585"
-        }
-      ],
-      "capabilities": [
-        4,
-        64,
-        1,
-        16
-      ],
-      "developers": [
-        {
-          "name": "Karrot"
-        }
-      ],
-      "id": "ReadComicsOnline"
     },
     {
       "name": "ScribbleHub",

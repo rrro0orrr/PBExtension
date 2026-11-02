@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "LNORI",
   description: "Extension that pulls light novels from lnori.com.",
-  version: "1.0.0",
+  version: "1.0.1",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.EVERYONE,

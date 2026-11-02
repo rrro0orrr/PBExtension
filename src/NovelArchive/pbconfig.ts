@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "Novel Archive",
   description: "Extension that pulls web novels from novelarchive.cc.",
-  version: "1.0.0",
+  version: "1.1.0",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.MATURE,

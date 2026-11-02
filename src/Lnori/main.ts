@@ -198,7 +198,7 @@ export class LnoriExtension implements LnoriImplementation {
       a.localeCompare(b),
     );
     return new LnoriSearchForm(
-      tagNames.map((name) => ({ id: name, name: titleCase(name) })),
+      tagNames.map((name) => ({ id: encodeId(name), name: titleCase(name) })),
       meta,
     );
   }
@@ -213,8 +213,8 @@ export class LnoriExtension implements LnoriImplementation {
   ): Promise<PagedResults<SearchResultItem>> {
     const searchMeta = (query.metadata as { searchMeta?: LnoriSearchMetadata } | undefined)
       ?.searchMeta;
-    const included = searchMeta?.tagIncluded ?? [];
-    const excluded = searchMeta?.tagExcluded ?? [];
+    const included = (searchMeta?.tagIncluded ?? []).map(decodeId);
+    const excluded = (searchMeta?.tagExcluded ?? []).map(decodeId);
     const terms = normalize(query.title ?? "")
       .split(" ")
       .filter(Boolean);
@@ -281,7 +281,7 @@ export class LnoriExtension implements LnoriImplementation {
               {
                 id: "genres",
                 title: "Genres",
-                tags: genres.map((g) => ({ id: g.toLowerCase(), title: titleCase(g) })),
+                tags: genres.map((g) => ({ id: encodeId(g.toLowerCase()), title: titleCase(g) })),
               },
             ]
           : [],
@@ -538,6 +538,25 @@ function normalize(text: string): string {
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+// Paperback rejects ids with characters outside this set, so tag names like
+// "slice of life" are percent-encoded when used as ids
+const UNSAFE_ID_CHARS = /[^a-zA-Z0-9._\-@()[\]%?#+=/&:]/g;
+
+function encodeId(value: string): string {
+  return value.replace(UNSAFE_ID_CHARS, (char) => {
+    const encoded = encodeURIComponent(char);
+    return encoded !== char ? encoded : "-";
+  });
+}
+
+function decodeId(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 function titleCase(text: string): string {

@@ -10,10 +10,7 @@ export interface Hentai2readSearchMetadata extends JSONObject {
 export class Hentai2readSearchForm extends AdvancedSearchForm {
   private tagForm: TagFilterForm;
 
-  constructor(
-    tags: { id: string; name: string }[],
-    initialMeta?: Hentai2readSearchMetadata,
-  ) {
+  constructor(tags: { id: string; name: string }[], initialMeta?: Hentai2readSearchMetadata) {
     super();
     this.tagForm = new TagFilterForm(tags, {
       included: initialMeta?.tagIncluded ?? [],

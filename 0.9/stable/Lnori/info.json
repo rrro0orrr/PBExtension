@@ -1,0 +1,1 @@
+{"name":"LNORI","description":"Extension that pulls light novels from lnori.com.","version":"1.0.0","icon":"icon.png","language":"en","contentRating":"SAFE","capabilities":[4,64,1,16],"badges":[{"label":"Light Novels","textColor":"#FFFFFF","backgroundColor":"#5B3FA0"}],"developers":[{"name":"Karrot"}],"id":"Lnori"}

@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-02T19:17:44.418Z",
+  "buildTime": "2026-11-02T19:22:38.562Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.91",
     "types": "1.0.0-alpha.91"
@@ -203,6 +203,33 @@
         }
       ],
       "id": "LeagueOfComicGeeks"
+    },
+    {
+      "name": "LNORI",
+      "description": "Extension that pulls light novels from lnori.com.",
+      "version": "1.0.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [
+        {
+          "label": "Light Novels",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#5B3FA0"
+        }
+      ],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "Lnori"
     },
     {
       "name": "Mangaball",

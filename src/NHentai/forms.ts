@@ -264,7 +264,7 @@ class NHentaiApiKeyForm extends Form {
           `[NHentai] API key validation: ${authorized ? "Authenticated" : "Unauthenticated"} (HTTP ${response.status})`,
         );
         setApiKeyAuthorizedSetting(authorized);
-      } catch (e) {
+      } catch {
         setApiKeyAuthorizedSetting(false);
       }
     } else {

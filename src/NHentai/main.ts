@@ -209,11 +209,6 @@ const DISCOVER_FETCH_BATCH_SIZE = 1;
 
 // Track how many times each related manga has been shown in the carousel
 let relatedViewCounts: Map<number, number> | undefined;
-/**
- * Related carousel cycles age out after user scrolls 72 tiles past the final item.
- * This allows cycles to gradually become stale while staying visible for initial discovery.
- */
-const RELATED_AGE_WINDOW_TILES = 72;
 
 function getCarouselTiles(): number {
   const value = getDiscoverCarouselTilesSetting();
@@ -547,7 +542,7 @@ function withNhentaiApiAuth(request: Request): Request {
   return {
     ...normalizedRequest,
     headers: {
-      ...(normalizedRequest.headers ?? {}),
+      ...normalizedRequest.headers,
       Authorization: `Key ${apiKey}`,
     },
   };
@@ -2488,7 +2483,7 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
             const tagsValue = filter.value as
               | Record<string, "included" | "excluded">
               | undefined;
-            const nextTags = { ...(tagsValue ?? {}) };
+            const nextTags = { ...tagsValue };
             // Strip leftover apply-manga-filter key from old state
             delete nextTags["__apply_manga_filter_tags__"];
             setSearchFilterTags(nextTags);
@@ -3710,7 +3705,6 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
       const showRelatedOrder = displayOptions.includes("show_related_order");
       const seenIds = new Set<number>();
       let expansions = 0;
-      const batchSize = Math.max(limit, relatedCarouselTiles);
       let languageSkipped = 0;
 
       // For pool items in the upcoming display window: if any tiles are missing,
@@ -4025,7 +4019,7 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
       metadata?: Record<string, unknown>;
     };
     sourceMangaWithMetadata.metadata = {
-      ...(sourceMangaWithMetadata.metadata ?? {}),
+      ...sourceMangaWithMetadata.metadata,
       chapterTitle,
       chapterId: sourceManga.mangaId,
       subtitle: existingInfo?.author ?? "",
@@ -5018,8 +5012,9 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
           seen.add(slug);
         }
       } catch (error) {
+        // Keep the pages that already loaded instead of discarding them all
         console.error("Unable to load NHentai popular tags", error);
-        return [];
+        break;
       }
     }
 
@@ -5128,12 +5123,12 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
         if (!Number.isNaN(value)) {
           if (operator === ">=" || operator === ">") {
             favoritesConstraint = {
-              ...(favoritesConstraint ?? {}),
+              ...favoritesConstraint,
               min: value,
             };
           } else if (operator === "<=" || operator === "<") {
             favoritesConstraint = {
-              ...(favoritesConstraint ?? {}),
+              ...favoritesConstraint,
               max: value,
             };
           }
@@ -5184,7 +5179,7 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
 
       if (typeof newest === "number") {
         dateConstraint = {
-          ...(dateConstraint ?? {}),
+          ...dateConstraint,
           newerThanDays: newest,
         };
         // uploaded:<Xd means "newer than X days"
@@ -5192,7 +5187,7 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
       }
       if (typeof oldest === "number") {
         dateConstraint = {
-          ...(dateConstraint ?? {}),
+          ...dateConstraint,
           olderThanDays: oldest,
         };
         // uploaded:>Xd means "older than X days"
@@ -5883,8 +5878,7 @@ export class NHentaiExtension implements ExtensionImpl<typeof NHentaiConfig> {
     let limit = totalTags - scrollerCount;
 
     // If any would-be scroller tag has a long name (>14 chars), cap scroller at 4
-    // Only apply when scroller already has >= 3 tags to avoid collapsing small scrollers
-    if (scrollerCount >= 3 && scrollerCount > 4) {
+    if (scrollerCount > 4) {
       const scrollerTags = tags.slice(limit);
       if (scrollerTags.some((t) => t.name.replace(/_/g, " ").length > 14)) {
         scrollerCount = 4;

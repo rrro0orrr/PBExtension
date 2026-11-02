@@ -1,6 +1,6 @@
 # Kakarot Extension
 
-A repository for paperback that includes both manga and comic extensions
+A repository for paperback that includes both manga and comic extensions based on Kakarot's Extension - https://github.com/karrot0/KakarotExtension
 
 ## 📚 Available Sources
 
@@ -27,7 +27,7 @@ A repository for paperback that includes both manga and comic extensions
 ## 🚀 Installation
 
 1. Open Paperback
-2. Add this repository using [this link](https://rrro0orrr.github.io/KakarotExtension/0.9/stable/)
+2. Add this repository using [this link](https://rrro0orrr.github.io/PBExtension/0.9/stable/)
 3. Install and enjoy reading!
 
 ---

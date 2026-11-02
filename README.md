@@ -12,6 +12,7 @@ A repository for paperback that includes both manga and comic extensions based o
 - Hitomi
 - Kenmei
 - LeagueOfComicGeeks
+- LNORI
 - MangaBall
 - MangaBuddy
 - MangaCloud

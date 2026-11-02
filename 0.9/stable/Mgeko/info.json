@@ -1,0 +1,1 @@
+{"name":"Mgeko","description":"Extension that pulls manga, manhwa and manhua from mgeko.cc.","version":"1.0.0","icon":"icon.png","language":"en","contentRating":"MATURE","capabilities":[4,64,1,16],"badges":[{"label":"Aggregator","textColor":"#FFFFFF","backgroundColor":"#800080"}],"developers":[{"name":"Karrot"}],"id":"Mgeko"}

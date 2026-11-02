@@ -473,6 +473,30 @@ const LANGUAGE_SHORT: Record<string, string> = {
   vietnamese: "VI",
 };
 
+// Hitomi language name → Paperback chapter language code
+const CHAPTER_LANG_CODES: Record<string, string> = {
+  english: "en",
+  japanese: "jp",
+  chinese: "cn",
+  korean: "kr",
+  spanish: "es",
+  thai: "th",
+  vietnamese: "vi",
+  german: "de",
+  french: "fr",
+  italian: "it",
+  portuguese: "pt",
+  russian: "ru",
+  indonesian: "id",
+  polish: "pl",
+  tagalog: "tl",
+};
+
+function getChapterLangCode(language: string | null | undefined): string {
+  if (!language) return "unk";
+  return CHAPTER_LANG_CODES[language.trim().toLowerCase()] ?? "unk";
+}
+
 function normalizeTagSlug(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, " ").replace(/ /g, "_");
 }
@@ -3529,7 +3553,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       metadata?: Record<string, unknown>;
     };
     sourceMangaWithMetadata.metadata = {
-      ...(sourceMangaWithMetadata.metadata ?? {}),
+      ...sourceMangaWithMetadata.metadata,
       subtitle,
     };
     return [
@@ -3537,7 +3561,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         chapterId: sourceManga.mangaId,
         volume: 0,
         chapNum: 1,
-        langCode: gallery.languageName.english === "japanese" ? "jp" : "en",
+        langCode: getChapterLangCode(gallery.languageName.english),
         publishDate: gallery.publishedDate,
         sourceManga,
         title: gallery.title.display || gallery.title.japanese || "",
@@ -5444,7 +5468,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         Referer: "https://hitomi.la/",
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-        ...(headers || {}),
+        ...headers,
       },
     } satisfies Request;
 
@@ -5661,7 +5685,10 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       },
     } satisfies Request;
 
-    const [, data] = await Application.scheduleRequest(request);
+    const [response, data] = await Application.scheduleRequest(request);
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`gg.js request failed with HTTP ${response.status}`);
+    }
     this.onRequestSuccess();
     return Application.arrayBufferToUTF8String(data);
   }
@@ -6097,8 +6124,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       promoteCount = totalTags - scrollerCount;
 
       // If any would-be scroller tag has a long name (>14 chars), cap scroller at 4
-      // Only apply when scroller already has >= 3 tags to avoid collapsing small scrollers
-      if (scrollerCount >= 3 && scrollerCount > 4) {
+      if (scrollerCount > 4) {
         const scrollerTags = sortedTags.slice(promoteCount);
         if (scrollerTags.some((x) => formatTagTitle(x.slug).length > 14)) {
           scrollerCount = 4;

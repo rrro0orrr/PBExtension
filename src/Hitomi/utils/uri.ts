@@ -63,17 +63,17 @@ export class ImageUriResolver {
   static parseGG(responseText: string) {
     IMAGE_URI_PARTS[2].clear();
 
-    const bMatch = responseText.match(/(?:var\s+)?b\s*[:=]\s*['"]([^'"]+)['"]/);
+    const bMatch = responseText.match(/\bb\s*[:=]\s*['"](\d+)\/?['"]/);
     if (bMatch) {
       IMAGE_URI_PARTS[0] = bMatch[1].replace(/\/$/, "");
     }
 
-    const oMatch = responseText.match(/(?:var\s+)?o\s*=\s*(\d+)/);
+    const oMatch = responseText.match(/\bvar\s+o\s*=\s*(\d+)/);
     if (oMatch) {
       IMAGE_URI_PARTS[1] = oMatch[1] === "0";
     }
 
-    const cArrayMatch = responseText.match(/(?:var\s+)?c\s*=\s*\[([\d,\s]+)\]/);
+    const cArrayMatch = responseText.match(/\bc\s*=\s*\[([\d,\s]+)\]/);
     if (cArrayMatch) {
       const numbers = cArrayMatch[1]
         .split(",")
@@ -102,11 +102,11 @@ export class ImageUriResolver {
       }
     }
 
-    if (IMAGE_URI_PARTS[0].length === 0) {
-      IMAGE_URI_PARTS[0] = "1763701202";
-    }
-
+    // No hardcoded fallback for b: it rotates regularly, and a stale value
+    // silently produces 404 URLs instead of surfacing the parse failure.
     if (
+      !bMatch ||
+      !oMatch ||
       IMAGE_URI_PARTS[0].length === 0 ||
       IMAGE_URI_PARTS[2].size === 0 ||
       IMAGE_URI_PARTS[2].has(NaN)

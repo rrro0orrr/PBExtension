@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-02T19:28:55.200Z",
+  "buildTime": "2026-11-02T19:42:55.253Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.91",
     "types": "1.0.0-alpha.91"
@@ -395,6 +395,39 @@
         }
       ],
       "id": "NovelArchive"
+    },
+    {
+      "name": "NovelCool",
+      "description": "Extension that pulls content from novelcool.com.",
+      "version": "1.0.0-alpha.27",
+      "icon": "icons.png",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ],
+      "badges": [
+        {
+          "label": "Novel",
+          "textColor": "#ffffff",
+          "backgroundColor": "#4fa06a"
+        },
+        {
+          "label": "Manga",
+          "textColor": "#ffffff",
+          "backgroundColor": "#d1477a"
+        }
+      ],
+      "developers": [
+        {
+          "name": "Popmango",
+          "github": "https://github.com/PoppingMangoSources"
+        }
+      ],
+      "id": "NovelCool"
     },
     {
       "name": "NovelFire",

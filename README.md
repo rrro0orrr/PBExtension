@@ -14,6 +14,7 @@ A repository for paperback that includes both manga and comic extensions based o
 - MangaBall
 - MangaBuddy
 - MangaCloud
+- Mgeko
 - Mitaku
 - NHentai
 - NovelArchive

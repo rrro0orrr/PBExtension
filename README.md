@@ -13,6 +13,7 @@ A repository for paperback that includes both manga and comic extensions based o
 - Kenmei
 - LeagueOfComicGeeks
 - LNORI
+- MVLEMPYR
 - MangaBall
 - MangaBuddy
 - MangaCloud

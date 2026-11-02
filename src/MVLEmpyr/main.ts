@@ -104,7 +104,10 @@ const SORT_OPTIONS: SortingOption[] = [
 ];
 
 // Home page sections, by their <section> class
-const HOME_SECTIONS: Record<string, { title: string; cls: string; type: DiscoverSectionType }> = {
+const HOME_SECTIONS: Record<
+  string,
+  { title: string; cls: string; type: DiscoverSectionType; adult?: boolean }
+> = {
   popular: { title: "Popular", cls: "popular-section", type: DiscoverSectionType.featured },
   trending: {
     title: "Trending",
@@ -127,6 +130,13 @@ const HOME_SECTIONS: Record<string, { title: string; cls: string; type: Discover
     type: DiscoverSectionType.simpleCarousel,
   },
   romance: { title: "Romance", cls: "romance-section", type: DiscoverSectionType.simpleCarousel },
+  // Every title here is marked Adult so the app's content filter can hide it
+  r18: {
+    title: "R18",
+    cls: "r18-section",
+    type: DiscoverSectionType.simpleCarousel,
+    adult: true,
+  },
 };
 
 interface CatalogueRecord {
@@ -273,6 +283,7 @@ export class MVLEmpyrExtension implements MVLEmpyrImplementation {
               mangaId: card.slug,
               imageUrl: card.cover,
               title: card.title,
+              ...(def.adult ? { contentRating: ContentRating.ADULT } : {}),
             };
         }
       }),

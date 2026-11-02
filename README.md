@@ -18,6 +18,7 @@ A repository for paperback that includes both manga and comic extensions based o
 - MangaCloud
 - Mitaku
 - NHentai
+- NovelArchive
 - NovelFire
 - Ososedki
 - ProjectSuki

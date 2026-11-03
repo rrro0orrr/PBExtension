@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-02T20:15:56.275Z",
+  "buildTime": "2026-11-03T02:41:49.405Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.91",
     "types": "1.0.0-alpha.91"
@@ -421,7 +421,7 @@
     {
       "name": "Ososedki",
       "description": "Extension that pulls content from ososedki.com",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "ADULT",

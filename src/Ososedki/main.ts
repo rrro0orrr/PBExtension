@@ -73,21 +73,21 @@ export class OsosedkiExtension implements OsosedkiImplementation {
     });
 
     const pages = this.parseImages($);
-    const firstImg = $("img", $("div.thumbs", "div.container-fluid").first());
 
+    // Photo alt text is "<gallery> - Photo <n>"; strip the photo number.
+    const alt = $("figure.photo-item img").first().attr("alt")?.trim() ?? "";
     const titleString =
-      firstImg.attr("alt")?.trim() ||
+      alt.replace(/\s+-\s+Photo\s+\d+$/i, "").trim() ||
       $("h1").first().text().trim() ||
       $('meta[property="og:title"]').attr("content")?.trim() ||
       "";
-    // Alt text is "<gallery> - <n>", strip the image number
-    const split = titleString.split(" - ");
-    const title = decode(split.slice(0, -1).join(" - ") || titleString);
+    const title = decode(titleString);
 
+    // Model / cosplay / fandom buttons above the photo grid
     const tags: Tag[] = [];
     const seen = new Set<string>();
-    for (const el of $('a[href*="/category/"]', "div.container-fluid").toArray()) {
-      const id = idFromUrl($(el).attr("href") ?? "");
+    for (const el of $(".album-info a[href]").toArray()) {
+      const id = pathFromUrl($(el).attr("href") ?? "");
       const tagTitle = decode($(el).text().trim());
       if (!id || !tagTitle || seen.has(id)) continue;
       seen.add(id);
@@ -99,7 +99,7 @@ export class OsosedkiExtension implements OsosedkiImplementation {
       mangaInfo: {
         primaryTitle: title,
         secondaryTitles: [],
-        thumbnailUrl: pages[0] ?? $('meta[property="og:image"]').attr("content") ?? "",
+        thumbnailUrl: $('meta[property="og:image"]').attr("content") ?? pages[0] ?? "",
         synopsis: `Gallery: ${title}\n\nImages: ${pages.length}`,
         status: "Completed",
         tagGroups: tags.length ? [{ id: "tags", title: "Tags", tags }] : [],
@@ -197,20 +197,23 @@ export class OsosedkiExtension implements OsosedkiImplementation {
     const title = (query.title ?? "").trim().toLowerCase();
     const category = query.metadata?.find((f) => f.id === "category")?.value;
 
-    // The site has no title search; browse a category (or the latest
-    // galleries) and filter by title locally.
-    const url =
-      typeof category === "string" && category
-        ? `${OS_DOMAIN}/category/${category}?page=${page}`
-        : `${OS_DOMAIN}/?page=${page}`;
+    let url: string;
+    if (title) {
+      url = `${OS_DOMAIN}/search?q=${encodeURIComponent(title)}&page=${page}`;
+    } else if (typeof category === "string" && category) {
+      // Older versions stored bare category slugs
+      const path = category.includes("/") ? category : `category/${category}`;
+      url = `${OS_DOMAIN}/${path}?page=${page}`;
+    } else {
+      url = `${OS_DOMAIN}/?page=${page}`;
+    }
 
     const $ = await this.fetchCheerio({ url, method: "GET" });
-    const all = this.parseGalleryList($);
-    const items = title ? all.filter((i) => i.title.toLowerCase().includes(title)) : all;
+    const items = this.parseGalleryList($);
 
     return {
       items,
-      metadata: all.length ? { page: page + 1 } : undefined,
+      metadata: items.length ? { page: page + 1 } : undefined,
     };
   }
 
@@ -219,9 +222,9 @@ export class OsosedkiExtension implements OsosedkiImplementation {
 
     const tags: Tag[] = [];
     const seen = new Set<string>();
-    for (const el of $("li", $("li.nav-item.dropdown").first()).toArray()) {
+    for (const el of $('a.dropdown-item[href*="/category/"]').toArray()) {
       const title = $(el).text().trim();
-      const id = encodeURI(idFromUrl($("a", el).attr("href") ?? ""));
+      const id = pathFromUrl($(el).attr("href") ?? "");
       if (!id || !title || seen.has(id)) continue;
       seen.add(id);
       tags.push({ id, title: decode(title) });
@@ -268,23 +271,23 @@ export class OsosedkiExtension implements OsosedkiImplementation {
     const results: SearchResultItem[] = [];
     const seen = new Set<string>();
 
-    for (const item of $("div.thumbs", "div.container-fluid").toArray()) {
-      const href = $("a", item).first().attr("href") ?? "";
+    // Ad tiles are div.gallery-item.banner-item; real galleries are <article>s.
+    for (const item of $("#gallery article.gallery-item").toArray()) {
+      const href = $("a.gallery-link", item).attr("href") ?? "";
       if (!href.includes("/photos/")) continue;
       const id = idFromUrl(href);
       if (!id || seen.has(id)) continue;
 
-      const title = $("a.text-white.text-decoration-none, a", item).text().trim();
+      const img = $("img.gallery-img", item).first();
+      const title = $("h3", item).first().text().trim() || img.attr("alt")?.trim() || "";
       if (!title) continue;
 
-      const count = $("i.bi.bi-images", item).parent().text().trim();
+      const count = $(".badge.bg-dark", item).first().text().trim();
 
       seen.add(id);
       results.push({
         mangaId: id,
-        imageUrl: absoluteUrl(
-          $("img", item).first().attr("src") ?? $("img", item).first().attr("data-src") ?? "",
-        ),
+        imageUrl: absoluteUrl(img.attr("data-src") ?? img.attr("src") ?? ""),
         title: decode(title),
         subtitle: count ? `${count} images` : undefined,
       });
@@ -296,14 +299,12 @@ export class OsosedkiExtension implements OsosedkiImplementation {
   parseImages($: CheerioAPI): string[] {
     const pages: string[] = [];
 
-    for (const el of $("div.thumbs", "div.container-fluid").toArray()) {
+    for (const el of $("#photos figure.photo-item").toArray()) {
       const img = $("img", el).first();
+      const src = img.attr("data-src") ?? img.attr("src") ?? "";
       const image = absoluteUrl(
-        img.attr("data-src") ?? img.attr("src") ?? $(el).attr("data-src") ?? "",
+        src && !src.startsWith("data:") ? src : ($("a", el).first().attr("href") ?? ""),
       );
-      const link = $("a", el).first().attr("href") ?? "";
-      // Skip the Telegram promo tile appended to every gallery
-      if (/telegram|t\.me\//i.test(image + link)) continue;
       if (!image || pages.includes(image)) continue;
       pages.push(image);
     }
@@ -324,6 +325,15 @@ function absoluteUrl(url: string): string {
 
 function decode(str: string): string {
   return Application.decodeHTMLEntities(str);
+}
+
+// "https://ososedki.com/model/Foo?x" -> "model/Foo"
+function pathFromUrl(url: string): string {
+  return url
+    .trim()
+    .replace(/^https?:\/\/[^/]+/, "")
+    .split(/[?#]/)[0]
+    .replace(/^\/+|\/+$/g, "");
 }
 
 function idFromUrl(url: string): string {

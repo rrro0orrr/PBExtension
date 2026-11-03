@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "Ososedki",
   description: "Extension that pulls content from ososedki.com",
-  version: "1.1.0",
+  version: "1.2.0",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.ADULT,

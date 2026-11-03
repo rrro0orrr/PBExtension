@@ -8,7 +8,6 @@ A repository for paperback that includes both manga and comic extensions based o
 - Hentai2Read
 - HentaiCosplay
 - Hitomi
-- Kenmei
 - LNORI
 - MVLEMPYR
 - MangaBall
@@ -21,8 +20,6 @@ A repository for paperback that includes both manga and comic extensions based o
 - NovelCool
 - NovelFire
 - Ososedki
-- ProjectSuki
-- Rawkuma
 
 ## 🚀 Installation
 

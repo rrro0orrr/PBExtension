@@ -4,11 +4,13 @@ A repository for paperback that includes both manga and comic extensions based o
 
 ## 📚 Available Sources
 
+- Doujins
 - Elftoon
 - Hentai2Read
 - HentaiCosplay
 - Hitomi
 - LNORI
+- MadaraDex
 - MVLEMPYR
 - MangaBall
 - MangaBuddy

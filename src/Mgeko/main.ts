@@ -24,6 +24,7 @@ import {
   SortingOption,
   SourceManga,
   Tag,
+  URL,
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
@@ -390,27 +391,23 @@ export class MgekoExtension implements MgekoImplementation {
     excludeGenres?: string[];
     minChapters?: string;
   }): Promise<{ cards: ComicCard[]; hasNext: boolean }> {
-    // URLSearchParams is not available in the Paperback runtime, so build the query manually.
-    const params: [string, string][] = [
-      ["page", String(options.page)],
-      ["sort", options.sort],
-      ["safe_mode", "0"],
-    ];
-    if (options.q) params.push(["q", options.q]);
-    if (options.status) params.push(["status", options.status]);
-    if (options.type) params.push(["type", options.type]);
+    // URLSearchParams is not available in the Paperback runtime; use the URL helper from @paperback/types.
+    const url = new URL(DOMAIN)
+      .addPathComponent("browse-comics")
+      .addPathComponent("data")
+      .setQueryItem("page", String(options.page))
+      .setQueryItem("sort", options.sort)
+      .setQueryItem("safe_mode", "0");
+    if (options.q) url.setQueryItem("q", options.q);
+    if (options.status) url.setQueryItem("status", options.status);
+    if (options.type) url.setQueryItem("type", options.type);
     if (options.includeGenres?.length)
-      params.push(["include_genres", options.includeGenres.join(",")]);
+      url.setQueryItem("include_genres", options.includeGenres.join(","));
     if (options.excludeGenres?.length)
-      params.push(["exclude_genres", options.excludeGenres.join(",")]);
-    if (options.minChapters) params.push(["min_chapters", options.minChapters]);
-    const query = params
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-      .join("&");
+      url.setQueryItem("exclude_genres", options.excludeGenres.join(","));
+    if (options.minChapters) url.setQueryItem("min_chapters", options.minChapters);
 
-    const data = await this.fetchJson<BrowseResult>(
-      `${DOMAIN}/browse-comics/data/?${query}`,
-    );
+    const data = await this.fetchJson<BrowseResult>(url.toString());
     const cards = parseCards(cheerio.load(data.results_html ?? ""));
     const hasNext =
       typeof data.page === "number" && typeof data.num_pages === "number"

@@ -1,12 +1,12 @@
 {
-  "buildTime": "2026-11-18T07:28:22.283Z",
+  "buildTime": "2026-11-18T07:42:25.132Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
   },
   "repository": {
-    "name": "kakarotextension",
-    "description": "Kakarot extensions for Paperback"
+    "name": "pbextension",
+    "description": "rrro0orrr's Paperback extensions (fork of karrot0/KakarotExtension)"
   },
   "sources": [
     {
@@ -42,27 +42,6 @@
       "id": "Doujins"
     },
     {
-      "name": "Elftoon",
-      "description": "Extension that pulls content from elftoon.com (Cloudflare protected).",
-      "version": "1.0.0-alpha.4",
-      "icon": "icon.png",
-      "language": "en",
-      "contentRating": "SAFE",
-      "capabilities": [
-        4,
-        64,
-        1,
-        16
-      ],
-      "badges": [],
-      "developers": [
-        {
-          "name": "Karrot"
-        }
-      ],
-      "id": "Elftoon"
-    },
-    {
       "name": "Hentai2read",
       "description": "Extension that pulls content from hentai2read.com.",
       "version": "2.0",
@@ -78,7 +57,8 @@
       "badges": [],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "Hentai2read"
@@ -156,7 +136,8 @@
       ],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "Lnori"
@@ -177,7 +158,8 @@
       "badges": [],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "MVLEmpyr"
@@ -237,7 +219,8 @@
       "badges": [],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "Mangaball"
@@ -264,7 +247,8 @@
       ],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "Mangacloud"
@@ -311,7 +295,8 @@
       ],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         },
         {
           "name": "Havilah"
@@ -341,7 +326,8 @@
       ],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "Mgeko"
@@ -407,7 +393,8 @@
       "badges": [],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "NovelArchive"
@@ -461,7 +448,8 @@
       "badges": [],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "NovelFire"
@@ -509,42 +497,11 @@
       "badges": [],
       "developers": [
         {
-          "name": "Karrot"
+          "name": "Karrot",
+          "github": "https://github.com/karrot0"
         }
       ],
       "id": "ScribbleHub"
-    },
-    {
-      "name": "ZipComic",
-      "description": "Extension that pulls content from zipcomic.com.",
-      "version": "1.0",
-      "icon": "icon.png",
-      "language": "en",
-      "contentRating": "SAFE",
-      "badges": [
-        {
-          "label": "Aggregator",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#800080"
-        },
-        {
-          "label": "Western Comics",
-          "textColor": "#FFFFFF",
-          "backgroundColor": "#3E4A59"
-        }
-      ],
-      "capabilities": [
-        4,
-        64,
-        1,
-        16
-      ],
-      "developers": [
-        {
-          "name": "Karrot"
-        }
-      ],
-      "id": "ZipComic"
     }
   ]
 }

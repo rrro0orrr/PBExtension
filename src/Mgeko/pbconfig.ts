@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "Mgeko",
   description: "Extension that pulls manga, manhwa and manhua from mgeko.cc.",
-  version: "1.0.3",
+  version: "1.0.4",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.MATURE,

@@ -23,6 +23,7 @@ export default {
   developers: [
     {
       name: "Karrot",
+      github: "https://github.com/karrot0",
     },
     {
       name: "Havilah",

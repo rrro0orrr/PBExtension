@@ -482,7 +482,7 @@ export class StatisticsForm extends Form {
         {
           id: "details",
           footer:
-            "Visit Inkdex Discord -> #other-repos -> KakarotExtension for Bugs and Suggestions.",
+            "Report bugs and suggestions at github.com/rrro0orrr/PBExtension/issues.",
         },
         [
           NavigationRow("contentStats", {

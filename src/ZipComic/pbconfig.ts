@@ -24,6 +24,7 @@ export default {
   developers: [
     {
       name: "Karrot",
+      github: "https://github.com/karrot0",
     },
   ],
 } satisfies ExtensionInfo;

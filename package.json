@@ -1,7 +1,13 @@
 {
-  "name": "kakarotextension",
-  "description": "Kakarot extensions for Paperback",
-  "author": "Karrot",
+  "name": "pbextension",
+  "description": "rrro0orrr's Paperback extensions (fork of karrot0/KakarotExtension)",
+  "author": "rrro0orrr",
+  "contributors": [
+    {
+      "name": "Karrot (karrot0)",
+      "url": "https://github.com/karrot0"
+    }
+  ],
   "keywords": [
     "Paperback",
     "extensions"
@@ -10,14 +16,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/karrot0/KakarotExtension.git"
+    "url": "git+https://github.com/rrro0orrr/PBExtension.git"
   },
   "bugs": {
-    "url": "https://github.com/karrot0/KakarotExtension/issues"
+    "url": "https://github.com/rrro0orrr/PBExtension/issues"
   },
-  "homepage": "https://github.com/karrot0/KakarotExtension#readme",
-  "repositoryName": "KakarotExtension",
-  "repositoryDescription": "Kakarot extensions for Paperback",
+  "homepage": "https://github.com/rrro0orrr/PBExtension#readme",
+  "repositoryName": "PBExtension",
+  "repositoryDescription": "rrro0orrr's Paperback extensions, forked from KakarotExtension by Karrot",
   "private": true,
   "type": "module",
   "scripts": {

@@ -125,8 +125,10 @@ type MgekoImplementation = Extension &
   CloudflareBypassRequestProviding;
 
 export class MgekoExtension implements MgekoImplementation {
+  // Cookies stay in memory: saving them to the app's state (stateManager) right after the
+  // title-details request is followed by a native Paperback crash (Date range trap).
   cookieStorageInterceptor = new CookieStorageInterceptor({
-    storage: "stateManager",
+    storage: "memory",
   });
   requestManager = new MgekoInterceptor("main");
   globalRateLimiter = new BasicRateLimiter("rateLimiter", {

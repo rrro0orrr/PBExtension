@@ -2,6 +2,7 @@ import {
   type AdvancedSearchForm,
   BasicRateLimiter,
   Chapter,
+  ChapterDetails,
   ChapterProviding,
   CloudflareError,
   ContentRating,
@@ -12,7 +13,6 @@ import {
   Extension,
   type Metadata,
   MangaProviding,
-  NovelChapter,
   PagedResults,
   Request,
   SearchQuery,
@@ -24,6 +24,7 @@ import {
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 import * as htmlparser2 from "htmlparser2";
+import { render as renderDom } from "dom-serializer";
 import { ScribbleHubInterceptor } from "./interceptors";
 import { type ScribbleHubMetadata, type ScribbleHubSearchMeta, SORTS } from "./model";
 import { ScribbleHubSearchForm } from "./forms/SearchForm";
@@ -150,10 +151,19 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
     $(".wi_fic_showtags a.stag").each((_, el) => {
       tags.push(String($(el).text()).trim());
     });
-    const rating = parseFloat(String($(".fic_rate span span").first().text()).trim()) || 1;
+    // Site rating is out of 5; Paperback expects 0..1 (0 when unrated).
+    const rawRating = parseFloat(String($(".fic_rate span span").first().text()).trim());
+    const rating = isNaN(rawRating) ? 0 : Math.min(Math.max(rawRating / 5, 0), 1);
     const author = String($('[property="author"] .auth_name_fic').text()).trim();
     const rawStatus = String($("li:has(.rnd_stats) > span").text()).trim();
-    const status = rawStatus.split(" - ")[0]?.toUpperCase() || "UNKNOWN";
+    const statusText = (rawStatus.split(" - ")[0] ?? "").toLowerCase();
+    const status = statusText.includes("complet")
+      ? "Completed"
+      : statusText.includes("ongoing")
+        ? "Ongoing"
+        : statusText.includes("hiatus")
+          ? "Hiatus"
+          : "Unknown";
     const description = String($(".wi_fic_desc").text()).trim();
 
     const tagGroups: TagSection[] = [];
@@ -185,10 +195,11 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
         secondaryTitles: [],
         thumbnailUrl: coverUrl,
         synopsis: description,
+        author: author || undefined,
         rating: rating,
         contentRating: ContentRating.EVERYONE,
         contentType: "novel",
-        status: status as "ONGOING" | "COMPLETED" | "UNKNOWN",
+        status,
         tagGroups: tagGroups,
       },
     };
@@ -246,7 +257,7 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
     return chapters;
   }
 
-  async getChapterDetails(chapter: Chapter): Promise<NovelChapter> {
+  async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
     const request = {
       url: `${baseUrl}/${chapter.chapterId}/`,
       method: "GET",
@@ -256,8 +267,21 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
 
     $(".wi-ads, .ads-title").remove();
 
-    const content = $(".chp_raw").map((_, el) => $(el).html() ?? "").toArray().join("").replace(/&nbsp;/g, " ");
-    const html = `<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>${content}</body></html>`;
+    // Paperback's novel reader parses chapter HTML as XHTML (XML). Raw
+    // innerHTML (unclosed <br>, named entities like &nbsp;) fails to parse,
+    // so serialize the nodes in XML mode to guarantee well-formed output.
+    const content = $(".chp_raw")
+      .contents()
+      .toArray()
+      .map((node) => renderDom(node, { xmlMode: true, decodeEntities: true }))
+      .join("")
+      .replace(/\u00a0|&#xa0;/g, " ");
+    if (!content.trim()) {
+      throw new Error(`No content found for chapter ${chapter.chapterId}`);
+    }
+    const html =
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>${content}</body></html>`;
 
     return {
       mangaId: chapter.sourceManga.mangaId,

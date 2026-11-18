@@ -574,10 +574,10 @@ export async function runTests(logger: TestLogger) {
     const query = { title: 'school pages:<=150', metadata: [] }
     const result1 = await NHentai.getSearchResults(query, undefined)
     if (!result1.items.length) throw new Error('First search should return results')
-    const ids1 = result1.items.map((i: any) => i.mangaId).sort()
+    const ids1 = result1.items.map((i: any) => i.mangaId).sort((a: string, b: string) => a.localeCompare(b))
     const result2 = await NHentai.getSearchResults(query, undefined)
     if (!result2.items.length) throw new Error('Second search should return results')
-    const ids2 = result2.items.map((i: any) => i.mangaId).sort()
+    const ids2 = result2.items.map((i: any) => i.mangaId).sort((a: string, b: string) => a.localeCompare(b))
     if (ids1.length !== ids2.length) {
       throw new Error(
         `Results should be consistent: first search ${ids1.length} items, ` +

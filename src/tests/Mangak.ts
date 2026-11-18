@@ -7,7 +7,7 @@ export async function runTests(logger: TestLogger) {
   const suite = new TestSuite('Mangak tests', logger)
   registerDefaultTests(suite, Mangak, sourceInfo, {
     searchResultsProviding: {
-      getSearchResults: [{ title: 'solo leveling' }, undefined],
+      getSearchResults: [{ title: 'solo leveling' }, undefined, undefined],
     },
     mangaProviding: {
       getMangaDetails: ['eternally-regressing-knight'],
@@ -38,6 +38,7 @@ export async function runTests(logger: TestLogger) {
       langCode: '🇬🇧',
     }
     const details = await Mangak.getChapterDetails(mockChapter as never)
+    if (!('pages' in details)) throw new Error('Expected an image chapter')
     if (!details.pages.length) throw new Error('Expected at least one page')
     if (!details.pages[0].startsWith('http')) throw new Error(`Invalid page URL: ${details.pages[0]}`)
   })

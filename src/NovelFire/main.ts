@@ -531,9 +531,6 @@ export class NovelFireExtension implements NovelFireImplementation {
       const coverUrl = `${baseUrl}${imgurl}`;
       const rating =
         parseFloat(novel.find(".badge._br").text().trim()) || undefined;
-      const chapters =
-        parseInt(novel.find(".novel-stats").text().replace(/\D/g, "")) ||
-        undefined;
 
       const mangaId = toId(url);
 

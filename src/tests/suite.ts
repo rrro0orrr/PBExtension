@@ -129,7 +129,7 @@ export const registerDefaultTests = function (
     if (implementsSearchResultsProviding(extension)) {
       if ('getSortingOptions' in extension && testData.searchResultsProviding?.getSortingOptions !== false) {
         suite.test('getSortingOptions', async () => {
-          let params = testData.searchResultsProviding && testData.searchResultsProviding !== false
+          let params = testData.searchResultsProviding
             ? testData.searchResultsProviding.getSortingOptions
             : undefined
           if (!params) params = [{ title: '' }]
@@ -139,9 +139,9 @@ export const registerDefaultTests = function (
         })
       }
 
-      if (testData.searchResultsProviding !== false && testData.searchResultsProviding?.getSearchResults !== false) {
+      if (testData.searchResultsProviding?.getSearchResults !== false) {
         suite.test('getSearchResults', async () => {
-          let params = testData.searchResultsProviding && testData.searchResultsProviding !== false
+          let params = testData.searchResultsProviding
             ? testData.searchResultsProviding.getSearchResults
             : undefined
           if (!params) {
@@ -160,7 +160,7 @@ export const registerDefaultTests = function (
   if (testData.mangaProviding !== false) {
     suite.test('getMangaDetails', async () => {
       expect(extension).to.have.property('getMangaDetails')
-      let params = testData.mangaProviding && testData.mangaProviding !== false
+      let params = testData.mangaProviding
         ? testData.mangaProviding.getMangaDetails
         : undefined
       if (!params) {
@@ -182,7 +182,7 @@ export const registerDefaultTests = function (
     if (implementsChapterProviding(extension)) {
       if (testData.chapterProviding?.getChapters !== false) {
         suite.test('getChapters', async () => {
-          let params = testData.chapterProviding && testData.chapterProviding !== false
+          let params = testData.chapterProviding
             ? testData.chapterProviding.getChapters
             : undefined
           if (!params) {
@@ -201,7 +201,7 @@ export const registerDefaultTests = function (
 
       if (testData.chapterProviding?.getChapterDetails !== false) {
         suite.test('getChapterDetails', async () => {
-          let params = testData.chapterProviding && testData.chapterProviding !== false
+          let params = testData.chapterProviding
             ? testData.chapterProviding.getChapterDetails
             : undefined
           if (!params) {

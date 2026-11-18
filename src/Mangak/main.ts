@@ -29,7 +29,6 @@ import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import * as htmlparser2 from "htmlparser2";
 import { URLBuilder } from "../utils/url-builder/base";
-import { MangakMetadata } from "./Mangak";
 import { MangakInterceptor } from "./MangakInterceptor";
 
 const baseUrl = "https://mangak.io";
@@ -278,7 +277,10 @@ export class MangakExtension implements BuddyImplementation {
     const chapterUrl = `${baseUrl}/${chapter.sourceManga.mangaId}/${chapter.chapterId}`;
     const pageProps = await this.fetchNextData(chapterUrl);
 
-    const pages = pageProps?.initialChapter?.images as string[] | undefined;
+    const initialChapter = pageProps?.initialChapter as { images?: unknown } | undefined;
+    const pages = Array.isArray(initialChapter?.images)
+      ? initialChapter.images.filter((p): p is string => typeof p === "string" && p.length > 0)
+      : [];
 
     if (!pages.length) {
       throw new Error(`No images found for chapter ${chapter.chapterId}`);

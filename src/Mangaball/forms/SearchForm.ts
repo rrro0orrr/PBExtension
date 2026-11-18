@@ -6,7 +6,6 @@ import { AdvancedSearchForm, NavigationRow, Section, SelectRow, ToggleRow } from
 import { type Metadata, STATIC_SEARCH_DETAILS } from "../models";
 import { getNsfwSetting, setNsfwSetting } from "../settings";
 import { TagCategoryForm } from "./TagCategoryForm";
-import { ShowcaseForm } from "./ShowcaseForm";
 
 export class MangaballSearchForm extends AdvancedSearchForm {
   private nsfw: boolean;

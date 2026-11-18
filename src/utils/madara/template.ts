@@ -662,7 +662,7 @@ export class MadaraExtension implements MadaraImplementation {
   async getSearchResults(
     query: SearchQuery<Metadata>,
     metadata: Metadata | undefined,
-    sortingOption?: SortingOption | undefined,
+    sortingOption: SortingOption | undefined,
   ): Promise<PagedResults<SearchResultItem>> {
     const meta = metadata as MadaraMetadata | undefined;
     const page = meta?.page ?? 1;

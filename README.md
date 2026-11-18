@@ -7,7 +7,6 @@ This repository is a fork of [**KakarotExtension**](https://github.com/karrot0/K
 ## 📚 Available Sources
 
 - Doujins
-- Elftoon
 - Hentai2Read
 - HentaiCosplay
 - Hitomi
@@ -25,7 +24,6 @@ This repository is a fork of [**KakarotExtension**](https://github.com/karrot0/K
 - NovelFire
 - Ososedki
 - ScribbleHub
-- ZipComic
 
 ## 🚀 Installation
 

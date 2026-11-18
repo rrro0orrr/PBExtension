@@ -390,22 +390,26 @@ export class MgekoExtension implements MgekoImplementation {
     excludeGenres?: string[];
     minChapters?: string;
   }): Promise<{ cards: ComicCard[]; hasNext: boolean }> {
-    const params = new URLSearchParams({
-      page: String(options.page),
-      sort: options.sort,
-      safe_mode: "0",
-    });
-    if (options.q) params.set("q", options.q);
-    if (options.status) params.set("status", options.status);
-    if (options.type) params.set("type", options.type);
+    // URLSearchParams is not available in the Paperback runtime, so build the query manually.
+    const params: [string, string][] = [
+      ["page", String(options.page)],
+      ["sort", options.sort],
+      ["safe_mode", "0"],
+    ];
+    if (options.q) params.push(["q", options.q]);
+    if (options.status) params.push(["status", options.status]);
+    if (options.type) params.push(["type", options.type]);
     if (options.includeGenres?.length)
-      params.set("include_genres", options.includeGenres.join(","));
+      params.push(["include_genres", options.includeGenres.join(",")]);
     if (options.excludeGenres?.length)
-      params.set("exclude_genres", options.excludeGenres.join(","));
-    if (options.minChapters) params.set("min_chapters", options.minChapters);
+      params.push(["exclude_genres", options.excludeGenres.join(",")]);
+    if (options.minChapters) params.push(["min_chapters", options.minChapters]);
+    const query = params
+      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+      .join("&");
 
     const data = await this.fetchJson<BrowseResult>(
-      `${DOMAIN}/browse-comics/data/?${params.toString()}`,
+      `${DOMAIN}/browse-comics/data/?${query}`,
     );
     const cards = parseCards(cheerio.load(data.results_html ?? ""));
     const hasNext =

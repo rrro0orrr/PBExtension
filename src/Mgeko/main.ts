@@ -338,7 +338,9 @@ export class MgekoExtension implements MgekoImplementation {
         sourceManga,
         // The list is newest first
         chapNum: number ?? items.length - index,
-        title: extra ? `Chapter ${number ?? ""}: ${extra}`.replace(" :", ":") : "",
+        ...(extra ? { title: `Chapter ${number ?? ""}: ${extra}`.replace(" :", ":") } : {}),
+        volume: 0,
+        sortingIndex: items.length - index,
         langCode: "en",
         ...(date ? { publishDate: date } : {}),
       });
@@ -565,10 +567,10 @@ function contentRatingFor(genres: string[]): ContentRating {
 
 function mapStatus(status: string): string {
   const value = status.toLowerCase();
-  if (value.includes("complet")) return "COMPLETED";
-  if (value.includes("ongoing")) return "ONGOING";
-  if (value.includes("hiatus")) return "HIATUS";
-  return "UNKNOWN";
+  if (value.includes("complet")) return "Completed";
+  if (value.includes("ongoing")) return "Ongoing";
+  if (value.includes("hiatus")) return "Hiatus";
+  return "Unknown";
 }
 
 function formatCount(raw: string): string {

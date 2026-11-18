@@ -34,8 +34,6 @@ import { MgekoSearchForm, type GenreState, type MgekoSearchMetadata } from "./Se
 // Built with Inkdex's Mgeko extension (inkdex/general-extensions) as the
 // reference for the site's endpoints and markup.
 const DOMAIN = "https://www.mgeko.cc";
-// Temporarily off while testing whether chapter dates crash Paperback
-const PUBLISH_DATES_ENABLED = false;
 const GENRE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 // Values accepted by /browse-comics/data/?sort=
@@ -333,11 +331,7 @@ export class MgekoExtension implements MgekoImplementation {
         .replace(/-?eng(?:-li)?\b/gi, "")
         .replace(/^[\s:–-]+/, "")
         .trim();
-      // TEMPORARY EXPERIMENT: chapter dates are left out to test whether they trigger the
-      // Paperback crash (a Swift Date range trap) when opening a title.
-      const date = PUBLISH_DATES_ENABLED
-        ? parseSiteDate($(el).find("time.chapter-update").attr("datetime"))
-        : undefined;
+      const date = parseSiteDate($(el).find("time.chapter-update").attr("datetime"));
 
       chapters.push({
         chapterId,

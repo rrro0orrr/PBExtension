@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-18T07:42:25.132Z",
+  "buildTime": "2026-11-18T15:33:03.155Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
@@ -167,7 +167,7 @@
     {
       "name": "MadaraDex",
       "description": "Extension that pulls content from madaradex.org",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "MATURE",
@@ -256,7 +256,7 @@
     {
       "name": "Mangak",
       "description": "Extension that pulls content from mangak.io.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "MATURE",
@@ -485,7 +485,7 @@
     {
       "name": "ScribbleHub",
       "description": "Extension that pulls content from scribblehub.com.",
-      "version": "1.0.0-alpha.4",
+      "version": "1.0.0-alpha.5",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "SAFE",

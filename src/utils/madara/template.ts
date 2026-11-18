@@ -135,11 +135,28 @@ interface MadaraMetadata {
   searchCollectedIds?: string[];
 }
 
+/** Internal marker header on the MadaraDex auth-refresh request. The
+ * interceptor strips it before the request is sent (it only exists so the
+ * refresh call is not itself gated on auth, which would recurse). Mirrors
+ * keiyoushi's `X-Mdx-Auth-Refresh` handling. */
+const MDX_REFRESH_MARKER = "x-mdx-auth-refresh";
+
+/** Hooks the interceptor uses to drive MadaraDex auth (see MadaraExtension). */
+interface MdxAuthHooks {
+  /** Make sure `mdx_fp` + `mdx_auth` exist; `force` re-issues `mdx_auth`. */
+  ensure(force?: boolean): Promise<void>;
+  /** Current MadaraDex cookies as `{ name: value }`. */
+  cookies(): Record<string, string>;
+}
+
 class MadaraInterceptor extends PaperbackInterceptor {
+  /** URLs currently being retried after a CDN 403, to prevent retry loops. */
+  private readonly retrying = new Set<string>();
+
   constructor(
     id: string,
     private readonly getBaseUrl: () => string,
-    private readonly mdxAuth: boolean = false,
+    private readonly mdx?: MdxAuthHooks,
   ) {
     super(id);
   }
@@ -147,6 +164,7 @@ class MadaraInterceptor extends PaperbackInterceptor {
   override async interceptRequest(request: Request): Promise<Request> {
     const baseUrl = this.getBaseUrl();
     const isImage = MadaraInterceptor.isImageRequest(request.url);
+    const isMdxRefresh = !!request.headers?.[MDX_REFRESH_MARKER];
     request.headers = {
       ...request.headers,
       referer: `${baseUrl}/`,
@@ -159,11 +177,22 @@ class MadaraInterceptor extends PaperbackInterceptor {
       "cache-control": "no-cache",
       pragma: "no-cache",
     };
-    if (this.mdxAuth) {
-      // Upstream MadaraDex sets this header on every request; the site's
-      // anti-bot rejects requests without it (images come from the same-site
-      // cdn.madaradex.org host).
+    if (this.mdx) {
+      // Browser-like fetch metadata. Images come from the same-site
+      // cdn.madaradex.org host. (Current upstream only sends sec-fetch-*
+      // headers on the auth-refresh XHR; kept here because the site has been
+      // working with it.)
       request.headers["sec-fetch-site"] = "same-site";
+      if (isMdxRefresh) {
+        // Marker is internal only; never send it to the site.
+        delete request.headers[MDX_REFRESH_MARKER];
+      } else {
+        // Upstream checks auth before EVERY request, not just chapter loads.
+        // Inject the cookies directly so they are present regardless of the
+        // order interceptors run in.
+        await this.mdx.ensure();
+        request.cookies = { ...request.cookies, ...this.mdx.cookies() };
+      }
     }
     if (isImage) {
       // Browsers omit the Origin header when loading <img> elements (Origin is
@@ -187,7 +216,11 @@ class MadaraInterceptor extends PaperbackInterceptor {
     data: ArrayBuffer,
   ): Promise<ArrayBuffer> {
     const cfMitigated = response.headers?.["cf-mitigated"];
-    if (cfMitigated === "challenge") {
+    const isRecaptcha =
+      response.status === 403 &&
+      !MadaraInterceptor.isImageRequest(request.url) &&
+      Application.arrayBufferToUTF8String(data).includes("recaptcha");
+    if (cfMitigated === "challenge" || isRecaptcha) {
       throw new CloudflareError({
         url: request.url,
         method: request.method ?? "GET",
@@ -196,7 +229,36 @@ class MadaraInterceptor extends PaperbackInterceptor {
         },
       });
     }
+
+    // MadaraDex: a 403 from the image CDN means `mdx_auth` was rejected
+    // (expired or revoked server-side). Re-issue it and retry the image once,
+    // as upstream does. Without this, images stay broken until the cookie
+    // expires on its own.
+    if (
+      this.mdx &&
+      response.status === 403 &&
+      MadaraInterceptor.isMdxCdn(request.url) &&
+      !this.retrying.has(request.url)
+    ) {
+      this.retrying.add(request.url);
+      try {
+        await this.mdx.ensure(true);
+        const [retryResponse, retryData] = await Application.scheduleRequest({
+          url: request.url,
+          method: request.method ?? "GET",
+        });
+        if (retryResponse.status < 400) return retryData;
+      } catch {
+        // fall through and return the original response body
+      } finally {
+        this.retrying.delete(request.url);
+      }
+    }
     return data;
+  }
+
+  private static isMdxCdn(url: string): boolean {
+    return /^https?:\/\/cdn\.madaradex\.org\//i.test(url);
   }
 }
 
@@ -286,7 +348,16 @@ export class MadaraExtension implements MadaraImplementation {
     this.mangaDetailsArtistSelector = config.mangaDetailsArtistSelector;
     this.mdxAuth = config.mdxAuth ?? false;
 
-    this.requestManager = new MadaraInterceptor("main", () => this.baseUrl, this.mdxAuth);
+    this.requestManager = new MadaraInterceptor(
+      "main",
+      () => this.baseUrl,
+      this.mdxAuth
+        ? {
+            ensure: (force?: boolean) => this.ensureMdxAuth(force),
+            cookies: () => this.mdxCookies(),
+          }
+        : undefined,
+    );
   }
 
   async getSettingsForm(): Promise<Form> {
@@ -297,55 +368,102 @@ export class MadaraExtension implements MadaraImplementation {
     this.requestManager.registerInterceptor();
     this.cookieStorageInterceptor.registerInterceptor();
     this.globalRateLimiter.registerInterceptor();
-    await this.ensureMdxAuth();
+    // MadaraDex auth is established lazily by the interceptor on the first
+    // request, so startup no longer waits on a network round-trip.
   }
 
   // ----------------------------------------------------------------
   // MadaraDex anti-bot auth (no-op unless `mdxAuth` is enabled)
   // ----------------------------------------------------------------
 
-  /**
-   * Establish the `mdx_fp` / `mdx_auth` cookie pair MadaraDex requires before
-   * it serves real chapter images. Mirrors keiyoushi's `refreshAuth()`:
-   *   1. If no `mdx_fp` cookie exists, mint a random 16-byte hex fingerprint
-   *      and store it (30-day expiry, domain-scoped so it applies to the
-   *      `cdn.madaradex.org` image subdomain too).
-   *   2. If either `mdx_fp` or `mdx_auth` is missing, POST
-   *      `action=mdx_auth_refresh` to `/wp-admin/admin-ajax.php` with the
-   *      `X-Mdx-Auth-Refresh: 1` header; the response Set-Cookie supplies
-   *      `mdx_auth`, captured automatically by the CookieStorageInterceptor.
-   * Cheap to call repeatedly: it short-circuits once both cookies are present.
-   */
-  private async ensureMdxAuth(): Promise<void> {
-    if (!this.mdxAuth) return;
-    const host = this.baseUrl.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-    // Cookie domain without a leading dot; RFC 6265 domain-match covers
-    // subdomains (e.g. cdn.<host>).
-    const cookieDomain = host.replace(/^www\./, "");
-    const stored = this.cookieStorageInterceptor.cookiesForUrl(this.baseUrl);
-    const hasFp = stored.some((c) => c.name === "mdx_fp");
-    const hasAuth = stored.some((c) => c.name === "mdx_auth");
-    if (hasFp && hasAuth) return;
+  /** In-flight auth refresh, shared so concurrent requests refresh once. */
+  private mdxRefresh?: Promise<void>;
+  /** Time of the last refresh attempt (ms), to avoid hammering the endpoint. */
+  private mdxLastRefresh = 0;
 
-    if (!hasFp) {
+  private get mdxCookieDomain(): string {
+    // Cookie domain without a leading dot; domain-match covers subdomains
+    // (e.g. cdn.<host>).
+    return this.baseUrl
+      .replace(/^https?:\/\//, "")
+      .replace(/\/.*$/, "")
+      .replace(/^www\./, "");
+  }
+
+  private mdxCookieList(): Cookie[] {
+    return this.cookieStorageInterceptor
+      .cookiesForUrl(this.baseUrl)
+      .filter((c) => c.name === "mdx_fp" || c.name === "mdx_auth");
+  }
+
+  private mdxCookies(): Record<string, string> {
+    const out: Record<string, string> = {};
+    for (const c of this.mdxCookieList()) out[c.name] = c.value;
+    return out;
+  }
+
+  /**
+   * Ensure the `mdx_fp` / `mdx_auth` cookie pair MadaraDex requires before it
+   * serves real chapter images (otherwise it returns decoy pages). Mirrors
+   * keiyoushi's `refreshAuth()`:
+   *   1. If no `mdx_fp` cookie exists, mint a random 16-byte hex fingerprint
+   *      (30-day expiry, domain-scoped so it also covers cdn.madaradex.org).
+   *   2. POST `action=mdx_auth_refresh` to `/wp-admin/admin-ajax.php`; the
+   *      response Set-Cookie supplies `mdx_auth`, captured by the
+   *      CookieStorageInterceptor.
+   * Called by the interceptor before every request (cheap once both cookies
+   * exist) and with `force` after a CDN 403 to replace a rejected token.
+   * Concurrent callers share one refresh; failed attempts back off.
+   */
+  private ensureMdxAuth(force = false): Promise<void> {
+    if (!this.mdxAuth) return Promise.resolve();
+    if (this.mdxRefresh) return this.mdxRefresh;
+
+    const names = this.mdxCookieList().map((c) => c.name);
+    const complete = names.includes("mdx_fp") && names.includes("mdx_auth");
+    if (complete && !force) return Promise.resolve();
+
+    // Back off: 15s between routine attempts (e.g. while the endpoint is
+    // failing), 10s between forced ones (many images can 403 at once).
+    const sinceLast = Date.now() - this.mdxLastRefresh;
+    if (sinceLast < (force ? 10000 : 15000)) return Promise.resolve();
+
+    this.mdxRefresh = this.refreshMdxAuth(force).finally(() => {
+      this.mdxRefresh = undefined;
+    });
+    return this.mdxRefresh;
+  }
+
+  private async refreshMdxAuth(force: boolean): Promise<void> {
+    this.mdxLastRefresh = Date.now();
+    const existing = this.mdxCookieList();
+
+    if (force) {
+      // Drop the rejected token so a stale value can't be re-sent.
+      for (const c of existing) {
+        if (c.name === "mdx_auth") this.cookieStorageInterceptor.deleteCookie(c);
+      }
+    }
+
+    if (!existing.some((c) => c.name === "mdx_fp")) {
       this.cookieStorageInterceptor.setCookie({
         name: "mdx_fp",
         value: randomHex16(),
-        domain: cookieDomain,
+        domain: this.mdxCookieDomain,
         path: "/",
         expires: new Date(Date.now() + 2592000000),
       });
     }
 
-    // Refresh the server-issued auth token. Errors here are non-fatal — the
-    // chapter fetch will still be attempted and surface its own error.
+    // Errors are non-fatal: the original request still goes ahead and
+    // surfaces its own error.
     try {
       await Application.scheduleRequest({
         url: `${this.baseUrl}/wp-admin/admin-ajax.php`,
         method: "POST",
         headers: {
           "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "x-mdx-auth-refresh": "1",
+          [MDX_REFRESH_MARKER]: "1",
           "x-requested-with": "XMLHttpRequest",
         },
         body: "action=mdx_auth_refresh",
@@ -1009,11 +1127,6 @@ export class MadaraExtension implements MadaraImplementation {
       url = path + this.chapterUrlSuffix;
     }
 
-    // Ensure the MadaraDex anti-bot cookies are present before fetching the
-    // reader page; without them the site returns decoy images. No-op for every
-    // other Madara source.
-    await this.ensureMdxAuth();
-
     let $ = await this.fetchCheerio({ url, method: "GET" });
     if (styleListFallback && $("#single-pager").length > 0) {
       $ = await this.fetchCheerio({ url: styleListFallback, method: "GET" });
@@ -1308,6 +1421,9 @@ export class MadaraExtension implements MadaraImplementation {
     _localStorage: Record<string, string>,
   ): Promise<void> {
     for (const cookie of this.cookieStorageInterceptor.cookies) {
+      // Keep the MadaraDex fingerprint/auth pair: clearing it would force a
+      // new device fingerprint after every Cloudflare bypass.
+      if (cookie.name === "mdx_fp" || cookie.name === "mdx_auth") continue;
       this.cookieStorageInterceptor.deleteCookie(cookie);
     }
 
@@ -1323,6 +1439,11 @@ export class MadaraExtension implements MadaraImplementation {
     const [response, data] = await Application.scheduleRequest(request);
     if (response.status === 404) {
       throw new Error("Content not found");
+    }
+    // Don't parse an error page (403/5xx) as if it were content: that shows
+    // up as an empty list or a misleading "No pages found".
+    if (response.status >= 400) {
+      throw new Error(`Request failed (HTTP ${response.status}): ${request.url}`);
     }
     const htmlStr = Application.arrayBufferToUTF8String(data);
     const dom = htmlparser2.parseDocument(htmlStr);

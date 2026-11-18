@@ -1,0 +1,1 @@
+{"name":"HentaiCosplay","description":"Extension that pulls content from hentai-cosplay-xxx.com","version":"1.2.0","icon":"icon.png","language":"en","contentRating":"ADULT","badges":[{"label":"18+","textColor":"#000000","backgroundColor":"#FFD700"}],"capabilities":[1,4,64,16],"developers":[{"name":"Netsky","github":"https://github.com/TheNetsky"}],"id":"HentaiCosplay"}

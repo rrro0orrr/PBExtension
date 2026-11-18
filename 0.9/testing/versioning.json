@@ -1,0 +1,550 @@
+{
+  "buildTime": "2026-11-18T06:42:21.800Z",
+  "builtWith": {
+    "toolchain": "1.0.0-alpha.92",
+    "types": "1.0.0-alpha.92"
+  },
+  "repository": {
+    "name": "kakarotextension",
+    "description": "Kakarot extensions for Paperback"
+  },
+  "sources": [
+    {
+      "name": "Doujins",
+      "description": "Extension that pulls content from doujins.com",
+      "version": "1.0.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "ADULT",
+      "badges": [
+        {
+          "label": "18+",
+          "textColor": "#000000",
+          "backgroundColor": "#FFD700"
+        }
+      ],
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "developers": [
+        {
+          "name": "nicartjay",
+          "github": "https://github.com/Nicartjay"
+        },
+        {
+          "name": "keiyoushi",
+          "github": "https://github.com/keiyoushi"
+        }
+      ],
+      "id": "Doujins"
+    },
+    {
+      "name": "Elftoon",
+      "description": "Extension that pulls content from elftoon.com (Cloudflare protected).",
+      "version": "1.0.0-alpha.4",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "Elftoon"
+    },
+    {
+      "name": "Hentai2read",
+      "description": "Extension that pulls content from hentai2read.com.",
+      "version": "2.0",
+      "icon": "icon.png",
+      "language": "multi",
+      "contentRating": "ADULT",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "Hentai2read"
+    },
+    {
+      "name": "HentaiCosplay",
+      "description": "Extension that pulls content from hentai-cosplay-xxx.com",
+      "version": "1.2.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "ADULT",
+      "badges": [
+        {
+          "label": "18+",
+          "textColor": "#000000",
+          "backgroundColor": "#FFD700"
+        }
+      ],
+      "capabilities": [
+        1,
+        4,
+        64,
+        16
+      ],
+      "developers": [
+        {
+          "name": "Netsky",
+          "github": "https://github.com/TheNetsky"
+        }
+      ],
+      "id": "HentaiCosplay"
+    },
+    {
+      "name": "Hitomi",
+      "description": "Extension that pulls content from hitomi.la",
+      "version": "1.6.8",
+      "icon": "icon.png",
+      "language": "multi",
+      "contentRating": "ADULT",
+      "capabilities": [
+        4,
+        64,
+        1,
+        32,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "pisshammy",
+          "website": "$1/goon pls am poor\nzelle: pisshammy@gmail.com\ncashapp: $0hammy0"
+        }
+      ],
+      "id": "Hitomi"
+    },
+    {
+      "name": "LNORI",
+      "description": "Extension that pulls light novels from lnori.com.",
+      "version": "1.0.1",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [
+        {
+          "label": "Light Novels",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#5B3FA0"
+        }
+      ],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "Lnori"
+    },
+    {
+      "name": "MVLEMPYR",
+      "description": "Extension that pulls web novels from mvlempyr.io.",
+      "version": "1.0.1",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "MVLEmpyr"
+    },
+    {
+      "name": "MadaraDex",
+      "description": "Extension that pulls content from madaradex.org",
+      "version": "1.0.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16,
+        32
+      ],
+      "badges": [
+        {
+          "label": "Madara",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#2E7D32"
+        },
+        {
+          "label": "Mature",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#C62828"
+        }
+      ],
+      "developers": [
+        {
+          "name": "nicartjay",
+          "github": "https://github.com/Nicartjay"
+        },
+        {
+          "name": "keiyoushi",
+          "github": "https://github.com/keiyoushi"
+        }
+      ],
+      "id": "MadaraDex"
+    },
+    {
+      "name": "Mangaball",
+      "description": "Extension that pulls content from mangaball.net.",
+      "version": "1.1",
+      "icon": "icon.png",
+      "language": "multi",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        4,
+        64,
+        16,
+        32
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "Mangaball"
+    },
+    {
+      "name": "Mangacloud",
+      "description": "Extension that pulls content from https://mangacloud.org/",
+      "version": "1.2",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "badges": [
+        {
+          "label": "Aggregator",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#800080"
+        }
+      ],
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "Mangacloud"
+    },
+    {
+      "name": "Mangak",
+      "description": "Extension that pulls content from mangak.io.",
+      "version": "1.0.1",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "MATURE",
+      "badges": [
+        {
+          "label": "Aggregator",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#800080"
+        },
+        {
+          "label": "Mature",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#800080"
+        },
+        {
+          "label": "Manga",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#C71585"
+        },
+        {
+          "label": "Manhwa",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#C71585"
+        },
+        {
+          "label": "Manhua",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#C71585"
+        }
+      ],
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "developers": [
+        {
+          "name": "Karrot"
+        },
+        {
+          "name": "Havilah"
+        }
+      ],
+      "id": "Mangak"
+    },
+    {
+      "name": "Mgeko",
+      "description": "Extension that pulls manga, manhwa and manhua from mgeko.cc.",
+      "version": "1.0.3",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [
+        {
+          "label": "Aggregator",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#800080"
+        }
+      ],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "Mgeko"
+    },
+    {
+      "name": "Mitaku",
+      "description": "Extension that pulls content from mitaku.net",
+      "version": "1.1.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "ADULT",
+      "badges": [],
+      "capabilities": [
+        1,
+        4,
+        64,
+        16
+      ],
+      "developers": [
+        {
+          "name": "Netsky",
+          "github": "https://github.com/TheNetsky"
+        }
+      ],
+      "id": "Mitaku"
+    },
+    {
+      "name": "NHentai",
+      "description": "Extension that pulls content from nhentai.net",
+      "version": "2.9.7",
+      "icon": "icon.png",
+      "language": "multi",
+      "contentRating": "ADULT",
+      "capabilities": [
+        4,
+        64,
+        1,
+        32,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "pisshammy",
+          "website": "$1/climax: consider donating :3 \ncashapp: $0hammy0"
+        }
+      ],
+      "id": "NHentai"
+    },
+    {
+      "name": "Novel Archive",
+      "description": "Extension that pulls web novels from novelarchive.cc.",
+      "version": "1.1.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "NovelArchive"
+    },
+    {
+      "name": "NovelCool",
+      "description": "Extension that pulls content from novelcool.com.",
+      "version": "1.0.0-alpha.27",
+      "icon": "icons.png",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ],
+      "badges": [
+        {
+          "label": "Novel",
+          "textColor": "#ffffff",
+          "backgroundColor": "#4fa06a"
+        },
+        {
+          "label": "Manga",
+          "textColor": "#ffffff",
+          "backgroundColor": "#d1477a"
+        }
+      ],
+      "developers": [
+        {
+          "name": "Popmango",
+          "github": "https://github.com/PoppingMangoSources"
+        }
+      ],
+      "id": "NovelCool"
+    },
+    {
+      "name": "NovelFire",
+      "description": "Extension that pulls content from novelfire.net.",
+      "version": "1.0.0-alpha.9",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "NovelFire"
+    },
+    {
+      "name": "Ososedki",
+      "description": "Extension that pulls content from ososedki.com",
+      "version": "1.2.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "ADULT",
+      "badges": [
+        {
+          "label": "18+",
+          "textColor": "#000000",
+          "backgroundColor": "#FFD700"
+        }
+      ],
+      "capabilities": [
+        1,
+        4,
+        64,
+        16
+      ],
+      "developers": [
+        {
+          "name": "Netsky",
+          "github": "https://github.com/TheNetsky"
+        }
+      ],
+      "id": "Ososedki"
+    },
+    {
+      "name": "ScribbleHub",
+      "description": "Extension that pulls content from scribblehub.com.",
+      "version": "1.0.0-alpha.4",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        64,
+        1
+      ],
+      "badges": [],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "ScribbleHub"
+    },
+    {
+      "name": "ZipComic",
+      "description": "Extension that pulls content from zipcomic.com.",
+      "version": "1.0",
+      "icon": "icon.png",
+      "language": "en",
+      "contentRating": "SAFE",
+      "badges": [
+        {
+          "label": "Aggregator",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#800080"
+        },
+        {
+          "label": "Western Comics",
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#3E4A59"
+        }
+      ],
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ],
+      "developers": [
+        {
+          "name": "Karrot"
+        }
+      ],
+      "id": "ZipComic"
+    }
+  ]
+}

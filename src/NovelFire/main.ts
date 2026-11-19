@@ -84,6 +84,18 @@ function absoluteUrl(path: string | undefined): string {
   return path.startsWith("/") ? `${baseUrl}${path}` : `${baseUrl}/${path}`;
 }
 
+// The site prints "2026-11-19 14:52[:07]" with no timezone. Parse it as UTC and never
+// return a date in the future: Paperback traps (crashes) formatting a Date range when a
+// chapter's publish date is later than "now", which happens for freshly posted chapters
+// when the string is read as device-local time.
+function parseSiteDate(text: string | undefined): Date | undefined {
+  const m = text?.trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return undefined;
+  const time = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], m[6] ? +m[6] : 0);
+  if (Number.isNaN(time)) return undefined;
+  return new Date(Math.min(time, Date.now()));
+}
+
 function mapStatus(label: string): string {
   switch (label.trim().toLowerCase()) {
     case "ongoing":
@@ -391,8 +403,7 @@ export class NovelFireExtension implements NovelFireImplementation {
         added++;
         const title = (a.attr("title") ?? a.text()).trim();
         const parsedNo = parseFloat(a.find(".chapter-no").text().trim());
-        const datetime = a.find("time").attr("datetime");
-        const publishDate = datetime ? new Date(datetime) : undefined;
+        const publishDate = parseSiteDate(a.find("time").attr("datetime"));
 
         chapters.push({
           chapterId,
@@ -400,8 +411,7 @@ export class NovelFireExtension implements NovelFireImplementation {
           sourceManga,
           // Fall back to the chapter's position so sorting and read tracking still work
           chapNum: Number.isFinite(parsedNo) ? parsedNo : chapters.length + 1,
-          publishDate:
-            publishDate && !Number.isNaN(publishDate.getTime()) ? publishDate : undefined,
+          ...(publishDate ? { publishDate } : {}),
           volume: 0,
           langCode: "en",
           version: "1",

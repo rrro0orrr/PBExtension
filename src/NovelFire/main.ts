@@ -47,6 +47,7 @@ const baseUrl = "https://novelfire.net";
 const MAX_RATE_LIMIT_RETRIES = 3;
 const MAX_RETRY_WAIT_SECONDS = 30;
 const MAX_CHAPTER_PAGES = 200;
+const FALLBACK_COVER = `${baseUrl}/favicon.ico`;
 
 const VOID_ELEMENTS =
   "area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr";
@@ -211,7 +212,7 @@ export class NovelFireExtension implements NovelFireImplementation {
       const items: SearchResultItem[] = (result?.data ?? []).map((item) => ({
         mangaId: item.slug,
         title: item.title,
-        imageUrl: item.image.startsWith("http") ? item.image : `${baseUrl}/${item.image}`,
+        imageUrl: absoluteUrl(item.image) || FALLBACK_COVER,
         subtitle: `${item.total_chapter} chapters`,
       }));
       return { items };
@@ -256,7 +257,7 @@ export class NovelFireExtension implements NovelFireImplementation {
       const url = a.attr("href") || "";
       const title = (a.attr("title") || a.text()).trim();
       const img = novel.find("img").first();
-      const coverUrl = absoluteUrl(img.attr("data-src") || img.attr("src"));
+      const coverUrl = absoluteUrl(img.attr("data-src") || img.attr("src")) || FALLBACK_COVER;
       const mangaId = toId(url);
       if (title && mangaId && !collectedIds.includes(mangaId)) {
         collectedIds.push(mangaId);
@@ -280,10 +281,19 @@ export class NovelFireExtension implements NovelFireImplementation {
     };
     const $ = await this.fetchCheerio(request);
 
-    const cover = $(".cover > img").first();
+    const cover = $(".cover img, figure.cover img, .novel-cover img, .fixed-img img").first();
     const title =
       $(".novel-title").first().text().trim() || (cover.attr("alt") ?? "").trim();
-    const coverUrl = absoluteUrl(cover.attr("data-src") ?? cover.attr("src"));
+    // Paperback rejects an empty thumbnailUrl ("Invalid URL"), so fall back through
+    // lazy-load attributes, the og:image meta tag and finally the site's favicon.
+    const coverUrl =
+      absoluteUrl(
+        cover.attr("data-src") ||
+          cover.attr("data-original") ||
+          cover.attr("src") ||
+          $('meta[property="og:image"]').attr("content") ||
+          $('meta[name="twitter:image"]').attr("content"),
+      ) || FALLBACK_COVER;
 
     const genres: string[] = [];
     $(".categories .property-item").each((_, el) => {
@@ -528,7 +538,7 @@ export class NovelFireExtension implements NovelFireImplementation {
         novel.find("img").attr("data-src") ||
         novel.find("img").attr("src") ||
         "";
-      const coverUrl = `${baseUrl}${imgurl}`;
+      const coverUrl = absoluteUrl(imgurl) || FALLBACK_COVER;
       const rating =
         parseFloat(novel.find(".badge._br").text().trim()) || undefined;
 
@@ -584,7 +594,7 @@ export class NovelFireExtension implements NovelFireImplementation {
         novel.find("img").attr("data-src") ||
         novel.find("img").attr("src") ||
         "";
-      const coverUrl = `${baseUrl}${imgurl}`;
+      const coverUrl = absoluteUrl(imgurl) || FALLBACK_COVER;
       const chapters =
         parseInt(novel.find(".novel-stats").text().replace(/\D/g, "")) ||
         undefined;
@@ -642,7 +652,7 @@ export class NovelFireExtension implements NovelFireImplementation {
         novel.find("img").attr("data-src") ||
         novel.find("img").attr("src") ||
         "";
-      const coverUrl = `${baseUrl}${imgurl}`;
+      const coverUrl = absoluteUrl(imgurl) || FALLBACK_COVER;
       const rating =
         parseFloat(novel.find(".badge._br").text().trim()) || undefined;
 

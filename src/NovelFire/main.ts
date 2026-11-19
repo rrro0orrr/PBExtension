@@ -709,9 +709,12 @@ export class NovelFireExtension implements NovelFireImplementation {
     }
   }
 
-  checkCloudflareStatus(status: number): void {
+  // Chapter pages redirect to mirror domains (e.g. novelphoenix.com), so point the bypass
+  // at the domain that actually challenged us; clearing novelfire.net wouldn't help.
+  checkCloudflareStatus(status: number, url: string = baseUrl): void {
     if (status == 503 || status == 403) {
-      throw new CloudflareError({ url: baseUrl, method: "GET" });
+      const origin = url.match(/^https?:\/\/[^/?#]+/i)?.[0] ?? baseUrl;
+      throw new CloudflareError({ url: origin, method: "GET" });
     }
   }
 
@@ -722,7 +725,7 @@ export class NovelFireExtension implements NovelFireImplementation {
     status: number;
   }> {
     const [response, data] = await this.scheduleRequest(request);
-    this.checkCloudflareStatus(response.status);
+    this.checkCloudflareStatus(response.status, response.url || request.url);
     const html = Application.arrayBufferToUTF8String(data);
     const dom = htmlparser2.parseDocument(html);
     return {

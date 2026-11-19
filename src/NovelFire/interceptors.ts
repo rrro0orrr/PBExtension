@@ -4,7 +4,7 @@ export class NovelFireInterceptor extends PaperbackInterceptor {
   override async interceptRequest(request: Request): Promise<Request> {
     request.headers = {
       ...request.headers,
-      referer: `https://novelfire.net/`,
+      referer: `https://novelphoenix.com/`,
       "user-agent": await Application.getDefaultUserAgent(),
     };
     return request;
@@ -17,8 +17,9 @@ export class NovelFireInterceptor extends PaperbackInterceptor {
   ): Promise<ArrayBuffer> {
     const cfMitigated = response.headers?.["cf-mitigated"];
     if (cfMitigated === "challenge") {
+      // After a redirect to a mirror domain, response.url is the host that challenged us
       throw new CloudflareError({
-        url: request.url,
+        url: response.url || request.url,
         method: request.method ?? "GET",
         headers: {
           "user-agent": await Application.getDefaultUserAgent(),

@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-18T15:33:03.155Z",
+  "buildTime": "2026-11-19T23:05:25.173Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
@@ -434,8 +434,8 @@
     },
     {
       "name": "NovelFire",
-      "description": "Extension that pulls content from novelfire.net.",
-      "version": "1.0.0-alpha.9",
+      "description": "Extension that pulls content from novelphoenix.com (formerly novelfire.net).",
+      "version": "1.0.0-alpha.12",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "SAFE",

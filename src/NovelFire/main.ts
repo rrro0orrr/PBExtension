@@ -41,7 +41,8 @@ import {
 import { DEFAULT_SEARCH_META, NovelFireSearchForm } from "./forms/SearchForm";
 import type { CheerioAPI } from "cheerio";
 
-const baseUrl = "https://novelfire.net";
+// novelfire.net now redirects to this mirror, which uses /novel/ instead of /book/.
+const baseUrl = "https://novelphoenix.com";
 
 // Cloudflare answers bursts with HTTP 429 ("Access denied", error 1015), so back off and retry.
 const MAX_RATE_LIMIT_RETRIES = 3;
@@ -94,6 +95,27 @@ function parseSiteDate(text: string | undefined): Date | undefined {
   const time = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], m[6] ? +m[6] : 0);
   if (Number.isNaN(time)) return undefined;
   return new Date(Math.min(time, Date.now()));
+}
+
+// "4 weeks ago", "an hour ago", "yesterday", "just now" -> approximate Date (never in the future)
+function parseRelativeDate(text: string | undefined): Date | undefined {
+  const t = text?.trim().toLowerCase();
+  if (!t) return undefined;
+  if (t === "just now" || t === "now") return new Date();
+  if (t === "yesterday") return new Date(Date.now() - 86_400_000);
+  const m = t.match(/^(\d+|an?)\s+(second|minute|hour|day|week|month|year)s?\s+ago$/);
+  if (!m) return undefined;
+  const n = m[1] === "a" || m[1] === "an" ? 1 : parseInt(m[1], 10);
+  const unitMs: Record<string, number> = {
+    second: 1_000,
+    minute: 60_000,
+    hour: 3_600_000,
+    day: 86_400_000,
+    week: 604_800_000,
+    month: 2_592_000_000,
+    year: 31_536_000_000,
+  };
+  return new Date(Date.now() - n * unitMs[m[2]]);
 }
 
 function mapStatus(label: string): string {
@@ -224,7 +246,7 @@ export class NovelFireExtension implements NovelFireImplementation {
       const items: SearchResultItem[] = (result?.data ?? []).map((item) => ({
         mangaId: item.slug,
         title: item.title,
-        imageUrl: absoluteUrl(item.image) || FALLBACK_COVER,
+        imageUrl: absoluteUrl(item.image) || `${baseUrl}/server-1/${item.slug}.jpg`,
         subtitle: `${item.total_chapter} chapters`,
       }));
       return { items };
@@ -288,7 +310,7 @@ export class NovelFireExtension implements NovelFireImplementation {
 
   async getMangaDetails(mangaId: string): Promise<SourceManga> {
     const request = {
-      url: new URLBuilder(baseUrl).addPath("book").addPath(mangaId).build(),
+      url: new URLBuilder(baseUrl).addPath("novel").addPath(mangaId).build(),
       method: "GET",
     };
     const $ = await this.fetchCheerio(request);
@@ -379,7 +401,7 @@ export class NovelFireExtension implements NovelFireImplementation {
     while (page <= MAX_CHAPTER_PAGES) {
       const request = {
         url: new URLBuilder(baseUrl)
-          .addPath("book")
+          .addPath("novel")
           .addPath(mangaId)
           .addPath("chapters")
           .addQuery("page", String(page))
@@ -401,9 +423,19 @@ export class NovelFireExtension implements NovelFireImplementation {
         if (seenIds.has(chapterId)) return;
         seenIds.add(chapterId);
         added++;
-        const title = (a.attr("title") ?? a.text()).trim();
-        const parsedNo = parseFloat(a.find(".chapter-no").text().trim());
-        const publishDate = parseSiteDate(a.find("time").attr("datetime"));
+        // novelfire.net: title attr "Chapter 1: Name", chapter-no "1", absolute datetime.
+        // novelphoenix.com: no title attr, chapter-no "Ch. 1", relative "4 weeks ago".
+        const title = (
+          a.attr("title") ||
+          a.find(".chapter-title").first().text() ||
+          a.text()
+        ).trim();
+        const noMatch =
+          a.find(".chapter-no").text().match(/\d+(?:\.\d+)?/) ?? href.match(/chapter-(\d+(?:\.\d+)?)/);
+        const parsedNo = noMatch ? parseFloat(noMatch[1] ?? noMatch[0]) : NaN;
+        const time = a.find("time").first();
+        const publishDate =
+          parseSiteDate(time.attr("datetime")) ?? parseRelativeDate(time.text());
 
         chapters.push({
           chapterId,
@@ -419,7 +451,17 @@ export class NovelFireExtension implements NovelFireImplementation {
       });
 
       // Stop if the site keeps serving the same page, otherwise this loop hammers it into a 429
-      const hasNextPage = !!$(".pagination .page-item.active + .page-item:not(.disabled)").length;
+      // The mirror pages with a range dropdown ("1-100", "101-200", ...) instead of .pagination
+      const lastPage = Math.max(
+        0,
+        ...$(".chapter-range-pager option, .chapter-range-pager a")
+          .map((_, el) => Number(($(el).attr("value") ?? $(el).attr("href") ?? "").match(/[?&]page=(\d+)/)?.[1] ?? 0))
+          .get(),
+      );
+      const hasNextPage =
+        lastPage > 0
+          ? page < lastPage
+          : !!$(".pagination .page-item.active + .page-item:not(.disabled)").length;
       if (!hasNextPage || added === 0) break;
       page++;
     }
@@ -429,7 +471,7 @@ export class NovelFireExtension implements NovelFireImplementation {
 
   async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
     let url = new URLBuilder(baseUrl)
-      .addPath("book")
+      .addPath("novel")
       .addPath(chapter.chapterId)
       .build();
 
@@ -515,7 +557,7 @@ export class NovelFireExtension implements NovelFireImplementation {
   }
 
   getMangaShareUrl(mangaId: string): string {
-    return `${baseUrl}/book/${mangaId}`;
+    return `${baseUrl}/novel/${mangaId}`;
   }
 
   private async getPopularSectionItems(

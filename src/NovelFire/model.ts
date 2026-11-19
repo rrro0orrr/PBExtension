@@ -17,7 +17,7 @@ export interface NovelFireSearchMeta {
   excludedTags: string;
 }
 
-// Mirrors the filters on https://novelfire.net/search-adv
+// Mirrors the filters on https://novelphoenix.com/search-adv
 export const LANGUAGES = [
   { id: "1", label: "Chinese Novel" },
   { id: "3", label: "Japanese Novel" },
@@ -149,7 +149,8 @@ export interface NovelFireTagResult {
 }
 
 export interface NovelFireResultItem {
-  image: string;
+  // Not returned by the novelphoenix.com mirror
+  image?: string;
   rank: number;
   slug: string;
   title: string;

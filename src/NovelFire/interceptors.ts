@@ -4,7 +4,7 @@ export class NovelFireInterceptor extends PaperbackInterceptor {
   override async interceptRequest(request: Request): Promise<Request> {
     request.headers = {
       ...request.headers,
-      referer: `https://novelfire.net/`,
+      referer: `https://novelphoenix.com/`,
       "user-agent": await Application.getDefaultUserAgent(),
     };
     return request;

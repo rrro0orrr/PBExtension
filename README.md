@@ -24,6 +24,7 @@ This repository is a fork of [**KakarotExtension**](https://github.com/karrot0/K
 - NovelFire
 - Ososedki
 - ScribbleHub
+- Toonz
 
 ## 🚀 Installation
 

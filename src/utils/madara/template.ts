@@ -792,7 +792,7 @@ export class MadaraExtension implements MadaraImplementation {
   // ----------------------------------------------------------------
 
   async getMangaDetails(mangaId: string): Promise<SourceManga> {
-    const url = this.buildMangaUrl(mangaId);
+    const url = this.buildMangaUrl(await this.resolveMangaId(mangaId));
     const $ = await this.fetchCheerio({ url, method: "GET" });
 
     // Upstream #18681 switched this from `text()` to Jsoup's `ownText()`: some
@@ -959,7 +959,8 @@ export class MadaraExtension implements MadaraImplementation {
   // ----------------------------------------------------------------
 
   async getChapters(sourceManga: SourceManga): Promise<Chapter[]> {
-    const mangaId = sourceManga.mangaId;
+    // Chapter ids are parsed relative to the slug, so resolve post ids first.
+    const mangaId = await this.resolveMangaId(sourceManga.mangaId);
     const mangaUrl = this.buildMangaUrl(mangaId);
 
     let $ = await this.fetchCheerio({ url: mangaUrl, method: "GET" });
@@ -1108,7 +1109,8 @@ export class MadaraExtension implements MadaraImplementation {
       // than reconstructing (which would use the wrong path segment and 404).
       base = `${this.baseUrl.replace(/\/+$/, "")}${decodedId}`;
     } else {
-      base = `${this.baseUrl.replace(/\/+$/, "")}/${this.mangaSubString}/${this.safeDecode(chapter.sourceManga.mangaId)}/${decodedId}`;
+      const mangaId = await this.resolveMangaId(chapter.sourceManga.mangaId);
+      base = `${this.baseUrl.replace(/\/+$/, "")}/${this.mangaSubString}/${this.safeDecode(mangaId)}/${decodedId}`;
     }
     const path = base.replace(/\/+$/, "") + "/";
     // Upstream Madara 1.6 (#18075) made `?style=list` CONDITIONAL: the plain
@@ -1288,6 +1290,65 @@ export class MadaraExtension implements MadaraImplementation {
       return `${this.baseUrl.replace(/\/+$/, "")}${decoded}`;
     }
     return new URLBuilder(this.baseUrl).addPath(this.mangaSubString).addPath(mangaId).build();
+  }
+
+  /** postId -> slug lookups resolved this session. */
+  private readonly postIdSlugs = new Map<string, string>();
+
+  /**
+   * Map a numeric WordPress post id to the manga's current slug.
+   *
+   * The Inkdex Madara extensions publish sources under the same names as ours
+   * (e.g. "MadaraDex") but store the WP post id as the mangaId. Paperback
+   * treats them as the same source, so library entries added through Inkdex
+   * reach us as e.g. "1234" and `/title/1234/` 404s ("Content not found").
+   * WordPress resolves `/?p=<postId>` with a redirect to the canonical
+   * `/<mangaSubString>/<slug>/` page, so follow it and read the slug back.
+   * Any other mangaId (and a numeric one the site doesn't resolve, i.e. a real
+   * all-digit slug) is returned unchanged.
+   */
+  protected async resolveMangaId(mangaId: string): Promise<string> {
+    if (!/^\d+$/.test(mangaId)) return mangaId;
+    const cached = this.postIdSlugs.get(mangaId);
+    if (cached) return cached;
+
+    const stateKey = `madara.postIdSlug.${this.sourceName}.${mangaId}`;
+    const stored = Application.getState(stateKey);
+    if (typeof stored === "string" && stored) {
+      this.postIdSlugs.set(mangaId, stored);
+      return stored;
+    }
+
+    let slug: string | undefined;
+    try {
+      const [response, data] = await Application.scheduleRequest({
+        url: `${this.baseUrl.replace(/\/+$/, "")}/?p=${mangaId}`,
+        method: "GET",
+      });
+      if (response.status < 400) {
+        const $ = cheerio.load(Application.arrayBufferToUTF8String(data));
+        const candidates = [
+          response.url,
+          $('link[rel="canonical"]').attr("href"),
+          $('meta[property="og:url"]').attr("content"),
+        ];
+        const marker = new RegExp(`/${this.mangaSubString}/([^/?#]+)`);
+        for (const candidate of candidates) {
+          const match = candidate?.match(marker);
+          if (match && match[1] !== mangaId) {
+            slug = this.toSafeId(this.safeDecode(match[1]));
+            break;
+          }
+        }
+      }
+    } catch {
+      // fall through: treat the id as a slug
+    }
+    if (!slug) return mangaId;
+
+    this.postIdSlugs.set(mangaId, slug);
+    Application.setState(slug, stateKey);
+    return slug;
   }
 
   protected parseChapterId(href: string, mangaId: string): string {

@@ -1,4 +1,5 @@
 import {
+  AdvancedSearchForm,
   BasicRateLimiter,
   Chapter,
   ChapterDetails,
@@ -12,6 +13,7 @@ import {
   DiscoverSectionProviding,
   DiscoverSectionType,
   Extension,
+  Form,
   MangaProviding,
   Metadata,
   PagedResults,
@@ -19,6 +21,7 @@ import {
   SearchQuery,
   SearchResultItem,
   SearchResultsProviding,
+  SettingsFormProviding,
   SortingOption,
   SourceManga,
   Tag,
@@ -26,6 +29,13 @@ import {
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
+import {
+  hideYaoi,
+  ToonzSearchForm,
+  ToonzSettingsForm,
+  YAOI_GENRES,
+  type ToonzSearchMetadata,
+} from "./forms";
 import { DOMAIN, ToonzInterceptor } from "./interceptors";
 
 // Built with Keiyoushi's Toonz extension (keiyoushi/extensions-source,
@@ -55,6 +65,7 @@ interface ComicCard {
   title: string;
   cover: string;
   nsfw: boolean;
+  yaoi: boolean;
 }
 
 interface ApiChapter {
@@ -71,14 +82,16 @@ interface ApiGenre {
 }
 
 type PageMetadata = { page?: number };
-type ToonzSearchMetadata = { genre?: string };
+// Pages to read ahead when hiding yaoi leaves a listing page empty
+const MAX_EMPTY_PAGE_SKIPS = 3;
 
 type ToonzImplementation = Extension &
   SearchResultsProviding &
   MangaProviding &
   ChapterProviding &
   DiscoverSectionProviding &
-  CloudflareBypassRequestProviding;
+  CloudflareBypassRequestProviding &
+  SettingsFormProviding;
 
 export class ToonzExtension implements ToonzImplementation {
   cookieStorageInterceptor = new CookieStorageInterceptor({ storage: "stateManager" });
@@ -99,6 +112,12 @@ export class ToonzExtension implements ToonzImplementation {
     this.globalRateLimiter.registerInterceptor();
   }
 
+  // ----- Settings -----
+
+  async getSettingsForm(): Promise<Form> {
+    return new ToonzSettingsForm();
+  }
+
   // ----- Discover -----
 
   async getDiscoverSections(): Promise<DiscoverSection[]> {
@@ -113,12 +132,12 @@ export class ToonzExtension implements ToonzImplementation {
     metadata: PageMetadata | undefined,
   ): Promise<PagedResults<DiscoverSectionItem>> {
     if (section.id === "genres") {
-      const genres = await this.getGenres().catch(() => [] as Tag[]);
+      const genres = await this.getVisibleGenres().catch(() => [] as Tag[]);
       return {
         items: genres.map((genre) => ({
           type: "genresCarouselItem",
           name: genre.title,
-          searchQuery: { title: "", metadata: { genre: genre.id } },
+          searchQuery: { title: "", metadata: { searchMeta: { genre: genre.id } } },
           contentRating: contentRatingFor([genre.title]),
         })),
       };
@@ -128,7 +147,10 @@ export class ToonzExtension implements ToonzImplementation {
     if (!def) return { items: [] };
 
     const page = metadata?.page ?? 1;
-    const { cards, hasNext } = await this.fetchListing(listingUrl("comics", def.sort, page), page);
+    const { cards, nextPage } = await this.fetchListing(
+      (p) => listingUrl("comics", def.sort, p),
+      page,
+    );
 
     return {
       items: cards.map((card): DiscoverSectionItem =>
@@ -148,7 +170,7 @@ export class ToonzExtension implements ToonzImplementation {
               contentRating: card.nsfw ? ContentRating.ADULT : undefined,
             },
       ),
-      metadata: hasNext ? { page: page + 1 } : undefined,
+      metadata: nextPage ? { page: nextPage } : undefined,
     };
   }
 
@@ -156,6 +178,11 @@ export class ToonzExtension implements ToonzImplementation {
 
   async getSortingOptions(_query: SearchQuery<Metadata>): Promise<SortingOption[]> {
     return SORT_OPTIONS;
+  }
+
+  async getAdvancedSearchForm(query: SearchQuery<Metadata>): Promise<AdvancedSearchForm> {
+    const genres = await this.getVisibleGenres().catch(() => [] as Tag[]);
+    return new ToonzSearchForm(genres, searchMetaOf(query));
   }
 
   async getSearchResults(
@@ -182,20 +209,23 @@ export class ToonzExtension implements ToonzImplementation {
       };
     }
 
-    let url: string;
+    let url: (page: number) => string;
     if (title) {
-      url = new URL(DOMAIN)
-        .addPathComponent("search")
-        .setQueryItem("q", title)
-        .setQueryItem("page", String(page))
-        .toString();
+      url = (p) =>
+        new URL(DOMAIN)
+          .addPathComponent("search")
+          .setQueryItem("q", title)
+          .setQueryItem("page", String(p))
+          .toString();
     } else {
       const sort = sortingOption?.id ?? "popular";
-      const genre = (query.metadata as ToonzSearchMetadata | undefined)?.genre;
-      url = genre ? listingUrl(`genre/${genre}`, sort, page) : listingUrl("comics", sort, page);
+      const genre = searchMetaOf(query).genre;
+      // Every title in these genres would be hidden anyway
+      if (genre && hideYaoi() && YAOI_GENRES.includes(genre)) return { items: [] };
+      url = (p) => (genre ? listingUrl(`genre/${genre}`, sort, p) : listingUrl("comics", sort, p));
     }
 
-    const { cards, hasNext } = await this.fetchListing(url, page);
+    const { cards, nextPage } = await this.fetchListing(url, page);
     return {
       items: cards.map((card) => ({
         mangaId: card.id,
@@ -203,7 +233,7 @@ export class ToonzExtension implements ToonzImplementation {
         title: card.title,
         contentRating: card.nsfw ? ContentRating.ADULT : undefined,
       })),
-      metadata: hasNext ? { page: page + 1 } : undefined,
+      metadata: nextPage ? { page: nextPage } : undefined,
     };
   }
 
@@ -340,14 +370,31 @@ export class ToonzExtension implements ToonzImplementation {
 
   // ----- Helpers -----
 
+  /**
+   * Reads one listing page, dropping yaoi-flagged cards when that setting is
+   * on. If that empties the page, reads ahead (a few pages at most) so the
+   * results don't look like they ended. `nextPage` is the page to load next.
+   */
   private async fetchListing(
-    url: string,
+    url: (page: number) => string,
     page: number,
-  ): Promise<{ cards: ComicCard[]; hasNext: boolean }> {
-    const $ = loadStreamed(await this.fetchText(url));
-    const cards = parseCards($);
-    const hasNext = $(`a[href*="page=${page + 1}"]`).length > 0;
-    return { cards, hasNext };
+  ): Promise<{ cards: ComicCard[]; nextPage?: number }> {
+    const hide = hideYaoi();
+    let current = page;
+    for (let skips = 0; ; skips++) {
+      const $ = loadStreamed(await this.fetchText(url(current)));
+      const cards = parseCards($).filter((card) => !(hide && card.yaoi));
+      const hasNext = $(`a[href*="page=${current + 1}"]`).length > 0;
+      if (cards.length || !hasNext || skips >= MAX_EMPTY_PAGE_SKIPS) {
+        return { cards, nextPage: hasNext ? current + 1 : undefined };
+      }
+      current++;
+    }
+  }
+
+  private async getVisibleGenres(): Promise<Tag[]> {
+    const genres = await this.getGenres();
+    return hideYaoi() ? genres.filter((g) => !YAOI_GENRES.includes(g.id)) : genres;
   }
 
   private async getGenres(): Promise<Tag[]> {
@@ -416,6 +463,8 @@ function parseCards($: CheerioAPI): ComicCard[] {
       title,
       cover: absoluteUrl(img.attr("src") ?? ""),
       nsfw: img.attr("data-nsfw") !== undefined,
+      // The site flags yaoi / BL cards on the card wrapper
+      yaoi: img.closest("[data-yaoi]").length > 0,
     });
   });
   return cards;
@@ -505,6 +554,12 @@ function mangaIdFromUrl(text: string): string | undefined {
 
 function normaliseMangaId(id: string): string {
   return id.replace(/^\/+/, "").replace(/^manhua\//, "manhwa/");
+}
+
+/** Genre from the search form / genre tiles (`searchMeta`), or the 1.0.0 `{ genre }` shape. */
+function searchMetaOf(query: SearchQuery<Metadata>): ToonzSearchMetadata {
+  const meta = query.metadata as { searchMeta?: ToonzSearchMetadata; genre?: string } | undefined;
+  return meta?.searchMeta ?? (meta?.genre ? { genre: meta.genre } : {});
 }
 
 function checkStatus(status: number, url: string): void {

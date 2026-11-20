@@ -2,6 +2,12 @@ import { CloudflareError, PaperbackInterceptor, Request, Response } from "@paper
 
 export const DOMAIN = "https://toonz.to";
 
+/** True only when the URL's host is exactly toonz.to (or www.toonz.to). */
+export function isToonzUrl(url: string): boolean {
+  const host = url.match(/^https?:\/\/([^/?#:@]+)(?::\d+)?(?:[/?#]|$)/i)?.[1]?.toLowerCase();
+  return host === "toonz.to" || host === "www.toonz.to";
+}
+
 export class ToonzInterceptor extends PaperbackInterceptor {
   override async interceptRequest(request: Request): Promise<Request> {
     const headers = { ...request.headers };
@@ -34,7 +40,7 @@ export class ToonzInterceptor extends PaperbackInterceptor {
     response: Response,
     data: ArrayBuffer,
   ): Promise<ArrayBuffer> {
-    if (!request.url.startsWith(DOMAIN)) return data;
+    if (!isToonzUrl(request.url)) return data;
     const challenged =
       response.headers?.["cf-mitigated"] === "challenge" ||
       ((response.status === 403 || response.status === 503) &&

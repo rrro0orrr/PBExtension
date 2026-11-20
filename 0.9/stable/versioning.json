@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-19T23:05:25.173Z",
+  "buildTime": "2026-11-20T06:34:42.432Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
@@ -167,7 +167,7 @@
     {
       "name": "MadaraDex",
       "description": "Extension that pulls content from madaradex.org",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "MATURE",

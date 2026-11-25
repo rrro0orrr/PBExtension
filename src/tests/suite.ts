@@ -15,7 +15,6 @@ import {
   type SourceManga,
   type TestLogger,
 } from "@paperback/types";
-
 import { expect } from "chai";
 
 export type TestCase = {

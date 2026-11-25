@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright © 2026 Inkdex */
 import { CloudflareError, PaperbackInterceptor, Request, Response } from "@paperback/types";
+
 import { HitomiFile } from "./model";
 import { addDataReceived } from "./settings";
 import { ImageUriResolver } from "./utils/uri";

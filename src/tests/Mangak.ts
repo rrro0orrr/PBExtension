@@ -1,7 +1,8 @@
 import { type TestLogger } from "@paperback/types";
-import { TestSuite, registerDefaultTests } from "./suite.js";
+
 import { Mangak } from "../Mangak/main.js";
 import sourceInfo from "../Mangak/pbconfig.js";
+import { TestSuite, registerDefaultTests } from "./suite.js";
 
 export async function runTests(logger: TestLogger) {
   const suite = new TestSuite("Mangak tests", logger);

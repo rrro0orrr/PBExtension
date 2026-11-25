@@ -32,6 +32,7 @@ import {
 import * as cheerio from "cheerio";
 import type { Cheerio, CheerioAPI } from "cheerio";
 import type { Element } from "domhandler";
+
 import { Interceptor, MITAKU_DOMAIN } from "./interceptors";
 import pbconfig from "./pbconfig";
 

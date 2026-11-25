@@ -24,11 +24,12 @@ import {
   SourceManga,
   TagSection,
 } from "@paperback/types";
-import { MangabuddySearchForm, type BuddySearchMetadata } from "./forms/SearchForm";
 import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import * as htmlparser2 from "htmlparser2";
+
 import { URLBuilder } from "../utils/url-builder/base";
+import { MangabuddySearchForm, type BuddySearchMetadata } from "./forms/SearchForm";
 import { MangakInterceptor } from "./MangakInterceptor";
 
 const baseUrl = "https://mangak.io";

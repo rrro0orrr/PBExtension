@@ -27,6 +27,7 @@ import {
   TagSection,
 } from "@paperback/types";
 import * as cheerio from "cheerio";
+
 import { Hentai2readSearchForm, type Hentai2readSearchMetadata } from "./forms/SearchForm";
 import { Hentai2readInterceptor } from "./interceptors";
 import type {

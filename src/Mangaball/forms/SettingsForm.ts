@@ -1,4 +1,5 @@
 import { Form, FormSectionElement, LabelRow, Section, SelectRow } from "@paperback/types";
+
 import { LANGUAGE_OPTIONS, getLanguageSetting, setLanguageSetting } from "../settings";
 
 export class MangaballSettingsForm extends Form {

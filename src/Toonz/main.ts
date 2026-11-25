@@ -30,6 +30,7 @@ import {
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
+
 import {
   hideYaoi,
   ToonzSearchForm,

@@ -30,6 +30,7 @@ import {
 } from "@paperback/types/lib/compat/0.8/searchFilters";
 import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
+
 import { HC_DOMAIN, Interceptor } from "./interceptors";
 import pbconfig from "./pbconfig";
 

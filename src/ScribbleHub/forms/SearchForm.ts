@@ -1,4 +1,5 @@
 import { AdvancedSearchForm, Section, TriStateSelectRow } from "@paperback/types";
+
 import { type ScribbleHubSearchMeta, GENRES } from "../model";
 
 export class ScribbleHubSearchForm extends AdvancedSearchForm {

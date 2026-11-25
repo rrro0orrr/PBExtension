@@ -1,4 +1,5 @@
 import { argv } from "node:process";
+
 import contentTemplateTool from "./ContentTemplate/tool.js";
 
 async function run(args: string[]): Promise<void> {

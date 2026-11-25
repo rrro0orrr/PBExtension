@@ -27,8 +27,11 @@ import {
   TagSection,
 } from "@paperback/types";
 import * as cheerio from "cheerio";
+import type { CheerioAPI } from "cheerio";
 import * as htmlparser2 from "htmlparser2";
+
 import { URLBuilder } from "../utils/url-builder/base";
+import { DEFAULT_SEARCH_META, NovelFireSearchForm } from "./forms/SearchForm";
 import { NovelFireInterceptor } from "./interceptors";
 import {
   type NovelFireMetadata,
@@ -38,8 +41,6 @@ import {
   type NovelFireTagResult,
   SORTS,
 } from "./model";
-import { DEFAULT_SEARCH_META, NovelFireSearchForm } from "./forms/SearchForm";
-import type { CheerioAPI } from "cheerio";
 
 // novelfire.net now redirects to this mirror, which uses /novel/ instead of /book/.
 const baseUrl = "https://novelphoenix.com";

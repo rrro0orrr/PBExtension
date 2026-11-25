@@ -28,6 +28,7 @@ import {
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
+
 import { MgekoInterceptor } from "./interceptors";
 import { MgekoSearchForm, type GenreState, type MgekoSearchMetadata } from "./SearchForm";
 

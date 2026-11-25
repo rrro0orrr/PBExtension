@@ -210,13 +210,18 @@ class NovelCoolExtension implements ExtensionImpl<typeof NovelCoolConfig> {
       return (await this.getSearchOptions()).genres;
     } catch (error) {
       if (error instanceof CloudflareError) throw error;
-      this.searchOptionsPromise = undefined;
       return [];
     }
   }
 
   private getSearchOptions(): Promise<SearchOptions> {
-    return (this.searchOptionsPromise ??= fetchUrlPage("/category/").then(parseSearchOptions));
+    const pending = (this.searchOptionsPromise ??= fetchUrlPage("/category/")
+      .then(parseSearchOptions)
+      .catch((error: unknown) => {
+        if (this.searchOptionsPromise === pending) this.searchOptionsPromise = undefined;
+        throw error;
+      }));
+    return pending;
   }
 
   async getSortingOptions(_query: SearchQuery<SearchMetadata>): Promise<SortingOption[]> {

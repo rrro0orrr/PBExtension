@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "Toonz",
   description: "Extension that pulls manga, manhwa and manhua from toonz.to.",
-  version: "1.0.1",
+  version: "1.0.2",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.ADULT,

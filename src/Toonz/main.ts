@@ -4,6 +4,7 @@ import {
   Chapter,
   ChapterDetails,
   ChapterProviding,
+  CloudflareError,
   CloudflareBypassRequestProviding,
   ContentRating,
   Cookie,
@@ -36,7 +37,7 @@ import {
   YAOI_GENRES,
   type ToonzSearchMetadata,
 } from "./forms";
-import { DOMAIN, ToonzInterceptor } from "./interceptors";
+import { DOMAIN, isToonzUrl, ToonzInterceptor } from "./interceptors";
 
 // Built with Keiyoushi's Toonz extension (keiyoushi/extensions-source,
 // src/en/toonz) as the reference for the site's endpoints and markup.
@@ -248,6 +249,7 @@ export class ToonzExtension implements ToonzImplementation {
 
     const comicId = findComicId(html, title);
     if (comicId) this.comicIds.set(id, comicId);
+    else this.comicIds.delete(id);
     const cover = absoluteUrl(
       $("img[data-cover]").first().attr("src") ||
         $("div.group img[src]").first().attr("src") ||
@@ -349,7 +351,11 @@ export class ToonzExtension implements ToonzImplementation {
     const url = `${DOMAIN}/${id}/chapter/${chapter.chapterId}`;
 
     // The React Server Components payload carries the chapter's image list as JSON
-    let pages = parseImages(await this.fetchText(url, { rsc: "1" }));
+    const streamed = await this.fetchText(url, { rsc: "1" }).catch((error: unknown) => {
+      if (error instanceof CloudflareError) throw error;
+      return "";
+    });
+    let pages = parseImages(streamed);
     if (!pages.length) pages = parseImages(await this.fetchText(url));
     if (!pages.length) throw new Error(`Toonz: no pages found for ${url}`);
 
@@ -382,9 +388,10 @@ export class ToonzExtension implements ToonzImplementation {
     const hide = hideYaoi();
     let current = page;
     for (let skips = 0; ; skips++) {
-      const $ = loadStreamed(await this.fetchText(url(current)));
+      const listing = url(current);
+      const $ = loadStreamed(await this.fetchText(listing));
       const cards = parseCards($).filter((card) => !(hide && card.yaoi));
-      const hasNext = $(`a[href*="page=${current + 1}"]`).length > 0;
+      const hasNext = hasListingPage($, listing, current + 1);
       if (cards.length || !hasNext || skips >= MAX_EMPTY_PAGE_SKIPS) {
         return { cards, nextPage: hasNext ? current + 1 : undefined };
       }
@@ -440,6 +447,29 @@ function loadStreamed(html: string): CheerioAPI {
   return cheerio.load(html);
 }
 
+function hasListingPage($: CheerioAPI, listing: string, page: number): boolean {
+  const current = new URL(listing);
+  return $('a[href*="?"]')
+    .toArray()
+    .some((link) => {
+      try {
+        const target = new URL(listing).update($(link).attr("href") ?? "");
+        return (
+          isToonzUrl(target.toString()) &&
+          target.path.replace(/\/$/, "") === current.path.replace(/\/$/, "") &&
+          target.queryItems?.page === String(page) &&
+          ["q", "sort"].every(
+            (key) =>
+              target.queryItems?.[key] === undefined ||
+              target.queryItems[key] === current.queryItems?.[key],
+          )
+        );
+      } catch {
+        return false;
+      }
+    });
+}
+
 function parseCards($: CheerioAPI): ComicCard[] {
   const cards: ComicCard[] = [];
   const seen = new Set<string>();
@@ -472,8 +502,8 @@ function parseCards($: CheerioAPI): ComicCard[] {
 
 /**
  * The details page embeds `comicId` in its RSC data, but cards for related
- * titles on the same page carry their own `comicId`/`comicTitle` pairs. Prefer
- * the pair whose title is this page's title; otherwise take the first id.
+ * titles on the same page carry their own `comicId`/`comicTitle` pairs.
+ * Use an ID only when its title matches the details page.
  */
 function findComicId(html: string, title: string): string | undefined {
   const body = html.replace(/\\"/g, '"');
@@ -483,7 +513,7 @@ function findComicId(html: string, title: string): string | undefined {
   )) {
     if (clean(m[2]).toLowerCase() === wanted) return m[1];
   }
-  return body.match(/comicId"?\s*:\s*(\d+)/)?.[1];
+  return undefined;
 }
 
 /** Finds `"images":[{"filename":...}]` in an RSC payload or (escaped) in page HTML. */

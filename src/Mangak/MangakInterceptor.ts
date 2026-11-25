@@ -1,9 +1,9 @@
 import { PaperbackInterceptor, Request, Response } from "@paperback/types";
 
-function isHostOrSubdomain(url: string, domain: string): boolean {
+function isMangakUrl(url: string): boolean {
   try {
     const host = new URL(url).hostname.toLowerCase();
-    return host === domain || host.endsWith(`.${domain}`);
+    return host === "mangak.io" || host.endsWith(".mangak.io");
   } catch {
     return false;
   }
@@ -11,7 +11,7 @@ function isHostOrSubdomain(url: string, domain: string): boolean {
 
 export class MangakInterceptor extends PaperbackInterceptor {
   override async interceptRequest(request: Request): Promise<Request> {
-    const isMangak = isHostOrSubdomain(request.url, "mangak.io");
+    const isMangak = isMangakUrl(request.url);
     request.headers = {
       ...request.headers,
       referer: isMangak ? "https://mangak.io/" : "https://mangabuddy.com/",

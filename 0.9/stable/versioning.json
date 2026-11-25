@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-20T18:18:55.604Z",
+  "buildTime": "2026-11-25T01:12:13.065Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
@@ -402,7 +402,7 @@
     {
       "name": "NovelCool",
       "description": "Extension that pulls content from novelcool.com.",
-      "version": "1.0.0-alpha.27",
+      "version": "1.0.0-alpha.28",
       "icon": "icons.png",
       "language": "en",
       "contentRating": "ADULT",
@@ -506,7 +506,7 @@
     {
       "name": "Toonz",
       "description": "Extension that pulls manga, manhwa and manhua from toonz.to.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "ADULT",

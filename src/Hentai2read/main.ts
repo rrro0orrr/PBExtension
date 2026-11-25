@@ -28,6 +28,7 @@ import {
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 
+import { stripTags } from "../utils/html/strip-tags";
 import { Hentai2readSearchForm, type Hentai2readSearchMetadata } from "./forms/SearchForm";
 import { Hentai2readInterceptor } from "./interceptors";
 import type {
@@ -438,10 +439,7 @@ function descriptionText(description: unknown): string {
 
 function stripHtml(html: string): string {
   return Application.decodeHTMLEntities(
-    html
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/p>/gi, "\n\n")
-      .replace(/<[^>]+>/g, ""),
+    stripTags(html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n")),
   ).trim();
 }
 

@@ -52,7 +52,7 @@ const cleanDescription = (value?: string | null): string =>
 
 const encodeBookPathId = (value: string): string => {
   const path = Application.decodeHTMLEntities(value)
-    .replace(/^https?:\/\/(?:www\.)?novelcool\.com/i, "")
+    .replace(/^https?:\/\/(?:www\.)?novelcool\.com(?=[/?#]|$)/i, "")
     .replace(/[?#].*$/, "")
     .replace(/\/+$/, "")
     .trim();

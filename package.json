@@ -33,7 +33,7 @@
     "format:check": "oxfmt --check .",
     "tsc": "tsc",
     "bundle": "paperback-cli bundle",
-    "test": "paperback-cli test --noConsole --output ./bundles/tests.json",
+    "test": "node scripts/test.mjs --noConsole --output ./bundles/tests.json",
     "serve": "paperback-cli serve",
     "logcat": "paperback-cli logcat --ip 192.168.1.65",
     "dev": "paperback-cli serve --watch --port 3000",

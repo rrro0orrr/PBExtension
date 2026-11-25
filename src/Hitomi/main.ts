@@ -90,6 +90,17 @@ import {
 import { getGallery, getGalleryIds } from "./utils/gallery";
 import { ImageUriResolver } from "./utils/uri";
 
+const CONTENT_HOST = "gold-usergeneratedcontent.net";
+
+function isContentHostUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host === CONTENT_HOST || host.endsWith(`.${CONTENT_HOST}`);
+  } catch {
+    return false;
+  }
+}
+
 class ReadHistory {
   private _ordered: string[];
   private _lookup: Set<string>;
@@ -4969,7 +4980,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       }
 
       // Handle 404 - might be stale gg.js
-      if (is404 && url.includes("gold-usergeneratedcontent.net") && !url.includes("gg.js")) {
+      if (is404 && isContentHostUrl(url) && !url.includes("gg.js")) {
         logHitomiNotice(
           "fetchText:gg-refresh",
           "[Hitomi] 404 detected, forcing gg.js refresh",
@@ -5053,7 +5064,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         }
       }
 
-      if (is404 && url.includes("gold-usergeneratedcontent.net") && !url.includes(".nozomi")) {
+      if (is404 && isContentHostUrl(url) && !url.includes(".nozomi")) {
         logHitomiNotice(
           "fetchBinary:gg-refresh",
           "[Hitomi] 404 on binary fetch, forcing gg.js refresh",

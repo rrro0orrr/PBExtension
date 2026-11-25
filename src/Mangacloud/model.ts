@@ -84,7 +84,7 @@ export type BrowseMangaResponse = {
   end_day?: number | null;
   quality_checked?: boolean;
   mature_content?: boolean;
-  scan_groups?: any | null;
+  scan_groups?: any;
   src_path?: string | null;
   src_group?: string | null;
   mangadex_id?: string | null;
@@ -140,9 +140,9 @@ export type MangaInfo = {
     h: number;
     f: string;
   } | null;
-  banner?: any | null;
+  banner?: any;
   relations?: any[];
-}
+};
 
 export type ChapterInfo = {
   id: string;

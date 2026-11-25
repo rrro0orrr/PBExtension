@@ -143,10 +143,10 @@ export class MangabuddySearchForm extends AdvancedSearchForm {
           ],
           minItemCount: 1,
           maxItemCount: 1,
-          onValueChange: Application.Selector<MangabuddySearchForm, (value: string[]) => Promise<void>>(
-            this,
-            "updateStatus",
-          ),
+          onValueChange: Application.Selector<
+            MangabuddySearchForm,
+            (value: string[]) => Promise<void>
+          >(this, "updateStatus"),
         }),
         SelectRow("orderby", {
           title: "Sort By",
@@ -161,10 +161,10 @@ export class MangabuddySearchForm extends AdvancedSearchForm {
           ],
           minItemCount: 1,
           maxItemCount: 1,
-          onValueChange: Application.Selector<MangabuddySearchForm, (value: string[]) => Promise<void>>(
-            this,
-            "updateOrderby",
-          ),
+          onValueChange: Application.Selector<
+            MangabuddySearchForm,
+            (value: string[]) => Promise<void>
+          >(this, "updateOrderby"),
         }),
       ]),
       Section("genres_section", [

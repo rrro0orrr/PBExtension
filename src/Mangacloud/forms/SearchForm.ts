@@ -97,10 +97,10 @@ export class MangacloudSearchForm extends AdvancedSearchForm {
           options: Types.map((t) => ({ id: t.id, title: t.name })),
           minItemCount: 0,
           maxItemCount: 1,
-          onValueChange: Application.Selector<MangacloudSearchForm, (value: string[]) => Promise<void>>(
-            this,
-            "updateType",
-          ),
+          onValueChange: Application.Selector<
+            MangacloudSearchForm,
+            (value: string[]) => Promise<void>
+          >(this, "updateType"),
         }),
         SelectRow("status", {
           title: "Status",
@@ -108,10 +108,10 @@ export class MangacloudSearchForm extends AdvancedSearchForm {
           options: Statuses.map((s) => ({ id: s.id, title: s.name })),
           minItemCount: 0,
           maxItemCount: 1,
-          onValueChange: Application.Selector<MangacloudSearchForm, (value: string[]) => Promise<void>>(
-            this,
-            "updateStatus",
-          ),
+          onValueChange: Application.Selector<
+            MangacloudSearchForm,
+            (value: string[]) => Promise<void>
+          >(this, "updateStatus"),
         }),
       ]),
       Section("genres_section", [

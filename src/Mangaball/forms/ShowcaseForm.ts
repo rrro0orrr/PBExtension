@@ -25,9 +25,15 @@ import { State } from "../utils/StateUtil";
 class NestedExampleForm extends Form {
   override getSections() {
     return [
-      Section({ id: "nested", header: "Nested Form", footer: "You navigated here from a NavigationRow." }, [
-        LabelRow("info", { title: "This is a nested form", subtitle: "Opened via NavigationRow" }),
-      ]),
+      Section(
+        { id: "nested", header: "Nested Form", footer: "You navigated here from a NavigationRow." },
+        [
+          LabelRow("info", {
+            title: "This is a nested form",
+            subtitle: "Opened via NavigationRow",
+          }),
+        ],
+      ),
     ];
   }
 }
@@ -46,7 +52,11 @@ export class ShowcaseForm extends Form {
     this.selectState = new State<string[]>(this, "showcase_select", ["option_b"]);
     this.inputState = new State<string>(this, "showcase_input", "");
     this.stepperState = new State<number>(this, "showcase_stepper", 1);
-    this.listItems = (Application.getState("showcase_list") as string[] | undefined) ?? ["Item 1", "Item 2", "Item 3"];
+    this.listItems = (Application.getState("showcase_list") as string[] | undefined) ?? [
+      "Item 1",
+      "Item 2",
+      "Item 3",
+    ];
 
     (this as any)["onButtonPress"] = async () => {
       // ButtonRow — no-op demo; just reload to show it responds
@@ -71,10 +81,17 @@ export class ShowcaseForm extends Form {
     return [
       // ── LabelRow ─────────────────────────────────────────────────────────
       Section(
-        { id: "label_rows", header: "LabelRow", footer: "Supports title, subtitle, right-side value, and optional onSelect tap handler." },
+        {
+          id: "label_rows",
+          header: "LabelRow",
+          footer: "Supports title, subtitle, right-side value, and optional onSelect tap handler.",
+        },
         [
           LabelRow("label_basic", { title: "Basic label" }),
-          LabelRow("label_subtitle", { title: "With subtitle", subtitle: "This is the subtitle text" }),
+          LabelRow("label_subtitle", {
+            title: "With subtitle",
+            subtitle: "This is the subtitle text",
+          }),
           LabelRow("label_value", { title: "With value", value: "Right side" }),
           LabelRow("label_full", {
             title: "Tappable label",
@@ -88,7 +105,11 @@ export class ShowcaseForm extends Form {
 
       // ── ToggleRow ─────────────────────────────────────────────────────────
       Section(
-        { id: "toggle_rows", header: "ToggleRow", footer: `Current value: ${this.toggleState.value ? "ON" : "OFF"}` },
+        {
+          id: "toggle_rows",
+          header: "ToggleRow",
+          footer: `Current value: ${this.toggleState.value ? "ON" : "OFF"}`,
+        },
         [
           ToggleRow("toggle_basic", {
             title: "Enable feature",
@@ -101,7 +122,12 @@ export class ShowcaseForm extends Form {
 
       // ── SelectRow ─────────────────────────────────────────────────────────
       Section(
-        { id: "select_rows", header: "SelectRow", footer: "Opens a picker sheet. minItemCount / maxItemCount control how many can be chosen." },
+        {
+          id: "select_rows",
+          header: "SelectRow",
+          footer:
+            "Opens a picker sheet. minItemCount / maxItemCount control how many can be chosen.",
+        },
         [
           SelectRow("select_single", {
             title: "Single select",
@@ -120,20 +146,21 @@ export class ShowcaseForm extends Form {
       ),
 
       // ── InputRow ──────────────────────────────────────────────────────────
-      Section(
-        { id: "input_rows", header: "InputRow", footer: "Free-text entry field." },
-        [
-          InputRow("input_basic", {
-            title: "Text input",
-            value: this.inputState.value,
-            onValueChange: this.inputState.selector,
-          }),
-        ],
-      ),
+      Section({ id: "input_rows", header: "InputRow", footer: "Free-text entry field." }, [
+        InputRow("input_basic", {
+          title: "Text input",
+          value: this.inputState.value,
+          onValueChange: this.inputState.selector,
+        }),
+      ]),
 
       // ── StepperRow ────────────────────────────────────────────────────────
       Section(
-        { id: "stepper_rows", header: "StepperRow", footer: `Current value: ${this.stepperState.value}` },
+        {
+          id: "stepper_rows",
+          header: "StepperRow",
+          footer: `Current value: ${this.stepperState.value}`,
+        },
         [
           StepperRow("stepper_basic", {
             title: "Stepper",
@@ -150,7 +177,12 @@ export class ShowcaseForm extends Form {
 
       // ── ButtonRow ─────────────────────────────────────────────────────────
       Section(
-        { id: "button_rows", header: "ButtonRow", footer: "Centered tappable button. No value display — use LabelRow with onSelect if you need a label on the right." },
+        {
+          id: "button_rows",
+          header: "ButtonRow",
+          footer:
+            "Centered tappable button. No value display — use LabelRow with onSelect if you need a label on the right.",
+        },
         [
           ButtonRow("button_basic", {
             title: "Press me",
@@ -162,7 +194,11 @@ export class ShowcaseForm extends Form {
 
       // ── NavigationRow ─────────────────────────────────────────────────────
       Section(
-        { id: "nav_rows", header: "NavigationRow", footer: "Pushes a new Form onto the navigation stack." },
+        {
+          id: "nav_rows",
+          header: "NavigationRow",
+          footer: "Pushes a new Form onto the navigation stack.",
+        },
         [
           NavigationRow("nav_basic", {
             title: "Navigate to nested form",
@@ -175,7 +211,11 @@ export class ShowcaseForm extends Form {
 
       // ── FlowSection ───────────────────────────────────────────────────────
       FlowSection(
-        { id: "flow_section", header: "FlowSection", footer: "Items wrap like chips/tags instead of a vertical list." },
+        {
+          id: "flow_section",
+          header: "FlowSection",
+          footer: "Items wrap like chips/tags instead of a vertical list.",
+        },
         [
           LabelRow("chip_action", { title: "Action" }),
           LabelRow("chip_romance", { title: "Romance" }),
@@ -193,9 +233,7 @@ export class ShowcaseForm extends Form {
         id: "edit_section",
         header: "EditSection",
         footer: "Supports reorder (drag handle), deletion (swipe), and optional addition button.",
-        items: this.listItems.map((item, i) =>
-          LabelRow(`list_item_${i}`, { title: item }),
-        ),
+        items: this.listItems.map((item, i) => LabelRow(`list_item_${i}`, { title: item })),
         allowReorder: true,
         allowDeletion: true,
         allowAddition: false,

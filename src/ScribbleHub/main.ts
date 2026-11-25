@@ -92,7 +92,9 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
     return SORTS.map((s) => ({ id: s.id, label: s.label }));
   }
 
-  async getAdvancedSearchForm(query: SearchQuery<ScribbleHubMetadata>): Promise<AdvancedSearchForm> {
+  async getAdvancedSearchForm(
+    query: SearchQuery<ScribbleHubMetadata>,
+  ): Promise<AdvancedSearchForm> {
     const meta = (query.metadata as { searchMeta?: ScribbleHubSearchMeta } | undefined)?.searchMeta;
     return new ScribbleHubSearchForm(meta);
   }
@@ -105,7 +107,8 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
     const paginationMeta = metadata as { page?: number } | undefined;
     const page = paginationMeta?.page ?? 1;
 
-    const searchMeta = (query.metadata as { searchMeta?: ScribbleHubSearchMeta } | undefined)?.searchMeta;
+    const searchMeta = (query.metadata as { searchMeta?: ScribbleHubSearchMeta } | undefined)
+      ?.searchMeta;
     const genres = searchMeta?.genres ?? {};
     const sort = sortingOption?.id ?? "1";
 
@@ -140,7 +143,7 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
       url: `${baseUrl}/series/${mangaId}/`,
       method: "GET",
     };
-    const $ = (await this.fetchCheerio(request));
+    const $ = await this.fetchCheerio(request);
     const title = String($(".fic_title").text()).trim();
     const coverUrl = String($(".fic_image img").attr("src")) || "";
     const genres: string[] = [];
@@ -237,7 +240,8 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
         const chapNum = parseInt(li.attr("order") ?? "0", 10) || 0;
 
         const dateTitle = String(li.find("span.fic_date_pub").attr("title") ?? "");
-        const publishDate = dateTitle && !dateTitle.includes("ago") ? new Date(dateTitle) : undefined;
+        const publishDate =
+          dateTitle && !dateTitle.includes("ago") ? new Date(dateTitle) : undefined;
 
         chapters.push({
           chapterId,
@@ -352,7 +356,9 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
 
     return {
       items,
-      metadata: hasNextPage ? { page: page + 1, collectedIds } satisfies ScribbleHubMetadata : undefined,
+      metadata: hasNextPage
+        ? ({ page: page + 1, collectedIds } satisfies ScribbleHubMetadata)
+        : undefined,
     };
   }
 
@@ -387,10 +393,11 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
 
     const hasNextPage = $("a.page-link.next").length > 0;
 
-
     return {
       items,
-      metadata: hasNextPage ? { page: page + 1, collectedIds } satisfies ScribbleHubMetadata : undefined,
+      metadata: hasNextPage
+        ? ({ page: page + 1, collectedIds } satisfies ScribbleHubMetadata)
+        : undefined,
     };
   }
 
@@ -426,7 +433,9 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
 
     return {
       items,
-      metadata: hasNextPage ? { page: page + 1, collectedIds } satisfies ScribbleHubMetadata : undefined,
+      metadata: hasNextPage
+        ? ({ page: page + 1, collectedIds } satisfies ScribbleHubMetadata)
+        : undefined,
     };
   }
 

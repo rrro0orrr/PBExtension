@@ -33,12 +33,7 @@ import {
 import { closureSelector } from "@paperback/types/lib/impl/Selector.js";
 import { HitomiSettingsForm } from "./forms";
 import { HitomiInterceptor } from "./interceptors";
-import {
-  GalleryIdOptions,
-  HitomiFile,
-  HitomiGallery,
-  HitomiTag,
-} from "./model";
+import { GalleryIdOptions, HitomiFile, HitomiGallery, HitomiTag } from "./model";
 import hitomiInfo from "./pbconfig";
 import {
   addDescMarkedReadId,
@@ -153,11 +148,7 @@ class MemoryCache<T extends IdentifiableItem> {
     this.pruneCacheIfNeeded();
   }
 
-  setEntry(
-    item: T,
-    createdDate: Date,
-    lastAccessDate: Date = createdDate,
-  ): void {
+  setEntry(item: T, createdDate: Date, lastAccessDate: Date = createdDate): void {
     if (!this.items.includes(item.id)) this.items.push(item.id);
     this.cache[item.id] = { item, createdDate, lastAccessDate };
     this.pruneCacheIfNeeded();
@@ -228,9 +219,7 @@ const GALLERY_CACHE_MAX_SIZE = 300;
 class InlineSearchFilterForm extends SearchFilterForm {
   override getSections() {
     if (!this.filters) {
-      return [
-        Section("loading", [LabelRow("loading", { title: "Loading Filters" })]),
-      ];
+      return [Section("loading", [LabelRow("loading", { title: "Loading Filters" })])];
     }
     if (this.filters instanceof Error) {
       return [
@@ -246,22 +235,17 @@ class InlineSearchFilterForm extends SearchFilterForm {
     return this.filters.map((filter) => {
       switch (filter.type) {
         case "dropdown": {
-          const selectedOptionId = (this.selectedFilterValues[filter.id] ??
-            filter.value) as string;
+          const selectedOptionId = (this.selectedFilterValues[filter.id] ?? filter.value) as string;
           return Section(
             { id: filter.id, header: filter.title },
             filter.options.map((option) =>
               LabelRow(option.id, {
                 title: option.value,
                 value: selectedOptionId === option.id ? "✓" : undefined,
-                onSelect: closureSelector(
-                  this,
-                  `${filter.id}#${option.id}`,
-                  async () => {
-                    this.selectedFilterValues[filter.id] = option.id;
-                    this.reloadForm();
-                  },
-                ),
+                onSelect: closureSelector(this, `${filter.id}#${option.id}`, async () => {
+                  this.selectedFilterValues[filter.id] = option.id;
+                  this.reloadForm();
+                }),
               }),
             ),
           );
@@ -286,20 +270,15 @@ class InlineSearchFilterForm extends SearchFilterForm {
           });
         }
         case "input": {
-          const value = (this.selectedFilterValues[filter.id] ??
-            filter.value) as string;
+          const value = (this.selectedFilterValues[filter.id] ?? filter.value) as string;
           return Section({ id: filter.id, header: filter.title }, [
             InputRow(filter.id, {
               title: filter.title,
               value,
-              onValueChange: closureSelector(
-                this,
-                filter.id,
-                async (newValue: string) => {
-                  this.selectedFilterValues[filter.id] = newValue;
-                  this.reloadForm();
-                },
-              ),
+              onValueChange: closureSelector(this, filter.id, async (newValue: string) => {
+                this.selectedFilterValues[filter.id] = newValue;
+                this.reloadForm();
+              }),
             }),
           ]);
         }
@@ -326,8 +305,8 @@ const TAG_CHARS = [..."abcdefghijklmnopqrstuvwxyz".split(""), "123"];
 
 const DEBUG_HITOMI =
   typeof globalThis !== "undefined" &&
-  (globalThis as { process?: { env?: Record<string, string | undefined> } })
-    .process?.env?.KAKAROT_DEBUG_HITOMI === "1";
+  (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
+    ?.KAKAROT_DEBUG_HITOMI === "1";
 
 function logHitomiDebug(...args: unknown[]) {
   if (DEBUG_HITOMI) {
@@ -337,11 +316,7 @@ function logHitomiDebug(...args: unknown[]) {
 
 const hitomiNoticeTimestamps = new Map<string, number>();
 
-function logHitomiNotice(
-  key: string,
-  message: string,
-  minimumIntervalMs = 15000,
-): void {
+function logHitomiNotice(key: string, message: string, minimumIntervalMs = 15000): void {
   const now = Date.now();
   const last = hitomiNoticeTimestamps.get(key) ?? 0;
   if (!DEBUG_HITOMI && now - last < minimumIntervalMs) {
@@ -535,9 +510,7 @@ function sanitizeCachedTagEntries(entries: unknown): CachedTagEntry[] {
   // Handle compact string format: "slug|count|type|ref\nslug|count|type|ref"
   if (typeof entries === "string" && entries.includes("|")) {
     const lines = entries.split("\n");
-    logHitomiDebug(
-      `[Hitomi] Attempting to restore ${lines.length} tags from compact string`,
-    );
+    logHitomiDebug(`[Hitomi] Attempting to restore ${lines.length} tags from compact string`);
     for (const line of lines) {
       const parts = line.split("|");
       if (parts.length < 3) continue;
@@ -571,9 +544,7 @@ function sanitizeCachedTagEntries(entries: unknown): CachedTagEntry[] {
         : typeof obj.count === "string"
           ? Number.parseInt(obj.count, 10)
           : 0;
-    const count = Number.isFinite(countRaw)
-      ? Math.max(0, Math.floor(countRaw))
-      : 0;
+    const count = Number.isFinite(countRaw) ? Math.max(0, Math.floor(countRaw)) : 0;
     out.push({ slug, count, ref, type: (obj.type as any) || "tag" });
   }
   return out;
@@ -582,11 +553,7 @@ function sanitizeCachedTagEntries(entries: unknown): CachedTagEntry[] {
 function getTagCacheLastFetchTs(): number | undefined {
   const raw = Application.getState(TAG_CACHE_LAST_FETCH_KEY);
   const parsed =
-    typeof raw === "number"
-      ? raw
-      : typeof raw === "string"
-        ? Number.parseInt(raw, 10)
-        : NaN;
+    typeof raw === "number" ? raw : typeof raw === "string" ? Number.parseInt(raw, 10) : NaN;
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
@@ -601,7 +568,7 @@ function normalizeBridgeString(value: unknown, fallback = ""): string {
     const normalized =
       typeof value === "object" && value !== null
         ? JSON.stringify(value)
-        : String(value);
+        : String(value as bigint | symbol);
     return normalized.length > 0 ? normalized : fallback;
   } catch {
     return fallback;
@@ -687,10 +654,7 @@ function dedupeCreatorTokens(values: string[]): string[] {
   return deduped;
 }
 
-function getCreatorFields(
-  artists: string[],
-  groups: string[],
-): { author: string; artist: string } {
+function getCreatorFields(artists: string[], groups: string[]): { author: string; artist: string } {
   const normalizedArtists = dedupeCreatorTokens(artists);
   const normalizedGroups = dedupeCreatorTokens(groups);
 
@@ -718,10 +682,7 @@ function formatSearchSortLabel(sortBy: string): string {
     popular_year: "Popular Year",
     popular: "Popular Alltime",
   };
-  return (
-    labelMap[sortBy] ??
-    sortBy.replace(/[-_]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase())
-  );
+  return labelMap[sortBy] ?? sortBy.replace(/[-_]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
 function formatSearchFilterSummary(
@@ -766,16 +727,12 @@ function cleanSearchFilterValues(
   });
 }
 
-function getActiveSearchFilterValues(
-  filters: SearchFilterValue[],
-): SearchFilterValue[] {
+function getActiveSearchFilterValues(filters: SearchFilterValue[]): SearchFilterValue[] {
   return filters.filter((filter) => {
     if (typeof filter.value === "string") {
       return filter.value.trim().length > 0 && filter.value !== "all";
     }
-    return Object.keys(filter.value).some(
-      (key) => key !== "__apply_manga_filter_tags__",
-    );
+    return Object.keys(filter.value).some((key) => key !== "__apply_manga_filter_tags__");
   });
 }
 
@@ -805,10 +762,7 @@ function buildOffsetMetadata(
   return metadata;
 }
 
-function getEffectiveScanOffset(
-  metadata: CursorMetadata | undefined,
-  pageSize: number,
-): number {
+function getEffectiveScanOffset(metadata: CursorMetadata | undefined, pageSize: number): number {
   if (!metadata) return 0;
   if (metadata.scanOffset !== undefined) {
     return Math.max(0, readCursorNumber(metadata.scanOffset, 0));
@@ -852,9 +806,7 @@ function normalizeCursorMetadata(
     return buildOffsetMetadata(
       readCursorNumber(metadata.offset, 0),
       pageSize,
-      metadata.scanOffset !== undefined
-        ? readCursorNumber(metadata.scanOffset, 0)
-        : undefined,
+      metadata.scanOffset !== undefined ? readCursorNumber(metadata.scanOffset, 0) : undefined,
     );
   }
 
@@ -884,8 +836,7 @@ function getTagCharKey(slug: string): string {
 
 // Cache for tag type lookup - populated from tagData when tags are fetched
 // Maps normalized tag name -> type prefix (male/female/tag/ambiguous)
-let tagTypeCache: Map<string, "male" | "female" | "tag" | "ambiguous"> | null =
-  null;
+let tagTypeCache: Map<string, "male" | "female" | "tag" | "ambiguous"> | null = null;
 let tagTypeCacheDataSize = 0;
 // Set of tag slugs that exist as both male: and female: - must search both URLs
 let mergedMaleFemaleCache: Set<string> | null = null;
@@ -893,18 +844,12 @@ let mergedMaleFemaleCache: Set<string> | null = null;
 function ensureTagTypeCacheInitialized(): void {
   // Rebuild if cache is null or if tagData size changed (tags were refreshed)
   const currentDataSize =
-    (Application.getState(TAG_CACHE_STATE_KEY) as unknown[] | undefined)
-      ?.length ?? 0;
+    (Application.getState(TAG_CACHE_STATE_KEY) as unknown[] | undefined)?.length ?? 0;
   if (tagTypeCache && tagTypeCacheDataSize === currentDataSize) return;
   const persistedTags = Application.getState(TAG_CACHE_STATE_KEY) as
     | { slug: string; ref?: string; type?: string }[]
     | undefined;
-  if (
-    !persistedTags ||
-    !Array.isArray(persistedTags) ||
-    persistedTags.length === 0
-  )
-    return;
+  if (!persistedTags || !Array.isArray(persistedTags) || persistedTags.length === 0) return;
   const tagData = new Map<string, { type: "male" | "female" | "tag" }>();
   for (const t of persistedTags) {
     const ref = t.ref ?? t.slug;
@@ -915,12 +860,8 @@ function ensureTagTypeCacheInitialized(): void {
         : "tag";
     tagData.set(t.slug, { type });
   }
-  const cachedMerged = Application.getState(MERGED_TAGS_CACHE_KEY) as
-    | string[]
-    | undefined;
-  const merged = new Set<string>(
-    Array.isArray(cachedMerged) ? cachedMerged : [],
-  );
+  const cachedMerged = Application.getState(MERGED_TAGS_CACHE_KEY) as string[] | undefined;
+  const merged = new Set<string>(Array.isArray(cachedMerged) ? cachedMerged : []);
   buildTagTypeCache(tagData, merged);
   tagTypeCacheDataSize = persistedTags.length;
 }
@@ -973,9 +914,7 @@ interface HitomiSearchFilterTagGroup {
  * Returns a set of valid tag slugs from persisted tag cache.
  */
 export function getTagLookupCache(): Set<string> | null {
-  const cached = Application.getState(TAG_CACHE_STATE_KEY) as
-    | { slug: string }[]
-    | undefined;
+  const cached = Application.getState(TAG_CACHE_STATE_KEY) as { slug: string }[] | undefined;
   if (!cached || !Array.isArray(cached)) return null;
   return new Set(cached.map((t) => t.slug));
 }
@@ -1002,9 +941,7 @@ export function validateAndFilterTags(input: string): string {
         .split(/\s*\|\|\s*| OR /i)
         .map((s) => s.trim())
         .filter(Boolean);
-      const validOrParts = orParts.filter((orPart) =>
-        isTagValid(orPart, validSlugs),
-      );
+      const validOrParts = orParts.filter((orPart) => isTagValid(orPart, validSlugs));
       if (validOrParts.length > 0) {
         validParts.push(validOrParts.join(" OR "));
       }
@@ -1134,15 +1071,7 @@ function parseSingleTag(part: string): HitomiTag | null {
   ensureTagTypeCacheInitialized();
   if (
     explicitType &&
-    [
-      "artist",
-      "group",
-      "series",
-      "character",
-      "male",
-      "female",
-      "language",
-    ].includes(explicitType)
+    ["artist", "group", "series", "character", "male", "female", "language"].includes(explicitType)
   ) {
     tagType = explicitType as HitomiTag["type"];
   } else if (explicitType === "tag") {
@@ -1288,10 +1217,10 @@ function recordDisplayedTiles(items: readonly any[]): void {
       const candidate =
         item && typeof item === "object"
           ? (item as {
-            mangaId?: unknown;
-            id?: unknown;
-            galleryId?: unknown;
-          })
+              mangaId?: unknown;
+              id?: unknown;
+              galleryId?: unknown;
+            })
           : undefined;
       const id = candidate?.mangaId ?? candidate?.id ?? candidate?.galleryId;
       if (typeof id === "string") incrementDisplayedManga(id);
@@ -1354,11 +1283,9 @@ async function fetchGalleryIdsWithOrLogic(
           if (rangeVal && isIndexFile && buffer.byteLength > 2_000_000) {
             console.error(
               `[Hitomi Fetcher] Range request to ${url} returned ` +
-              `${buffer.byteLength} bytes — Range header likely stripped`,
+                `${buffer.byteLength} bytes — Range header likely stripped`,
             );
-            throw new Error(
-              `Range response too large: ${buffer.byteLength} bytes`,
-            );
+            throw new Error(`Range response too large: ${buffer.byteLength} bytes`);
           }
 
           // Cache the response (with LRU eviction at 100 entries)
@@ -1369,12 +1296,7 @@ async function fetchGalleryIdsWithOrLogic(
           }
           return buffer;
         } catch (e: unknown) {
-          const msg =
-            e instanceof Error
-              ? e.message
-              : typeof e === "string"
-                ? e
-                : "Unknown error";
+          const msg = e instanceof Error ? e.message : typeof e === "string" ? e : "Unknown error";
           console.error(`[Hitomi Fetcher] ERROR for ${cacheKey}: ${msg}`);
           if (msg.includes("404")) {
             console.log(`[Hitomi] Blacklisting 404 nozomi URL: ${url}`);
@@ -1423,24 +1345,17 @@ function buildLanguageParts(gallery: HitomiGallery): {
   langLabel: string;
 } {
   const galleryLang = gallery.languageName?.english || "unknown";
-  const langCode =
-    LANGUAGE_SHORT[galleryLang] ?? galleryLang.toUpperCase().slice(0, 2);
+  const langCode = LANGUAGE_SHORT[galleryLang] ?? galleryLang.toUpperCase().slice(0, 2);
   return { langCode, langLabel: galleryLang };
 }
 
-function generateSubtitle(
-  gallery: HitomiGallery,
-  isRead: boolean,
-  rereadCount?: number,
-): string {
+function generateSubtitle(gallery: HitomiGallery, isRead: boolean, rereadCount?: number): string {
   // Add defensive checks
   if (!gallery) return "Unknown";
 
   const displayOptions = getDisplayOptionsSetting();
   const { langCode } = buildLanguageParts(gallery);
-  const pages = Number.isFinite(gallery.files?.length)
-    ? Math.max(0, gallery.files.length)
-    : 0;
+  const pages = Number.isFinite(gallery.files?.length) ? Math.max(0, gallery.files.length) : 0;
   const showReadLetter = displayOptions.includes("hide_read_letter"); // Note: Despite the name, this now means "show" when present
   const showPageCount = displayOptions.includes("show_page_count");
   const readMarker = isRead && showReadLetter ? "r" : "";
@@ -1458,10 +1373,7 @@ function generateSubtitle(
           ? `${readMarker}${pages}p`
           : "";
 
-  const absoluteStr = formatDateByPattern(
-    gallery.publishedDate,
-    getDateFormatSetting(),
-  );
+  const absoluteStr = formatDateByPattern(gallery.publishedDate, getDateFormatSetting());
   const relativeStr = relativeDateString(gallery.publishedDate);
 
   const showLangTag = displayOptions.includes("show_lang_tip");
@@ -1515,9 +1427,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   > = new Map();
   tagFetchPromise: Promise<void> | null = null; // Mutex to prevent concurrent fetches
   mergedMaleFemaleTagSlugs = new Set<string>();
-  private tagListCache:
-    | { slug: string; display: string; count: number }[]
-    | null = null;
+  private tagListCache: { slug: string; display: string; count: number }[] | null = null;
   private tagListCacheSize = 0;
 
   // Cached SearchFilter[] output to avoid rebuilding on every framework call
@@ -1540,8 +1450,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
   // Cache for related pool to prevent re-fetching on pagination
   // Now uses lazy loading - pool grows as user scrolls
-  relatedPoolCache: { id: number; tag: string; cycleIndex: number }[] | null =
-    null;
+  relatedPoolCache: { id: number; tag: string; cycleIndex: number }[] | null = null;
   relatedPoolLastHistoryIndex = 0; // Track how far we've processed into history
   relatedPoolSeenIds = new Set<number>(); // Track seen IDs across lazy loads
   relatedPoolHistoryIds = new Set<number>(); // Track history IDs to exclude from relatedIds
@@ -1596,19 +1505,14 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   private foregroundGalleryPressureUntil = 0;
   private readonly MAX_BACKGROUND_GALLERY_LOADS = 2;
   private readonly FOREGROUND_GALLERY_GRACE_MS = 1800;
-  private sectionRequestInFlight = new Map<
-    string,
-    Promise<PagedResults<DiscoverSectionItem>>
-  >();
+  private sectionRequestInFlight = new Map<string, Promise<PagedResults<DiscoverSectionItem>>>();
   private sectionWaveSeq = 0;
   private sectionWaveTokenSeq = 0;
   private activeSectionWaves = new Map<SectionWaveKind, SectionWaveState>();
 
   async initialise(): Promise<void> {
     this.requestManager.registerInterceptor();
-    this.requestManager.setCookieHeaderProvider((url) =>
-      this.getCookieHeaderForUrl(url),
-    );
+    this.requestManager.setCookieHeaderProvider((url) => this.getCookieHeaderForUrl(url));
     // Re-create rate limiter with current dev settings
     this.globalRateLimiter = this.createRateLimiter();
     this.globalRateLimiter.registerInterceptor();
@@ -1618,17 +1522,13 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     // Static state may persist stale data from previous sessions
     ImageUriResolver.invalidate();
     // Start GG sync in background
-    this.syncGG().catch((e) =>
-      console.log("[Hitomi] syncGG background failed", e),
-    );
+    this.syncGG().catch((e) => console.log("[Hitomi] syncGG background failed", e));
     // Register global callback for related pool invalidation
-    (
-      globalThis as { __hitomiInvalidateRelatedPool?: () => void }
-    ).__hitomiInvalidateRelatedPool = () => this.invalidateRelatedPool();
+    (globalThis as { __hitomiInvalidateRelatedPool?: () => void }).__hitomiInvalidateRelatedPool =
+      () => this.invalidateRelatedPool();
     // Register global callback for clearing search caches when tag settings change
-    (
-      globalThis as { __hitomiClearSearchCaches?: () => void }
-    ).__hitomiClearSearchCaches = () => this.clearSearchCaches();
+    (globalThis as { __hitomiClearSearchCaches?: () => void }).__hitomiClearSearchCaches = () =>
+      this.clearSearchCaches();
     // Ensure install date is set for statistics
     ensureInstallDate();
     // Related pool persistence has historically produced bridge conversion
@@ -1641,7 +1541,6 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     // Tags are only fetched on-demand when forms/search actually need them.
     this.restoreTagsFromCache();
   }
-
 
   private restoreTagsFromCache(): void {
     try {
@@ -1659,9 +1558,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         return;
       }
 
-      const cachedRaw = Application.getState(TAG_CACHE_STATE_KEY) as
-        | string
-        | undefined;
+      const cachedRaw = Application.getState(TAG_CACHE_STATE_KEY) as string | undefined;
 
       const cachedSanitized = sanitizeCachedTagEntries(cachedRaw);
       const hasFullSnapshot = getTagCacheLastFetchTs() !== undefined;
@@ -1691,9 +1588,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         this.tagData.set(entry.slug, {
           slug: entry.slug,
           display: entry.display ?? formatTagTitle(entry.slug),
-          count: Number.isFinite(normalizedCount)
-            ? Math.max(0, Math.floor(normalizedCount))
-            : 0,
+          count: Number.isFinite(normalizedCount) ? Math.max(0, Math.floor(normalizedCount)) : 0,
           ref: entry.ref ?? entry.slug,
           type,
         });
@@ -1715,8 +1610,8 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     try {
       const saved = Application.getState(GALLERY_CACHE_STATE_KEY) as
         | {
-          entries: [string, { gallery: HitomiGallery; ts: number }][];
-        }
+            entries: [string, { gallery: HitomiGallery; ts: number }][];
+          }
         | undefined;
       if (!saved?.entries || !Array.isArray(saved.entries)) return;
 
@@ -1731,8 +1626,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         const normalizedGallery = {
           ...entry.gallery,
           publishedDate: new Date(
-            (entry.gallery as { publishedDate: string | number | Date })
-              .publishedDate,
+            (entry.gallery as { publishedDate: string | number | Date }).publishedDate,
           ),
         };
         if (!Number.isFinite(normalizedGallery.publishedDate.getTime())) {
@@ -1740,11 +1634,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         }
 
         const entryDate = new Date(entry.ts);
-        this.galleryCache.setEntry(
-          { id, gallery: normalizedGallery },
-          entryDate,
-          entryDate,
-        );
+        this.galleryCache.setEntry({ id, gallery: normalizedGallery }, entryDate, entryDate);
         restored++;
       }
 
@@ -1785,10 +1675,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         .filter((entry) => entry !== null)
         .sort((a, b) => b.ts - a.ts)
         .slice(0, GALLERY_CACHE_MAX_SIZE)
-        .map(
-          (entry) =>
-            [entry.id, { gallery: entry.gallery, ts: entry.ts }] as const,
-        );
+        .map((entry) => [entry.id, { gallery: entry.gallery, ts: entry.ts }] as const);
 
       Application.setState({ entries }, GALLERY_CACHE_STATE_KEY);
       this.galleryCacheDirty = false;
@@ -1822,18 +1709,14 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
   private parseCookieExpires(value: unknown): Date | undefined {
     if (!value) return undefined;
-    const parsed =
-      value instanceof Date ? value : new Date(value as string | number | Date);
+    const parsed = value instanceof Date ? value : new Date(value as string | number | Date);
     return Number.isFinite(parsed.getTime()) ? parsed : undefined;
   }
 
   private normalizeCookie(cookie: Cookie): Cookie | undefined {
     const name = typeof cookie.name === "string" ? cookie.name.trim() : "";
     const value = typeof cookie.value === "string" ? cookie.value : "";
-    const domain =
-      typeof cookie.domain === "string"
-        ? cookie.domain.trim().toLowerCase()
-        : "";
+    const domain = typeof cookie.domain === "string" ? cookie.domain.trim().toLowerCase() : "";
     if (!name || !domain) return undefined;
     const path = cookie.path && cookie.path.length > 0 ? cookie.path : "/";
     const expires = this.parseCookieExpires(cookie.expires);
@@ -1845,10 +1728,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     return !!cookie.expires && cookie.expires.getTime() <= now;
   }
 
-  private doesCookieMatchRequestUrl(
-    cookie: Cookie,
-    requestUrl: string,
-  ): boolean {
+  private doesCookieMatchRequestUrl(cookie: Cookie, requestUrl: string): boolean {
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(requestUrl);
@@ -1863,17 +1743,13 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       return false;
     }
 
-    const cookiePath =
-      cookie.path && cookie.path.length > 0 ? cookie.path : "/";
+    const cookiePath = cookie.path && cookie.path.length > 0 ? cookie.path : "/";
     return parsedUrl.pathname.startsWith(cookiePath);
   }
 
   private persistCookieJar(): void {
     try {
-      Application.setState(
-        Array.from(this.cookieJar.values()),
-        COOKIE_JAR_STATE_KEY,
-      );
+      Application.setState(Array.from(this.cookieJar.values()), COOKIE_JAR_STATE_KEY);
     } catch {
       // Ignore persistence failures
     }
@@ -1881,9 +1757,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
   private restoreCookieJar(): void {
     try {
-      const stored = Application.getState(COOKIE_JAR_STATE_KEY) as
-        | Cookie[]
-        | undefined;
+      const stored = Application.getState(COOKIE_JAR_STATE_KEY) as Cookie[] | undefined;
       if (!Array.isArray(stored)) {
         this.cookieJar.clear();
         return;
@@ -1930,9 +1804,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       return bPath.length - aPath.length;
     });
 
-    return matchingCookies
-      .map((cookie) => `${cookie.name}=${cookie.value}`)
-      .join("; ");
+    return matchingCookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
   }
 
   async saveCloudflareBypassCookies(cookies: Cookie[]): Promise<void> {
@@ -2005,10 +1877,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         .slice(0, 120)
         .map(
           ([key, entry]) =>
-            [key, { ids: entry.ids, ts: entry.ts }] as [
-              string,
-              { ids: number[]; ts: number },
-            ],
+            [key, { ids: entry.ids, ts: entry.ts }] as [string, { ids: number[]; ts: number }],
         );
       Application.setState({ entries }, IDSET_CACHE_STATE_KEY);
     } catch {
@@ -2026,10 +1895,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     }
   }
 
-  private beginSectionWave(
-    kind: SectionWaveKind,
-    label: string,
-  ): SectionWaveHandle {
+  private beginSectionWave(kind: SectionWaveKind, label: string): SectionWaveHandle {
     const now = Date.now();
     let wave = this.activeSectionWaves.get(kind);
     const canJoin = !!wave && now - wave.lastJoinAt <= WAVE_JOIN_WINDOW_MS;
@@ -2078,27 +1944,19 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     if (wave.pending.size > 0) return;
 
-    const ordered = [...wave.entries].sort(
-      (a, b) => a.completedAt - b.completedAt,
-    );
+    const ordered = [...wave.entries].sort((a, b) => a.completedAt - b.completedAt);
     const totalMs = Math.max(0, Date.now() - wave.startedAt);
     const logLines: string[] = [];
     for (const entry of ordered) {
       const logParts: string[] = [`${entry.items} items`];
       if (entry.skipped > 0) logParts.push(`${entry.skipped} read`);
-      logLines.push(
-        `  - ${entry.label}: ${logParts.join(", ")}, ${entry.elapsedMs}ms`,
-      );
+      logLines.push(`  - ${entry.label}: ${logParts.join(", ")}, ${entry.elapsedMs}ms`);
     }
     if (String(wave.kind).toLowerCase() !== "search") {
       if (ordered.length > 1) {
-        console.log(
-          `[Hitomi] ${wave.kind} Wave Total Time: ${totalMs}ms\n${logLines.join("\n")}`,
-        );
+        console.log(`[Hitomi] ${wave.kind} Wave Total Time: ${totalMs}ms\n${logLines.join("\n")}`);
       } else if (ordered.length === 1) {
-        console.log(
-          `[Hitomi] ${wave.kind} Wave: ${logLines[0]?.replace("  - ", "")}`,
-        );
+        console.log(`[Hitomi] ${wave.kind} Wave: ${logLines[0]?.replace("  - ", "")}`);
       }
     }
 
@@ -2195,17 +2053,13 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     })();
     this.sectionRequestInFlight.set(key, request);
     try {
-      const result = await request as PagedResults<DiscoverSectionItem> & {
+      const result = (await request) as PagedResults<DiscoverSectionItem> & {
         filteredSkipped?: number;
         readSkipped?: number;
       };
       const filteredSkipped = result.filteredSkipped ?? 0;
       const readSkipped = result.readSkipped ?? 0;
-      const filterSummary = formatSearchFilterSummary(
-        filteredSkipped,
-        readSkipped,
-        true,
-      );
+      const filterSummary = formatSearchFilterSummary(filteredSkipped, readSkipped, true);
       console.log(
         `[Hitomi] ${section.title ?? section.id}: ${result.items.length} items${filterSummary}, ${Date.now() - startedAt}ms`,
       );
@@ -2215,12 +2069,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       return result as PagedResults<DiscoverSectionItem>;
     } catch (e) {
       if (waveHandle) {
-        this.completeSectionWave(
-          waveHandle,
-          0,
-          getCarouselTiles(),
-          section.title ?? section.id,
-        );
+        this.completeSectionWave(waveHandle, 0, getCarouselTiles(), section.title ?? section.id);
       }
       console.error(`[Hitomi] Section "${section.id}" failed`, e);
       return { items: [], metadata: undefined };
@@ -2230,8 +2079,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   }
 
   private shouldRefreshTags(now = Date.now()): boolean {
-    const showTagCounts =
-      getDisplayOptionsSetting().includes("show_tag_counts");
+    const showTagCounts = getDisplayOptionsSetting().includes("show_tag_counts");
 
     // If showTagCounts is OFF, we do NOT refresh if we already have a successful fetch.
     if (!showTagCounts) return false;
@@ -2253,9 +2101,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     return isStale;
   }
 
-  async ensureTagsLoaded(
-    options: { allowPartial?: boolean } = {},
-  ): Promise<void> {
+  async ensureTagsLoaded(options: { allowPartial?: boolean } = {}): Promise<void> {
     // If we have tags in memory, we're good. Only refresh if stale + show_tag_counts enabled.
     if (this.tagData.size > 0) {
       if (this.shouldRefreshTags() && !this.tagFetchPromise) {
@@ -2275,8 +2121,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     options: { allowPartial?: boolean } = {},
   ): Promise<{ slug: string; display: string; count: number }[]> {
     const allowPartial = options.allowPartial ?? false;
-    const showTagCounts =
-      getDisplayOptionsSetting().includes("show_tag_counts");
+    const showTagCounts = getDisplayOptionsSetting().includes("show_tag_counts");
     const toList = () => {
       if (this.tagListCache && this.tagListCacheSize === this.tagData.size) {
         return this.tagListCache;
@@ -2360,22 +2205,17 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     const allRefsPerSlug = new Map<string, Set<string>>();
 
     const existingMerged = new Set<string>(
-      (Application.getState(MERGED_TAGS_CACHE_KEY) as string[] | undefined) ??
-      [],
+      (Application.getState(MERGED_TAGS_CACHE_KEY) as string[] | undefined) ?? [],
     );
 
     const now = Date.now();
     const charsToFetch = Array.from(new Set(TAG_CHARS));
 
-    console.log(
-      `[Hitomi Tags] Fetching all ${charsToFetch.length} character pages`,
-    );
+    console.log(`[Hitomi Tags] Fetching all ${charsToFetch.length} character pages`);
 
     const fetchCharPage = async (char: string): Promise<boolean> => {
       try {
-        const html = await this.fetchText(
-          `https://hitomi.la/alltags-${char}.html`,
-        );
+        const html = await this.fetchText(`https://hitomi.la/alltags-${char}.html`);
         const regex =
           /<li>\s*<a\b[^>]*href="(?:https?:\/\/hitomi\.la)?\/tag\/([^"]+)\.html"[^>]*>([\s\S]*?)<\/a>\s*\(([\d,]+)\)\s*<\/li>/g;
         let match: RegExpExecArray | null;
@@ -2475,25 +2315,18 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
           }
         }
       } catch (batchErr) {
-        console.log(
-          `[Hitomi Tags] Batch ${i / BATCH_SIZE + 1} failed:`,
-          batchErr,
-        );
+        console.log(`[Hitomi Tags] Batch ${i / BATCH_SIZE + 1} failed:`, batchErr);
         failCount += batch.length;
       }
     }
 
     const failedChars = charsToFetch.filter((char) => {
-      return !Array.from(this.tagData.values()).some(
-        (tag) => getTagCharKey(tag.slug) === char,
-      );
+      return !Array.from(this.tagData.values()).some((tag) => getTagCharKey(tag.slug) === char);
     });
 
     for (
       let retryPass = 1;
-      retryPass <= 1 &&
-      failedChars.length > 0 &&
-      failedChars.length < charsToFetch.length;
+      retryPass <= 1 && failedChars.length > 0 && failedChars.length < charsToFetch.length;
       retryPass++
     ) {
       console.log(
@@ -2519,13 +2352,9 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             failCount--;
             const index = failedChars.indexOf(char);
             if (index > -1) failedChars.splice(index, 1);
-            console.log(
-              `[Hitomi Tags] Recovered ${char} on retry pass ${retryPass}`,
-            );
+            console.log(`[Hitomi Tags] Recovered ${char} on retry pass ${retryPass}`);
           } else {
-            console.warn(
-              `[Hitomi Tags] Retry pass ${retryPass} failed for ${char}`,
-            );
+            console.warn(`[Hitomi Tags] Retry pass ${retryPass} failed for ${char}`);
           }
         }
       }
@@ -2547,10 +2376,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     try {
       Application.setState(compactTags, TAG_CACHE_STATE_KEY);
       Application.setState(TAG_CACHE_VERSION, TAG_CACHE_VERSION_KEY);
-      Application.setState(
-        Array.from(this.mergedMaleFemaleTagSlugs),
-        MERGED_TAGS_CACHE_KEY,
-      );
+      Application.setState(Array.from(this.mergedMaleFemaleTagSlugs), MERGED_TAGS_CACHE_KEY);
       Application.setState(String(now), TAG_CACHE_LAST_FETCH_KEY);
     } catch (e) {
       console.error("[Hitomi Tags] Failed to persist tag cache to state:", e);
@@ -2586,41 +2412,24 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     });
   }
 
-  private discoverItemsToSearchResults(
-    items: DiscoverSectionItem[],
-  ): SearchResultItem[] {
+  private discoverItemsToSearchResults(items: DiscoverSectionItem[]): SearchResultItem[] {
     return items
       .filter(
-        (
-          item,
-        ): item is Extract<
-          DiscoverSectionItem,
-          { type: "simpleCarouselItem" }
-        > => item.type === "simpleCarouselItem",
+        (item): item is Extract<DiscoverSectionItem, { type: "simpleCarouselItem" }> =>
+          item.type === "simpleCarouselItem",
       )
-      .map(
-        ({ mangaId, title, subtitle, imageUrl, metadata, contentRating }) => ({
-          mangaId: normalizeBridgeString(mangaId),
-          title: normalizeBridgeString(title, "Gallery"),
-          subtitle:
-            subtitle === undefined
-              ? undefined
-              : normalizeBridgeString(subtitle, ""),
-          imageUrl: normalizeBridgeString(
-            imageUrl,
-            HitomiExtension.PLACEHOLDER_COVER,
-          ),
-          metadata,
-          contentRating,
-        }),
-      );
+      .map(({ mangaId, title, subtitle, imageUrl, metadata, contentRating }) => ({
+        mangaId: normalizeBridgeString(mangaId),
+        title: normalizeBridgeString(title, "Gallery"),
+        subtitle: subtitle === undefined ? undefined : normalizeBridgeString(subtitle, ""),
+        imageUrl: normalizeBridgeString(imageUrl, HitomiExtension.PLACEHOLDER_COVER),
+        metadata,
+        contentRating,
+      }));
   }
 
   private getSearchFilterTagGroups(): HitomiSearchFilterTagGroup[] {
-    const grouped = new Map<
-      string,
-      HitomiSearchFilterTagGroup & { representativeCount: number }
-    >();
+    const grouped = new Map<string, HitomiSearchFilterTagGroup & { representativeCount: number }>();
 
     for (const entry of this.tagData.values()) {
       const id = sanitizeTagId(entry.slug);
@@ -2660,8 +2469,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   async getSearchFilters(): Promise<SearchFilter[]> {
     this.searchFiltersDirty = false;
 
-    const showTagCounts =
-      getDisplayOptionsSetting().includes("show_tag_counts");
+    const showTagCounts = getDisplayOptionsSetting().includes("show_tag_counts");
     await this.getTags({ allowPartial: !showTagCounts });
     const allDisplayableTags = this.getSearchFilterTagGroups().filter(
       (t) => !t.slugs.some((slug) => isUglyConventionTag(slug)),
@@ -2706,16 +2514,12 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     // Sort selected/excluded tags to the top of the tag list
     const selectedIds = new Set(Object.keys(cleanedTags));
-    const sortTagsAlpha =
-      getDisplayOptionsSetting().includes("show_tags_alpha");
+    const sortTagsAlpha = getDisplayOptionsSetting().includes("show_tags_alpha");
     const unselectedTags = displayTags.filter((t) => !selectedIds.has(t.id));
     if (sortTagsAlpha) {
       unselectedTags.sort((a, b) => a.display.localeCompare(b.display));
     }
-    const sortedTags = [
-      ...displayTags.filter((t) => selectedIds.has(t.id)),
-      ...unselectedTags,
-    ];
+    const sortedTags = [...displayTags.filter((t) => selectedIds.has(t.id)), ...unselectedTags];
 
     const filters: SearchFilter[] = [];
 
@@ -2740,18 +2544,12 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         type: "multiselect",
         title: "Tags",
         options: sortedTags.map((t) => {
-          const abbreviate = getDisplayOptionsSetting().includes(
-            "abbreviate_tag_counts",
-          );
-          const countStr = abbreviate
-            ? _abbreviateCount(t.count)
-            : t.count.toString();
+          const abbreviate = getDisplayOptionsSetting().includes("abbreviate_tag_counts");
+          const countStr = abbreviate ? _abbreviateCount(t.count) : t.count.toString();
           const cleanedLabel = t.display.replace(/\s*-\s*\([^)]*\)\s*$/, "");
           return {
             id: t.id,
-            value: showTagCounts
-              ? `${cleanedLabel} - (${countStr})`
-              : cleanedLabel,
+            value: showTagCounts ? `${cleanedLabel} - (${countStr})` : cleanedLabel,
           };
         }),
         value: cleanedTags,
@@ -2764,9 +2562,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     return filters;
   }
 
-  async getAdvancedSearchForm(
-    query: SearchQuery<SearchFilterValue[]>,
-  ): Promise<SearchFilterForm> {
+  async getAdvancedSearchForm(query: SearchQuery<SearchFilterValue[]>): Promise<SearchFilterForm> {
     return new InlineSearchFilterForm(query.metadata, this.getSearchFilters());
   }
 
@@ -2815,10 +2611,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     const cursor = metadata == null ? undefined : (metadata as CursorMetadata);
     const searchWaveHandle =
       !cursor?.page || readCursorNumber(cursor.page, 1) === 1
-        ? this.beginSectionWave(
-          "Search",
-          sortingOption?.label ?? sortingOption?.id ?? "default",
-        )
+        ? this.beginSectionWave("Search", sortingOption?.label ?? sortingOption?.id ?? "default")
         : undefined;
     const finishSearchWave = (label: string, itemCount: number): void => {
       if (!searchWaveHandle) return;
@@ -2857,8 +2650,8 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const excludeRaw = getExcludeTagsSetting();
       const searchFilterTags = submittedFilters
         ? ((submittedFilters.find((filter) => filter.id === "tags")?.value as
-          | Record<string, "included" | "excluded">
-          | undefined) ?? {})
+            | Record<string, "included" | "excluded">
+            | undefined) ?? {})
         : getSearchFilterTags();
 
       const mergedTags = { ...searchFilterTags };
@@ -2881,9 +2674,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       }
 
       const submittedActiveFilters = submittedFilters
-        ? getActiveSearchFilterValues(submittedFilters).filter(
-          (filter) => filter.id !== "tags",
-        )
+        ? getActiveSearchFilterValues(submittedFilters).filter((filter) => filter.id !== "tags")
         : undefined;
 
       if (Object.keys(mergedTags).length > 0) {
@@ -2906,15 +2697,9 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         cursor === undefined
           ? undefined
           : {
-            page:
-              cursor.page !== undefined
-                ? readCursorNumber(cursor.page, 1)
-                : undefined,
-            offset:
-              cursor.offset !== undefined
-                ? readCursorNumber(cursor.offset, 0)
-                : undefined,
-          };
+              page: cursor.page !== undefined ? readCursorNumber(cursor.page, 1) : undefined,
+              offset: cursor.offset !== undefined ? readCursorNumber(cursor.offset, 0) : undefined,
+            };
       const tags: HitomiTag[] = [];
       const configuredDefaultSort = getDefaultSearchSortSetting();
       const incomingSort = sortingOption?.id;
@@ -2923,10 +2708,8 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       if (incomingSort) {
         sortBy = incomingSort as HitomiSearchSortId;
       }
-      if (sortBy === "related" && !getEnableRelatedSetting())
-        sortBy = "date_added";
-      if (sortBy === "top_reread" && !getEnableRereadSectionSetting())
-        sortBy = "date_added";
+      if (sortBy === "related" && !getEnableRelatedSetting()) sortBy = "date_added";
+      if (sortBy === "top_reread" && !getEnableRereadSectionSetting()) sortBy = "date_added";
       let popularityOrderBy: GalleryIdOptions["popularityOrderBy"] = undefined;
 
       // Create unique search session key to track duplicates across pages
@@ -3058,9 +2841,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             if (filter.id === "length" && typeof filter.value === "string") {
               setSearchFilterLength(filter.value);
             } else if (filter.id === "tags") {
-              const tagsValue = filter.value as
-                | Record<string, "included" | "excluded">
-                | undefined;
+              const tagsValue = filter.value as Record<string, "included" | "excluded"> | undefined;
               if (tagsValue) {
                 const nextTags = { ...tagsValue };
                 // Strip leftover apply-manga-filter key from old state
@@ -3081,21 +2862,14 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         /* ignore */
       }
 
-      if (
-        !originalTitle &&
-        queryFilters.length === 0 &&
-        sortBy === "date_added"
-      ) {
+      if (!originalTitle && queryFilters.length === 0 && sortBy === "date_added") {
         const result = await this.getDateAddedSection(pageCursor, {
           carousel: false,
         });
         finishSearchWave("date_added", result.items.length);
         return {
           items: this.discoverItemsToSearchResults(result.items),
-          metadata: normalizeCursorMetadata(
-            result.metadata as CursorMetadata | undefined,
-            limit,
-          ),
+          metadata: normalizeCursorMetadata(result.metadata as CursorMetadata | undefined, limit),
         };
       }
 
@@ -3124,14 +2898,10 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         const isNegative = !!typedMatch[1];
         const type = (typedMatch[2] || "tag").toLowerCase();
         let name = typedMatch[3] || "";
-        if (name.startsWith('"') && name.endsWith('"'))
-          name = name.slice(1, -1);
+        if (name.startsWith('"') && name.endsWith('"')) name = name.slice(1, -1);
         tags.push({ type: type as HitomiTag["type"], name, isNegative });
       }
-      titleQuery = titleQuery
-        .replace(typedRegex, " ")
-        .replace(/\s+/g, " ")
-        .trim();
+      titleQuery = titleQuery.replace(typedRegex, " ").replace(/\s+/g, " ").trim();
 
       // Hitomi's own plain-text search hashes the complete sanitized query
       // string into the galleries B-tree. Splitting title text into individual
@@ -3168,14 +2938,10 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
               await this.getTags(); // Ensure tagData is populated
               const tagGroups = new Map(
-                this.getSearchFilterTagGroups().map((group) => [
-                  group.id,
-                  group,
-                ]),
+                this.getSearchFilterTagGroups().map((group) => [group.id, group]),
               );
               let nextAliasOrGroup =
-                tags.reduce((max, tag) => Math.max(max, tag.orGroup ?? 0), 0) +
-                1;
+                tags.reduce((max, tag) => Math.max(max, tag.orGroup ?? 0), 0) + 1;
 
               const pushResolvedTag = (
                 slug: string,
@@ -3186,9 +2952,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
                 if (!entry) return false;
 
                 tags.push({
-                  type: this.mergedMaleFemaleTagSlugs.has(slug)
-                    ? "ambiguous"
-                    : entry.type,
+                  type: this.mergedMaleFemaleTagSlugs.has(slug) ? "ambiguous" : entry.type,
                   name: cleanTagName(entry.ref || slug).replace(/_/g, " "),
                   isNegative: state === "excluded",
                   orGroup,
@@ -3201,9 +2965,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
                 const group = tagGroups.get(tagId);
                 if (group) {
                   const groupOr =
-                    state === "included" && group.slugs.length > 1
-                      ? nextAliasOrGroup++
-                      : undefined;
+                    state === "included" && group.slugs.length > 1 ? nextAliasOrGroup++ : undefined;
                   let pushed = false;
                   for (const slug of group.slugs) {
                     pushed = pushResolvedTag(slug, state, groupOr) || pushed;
@@ -3226,10 +2988,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             filter.value !== "all"
           ) {
             // Handle length filter like NHentai
-            const lengthFilterMap: Record<
-              string,
-              { min?: number; max?: number }
-            > = {
+            const lengthFilterMap: Record<string, { min?: number; max?: number }> = {
               le20: { max: 20 },
               gt20: { min: 21 },
               gt40: { min: 41 },
@@ -3242,10 +3001,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
               if (lengthFilter.min !== undefined) minPages = lengthFilter.min;
               if (lengthFilter.max !== undefined) maxPages = lengthFilter.max;
             }
-          } else if (
-            filter.id === "pagesExpr" &&
-            typeof filter.value === "string"
-          ) {
+          } else if (filter.id === "pagesExpr" && typeof filter.value === "string") {
             const parsed = parsePagesExpression(filter.value);
             if (parsed.min !== undefined) minPages = parsed.min;
             if (parsed.max !== undefined) maxPages = parsed.max;
@@ -3253,11 +3009,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         }
       }
 
-      if (
-        minPages !== undefined &&
-        maxPages !== undefined &&
-        minPages > maxPages
-      ) {
+      if (minPages !== undefined && maxPages !== undefined && minPages > maxPages) {
         [minPages, maxPages] = [maxPages, minPages];
       }
 
@@ -3310,7 +3062,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
           Math.max(
             offset + limit,
             (offset + limit) * (pageFilterActive || keywordActive ? 2 : 1) +
-            (hideReadFilter ? limit : 0),
+              (hideReadFilter ? limit : 0),
           ),
         );
         const rawWindow = rawIds.slice(0, lookaheadEnd);
@@ -3329,9 +3081,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             }),
           )
         ).filter((g): g is HitomiGallery => g !== null);
-        galleries.sort(
-          (a, b) => b.publishedDate.getTime() - a.publishedDate.getTime(),
-        );
+        galleries.sort((a, b) => b.publishedDate.getTime() - a.publishedDate.getTime());
         const ordered = galleries.map((g) => g.id);
         logHitomiDebug(
           "search:date_published",
@@ -3404,23 +3154,20 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         `keywordActive=${keywordActive}`,
       );
 
-      const { items: finalItems, consumed } =
-        await this.getSearchResultItemsIncremental(
-          deduplicatedIds,
-          offset,
-          limit,
-          {
-            minPages,
-            maxPages,
-            keywordTerms,
-            maxScanIds:
-              pageFilterActive || keywordActive ? limit * 20 : limit * 12,
-          },
-        );
+      const { items: finalItems, consumed } = await this.getSearchResultItemsIncremental(
+        deduplicatedIds,
+        offset,
+        limit,
+        {
+          minPages,
+          maxPages,
+          keywordTerms,
+          maxScanIds: pageFilterActive || keywordActive ? limit * 20 : limit * 12,
+        },
+      );
       const nextScanOffset = offset + consumed;
       const nextDisplayOffset = offset + finalItems.length;
-      const actuallyHasMore =
-        nextScanOffset < deduplicatedIds.length || upstreamHasMore;
+      const actuallyHasMore = nextScanOffset < deduplicatedIds.length || upstreamHasMore;
       recordDisplayedTiles(finalItems);
 
       // When filtering removes all items on this page but more IDs exist upstream,
@@ -3431,8 +3178,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       } else {
         this.searchConsecutiveEmpty = 0;
       }
-      const continueOffset =
-        actuallyHasMore && this.searchConsecutiveEmpty < 20;
+      const continueOffset = actuallyHasMore && this.searchConsecutiveEmpty < 20;
       logHitomiDebug(
         "search:return",
         `items=${finalItems.length}`,
@@ -3478,15 +3224,15 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     // Do this BEFORE checking isRead so the synopsis reflects the new state
     if (getHideReadSetting() && getMarkReadOnViewSetting()) {
       const tagNames = gallery.tags
-        .filter(
-          (t) => t.type === "tag" || t.type === "male" || t.type === "female",
-        )
+        .filter((t) => t.type === "tag" || t.type === "male" || t.type === "female")
         .map((t) => (t.type === "tag" ? t.name : `${t.type}:${t.name}`));
       const { isFirstRead } = markMangaAsRead(
         mangaId,
         gallery.title.display || gallery.title.japanese,
         tagNames,
-        { trackStats: false },
+        {
+          trackStats: false,
+        },
       );
       if (isFirstRead && !getDescMarkedReadIds().has(mangaId)) {
         incrementMarkReadOnDescCount();
@@ -3577,17 +3323,12 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     await this.syncGG();
     const gallery = await this.loadGalleryWithRetry(chapter.chapterId);
     const tagNames = gallery.tags
-      .filter(
-        (t) => t.type === "tag" || t.type === "male" || t.type === "female",
-      )
+      .filter((t) => t.type === "tag" || t.type === "male" || t.type === "female")
       .map((t) => (t.type === "tag" ? t.name : `${t.type}:${t.name}`));
     const wasDescMarked = getDescMarkedReadIds().has(chapter.chapterId);
-    markMangaAsRead(
-      chapter.chapterId,
-      gallery.title.display || gallery.title.japanese,
-      tagNames,
-      { forceFirstStatRead: wasDescMarked },
-    );
+    markMangaAsRead(chapter.chapterId, gallery.title.display || gallery.title.japanese, tagNames, {
+      forceFirstStatRead: wasDescMarked,
+    });
     // If this manga was previously only desc-marked-read, it's now actually read
     // so remove it from the exclusion list so it appears in Related section
     removeDescMarkedReadId(chapter.chapterId);
@@ -3688,10 +3429,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     let filteredByPage = 0;
     let failedLoads = 0;
     const totalRemainingIds = Math.max(0, ids.length - startOffset);
-    let scanBudget = Math.max(
-      targetCount,
-      Math.floor(options?.maxScanIds ?? targetCount),
-    );
+    let scanBudget = Math.max(targetCount, Math.floor(options?.maxScanIds ?? targetCount));
     const MAX_SCAN_EXPANSIONS = 2;
     let scanExpansions = 0;
     let scannedIds = 0;
@@ -3699,10 +3437,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     let cursor = startOffset;
     while (cursor < ids.length && items.length < targetCount) {
       if (scannedIds >= scanBudget) {
-        if (
-          scanExpansions >= MAX_SCAN_EXPANSIONS ||
-          scanBudget >= totalRemainingIds
-        ) {
+        if (scanExpansions >= MAX_SCAN_EXPANSIONS || scanBudget >= totalRemainingIds) {
           break;
         }
         scanBudget = Math.min(
@@ -3714,10 +3449,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
       const remaining = targetCount - items.length;
       const remainingScanBudget = scanBudget - scannedIds;
-      const batchSize = Math.max(
-        1,
-        Math.min(INCREMENTAL_BATCH, remaining, remainingScanBudget),
-      );
+      const batchSize = Math.max(1, Math.min(INCREMENTAL_BATCH, remaining, remainingScanBudget));
       const batch = ids.slice(cursor, Math.min(cursor + batchSize, ids.length));
       consumed = cursor + batch.length - startOffset;
       scannedIds += batch.length;
@@ -3742,10 +3474,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
             const pages = gallery.files.length;
             if (pageFilter) {
-              if (
-                pageFilter.exact !== undefined &&
-                pages !== pageFilter.exact
-              ) {
+              if (pageFilter.exact !== undefined && pages !== pageFilter.exact) {
                 filteredByPage++;
                 return null;
               }
@@ -3763,17 +3492,11 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             return {
               mangaId: normalizeBridgeString(gallery.id, id.toString()),
               title: normalizeBridgeString(
-                gallery.title?.display ||
-                gallery.title?.japanese ||
-                `Gallery ${id}`,
+                gallery.title?.display || gallery.title?.japanese || `Gallery ${id}`,
                 `Gallery ${id}`,
               ),
               imageUrl: coverUrl,
-              subtitle: generateSubtitle(
-                gallery,
-                isRead,
-                getRereadCount(id.toString()),
-              ),
+              subtitle: generateSubtitle(gallery, isRead, getRereadCount(id.toString())),
               type: "simpleCarouselItem",
             } satisfies DiscoverSectionItem;
           } catch {
@@ -3834,24 +3557,14 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     const items: SearchResultItem[] = [];
     let consumed = 0;
-    const maxScanIds = Math.max(
-      targetCount,
-      Math.floor(options?.maxScanIds ?? targetCount),
-    );
+    const maxScanIds = Math.max(targetCount, Math.floor(options?.maxScanIds ?? targetCount));
     let scannedIds = 0;
 
     let cursor = startOffset;
-    while (
-      cursor < ids.length &&
-      items.length < targetCount &&
-      scannedIds < maxScanIds
-    ) {
+    while (cursor < ids.length && items.length < targetCount && scannedIds < maxScanIds) {
       const remaining = targetCount - items.length;
       const remainingScanBudget = maxScanIds - scannedIds;
-      const batchSize = Math.max(
-        1,
-        Math.min(INCREMENTAL_BATCH, remaining, remainingScanBudget),
-      );
+      const batchSize = Math.max(1, Math.min(INCREMENTAL_BATCH, remaining, remainingScanBudget));
       const batch = ids.slice(cursor, Math.min(cursor + batchSize, ids.length));
       consumed = cursor + batch.length - startOffset;
       scannedIds += batch.length;
@@ -3871,8 +3584,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
             const pageCount = gallery.files.length;
             if (
-              (options?.minPages !== undefined &&
-                pageCount < options.minPages) ||
+              (options?.minPages !== undefined && pageCount < options.minPages) ||
               (options?.maxPages !== undefined && pageCount > options.maxPages)
             ) {
               return null;
@@ -3883,17 +3595,11 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             return {
               mangaId: normalizeBridgeString(gallery.id, id.toString()),
               title: normalizeBridgeString(
-                gallery.title?.display ||
-                gallery.title?.japanese ||
-                `Gallery ${id}`,
+                gallery.title?.display || gallery.title?.japanese || `Gallery ${id}`,
                 `Gallery ${id}`,
               ),
               imageUrl: coverUrl,
-              subtitle: generateSubtitle(
-                gallery,
-                isRead,
-                getRereadCount(id.toString()),
-              ),
+              subtitle: generateSubtitle(gallery, isRead, getRereadCount(id.toString())),
             };
           } catch {
             return null;
@@ -3917,9 +3623,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   ): Promise<PagedResults<DiscoverSectionItem>> {
     const offset = getEffectiveScanOffset(metadata, getDiscoverPageSize());
     const limit =
-      options?.carousel === false || offset > 0
-        ? getDiscoverPageSize()
-        : getCarouselTiles();
+      options?.carousel === false || offset > 0 ? getDiscoverPageSize() : getCarouselTiles();
     const hideRead = getHideReadSetting();
 
     const languageTokens = mapLanguageTokens();
@@ -3944,8 +3648,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       pageFilter,
       hideRead,
     });
-    const resetSession =
-      offset === 0 || this.randomDiscoverSessionQuery !== randomSessionKey;
+    const resetSession = offset === 0 || this.randomDiscoverSessionQuery !== randomSessionKey;
     if (resetSession) {
       this.randomDiscoverSessionQuery = randomSessionKey;
       this.randomDiscoverSessionIds = [];
@@ -3954,10 +3657,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     }
 
     const requiredForPage = offset + limit;
-    let poolSize = Math.max(
-      limit,
-      requiredForPage + (pageFilterActive || hideRead ? limit : 0),
-    );
+    let poolSize = Math.max(limit, requiredForPage + (pageFilterActive || hideRead ? limit : 0));
     if (this.randomDiscoverSessionFetchedCount > 0) {
       poolSize = Math.max(poolSize, this.randomDiscoverSessionFetchedCount);
     }
@@ -3973,19 +3673,14 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     let rawIds: number[] = [];
     const maxExpansionPasses = 2;
 
-    for (
-      let expansionPass = 0;
-      expansionPass <= maxExpansionPasses;
-      expansionPass++
-    ) {
+    for (let expansionPass = 0; expansionPass <= maxExpansionPasses; expansionPass++) {
       const expandedPoolSize =
         expansionPass === 0
           ? poolSize
           : poolSize + expansionPass * Math.max(limit, Math.floor(limit * 1.5));
       rawIds = await this.getGalleryIdsCached({
         tags,
-        range:
-          tags.length === 0 ? undefined : { start: 0, end: expandedPoolSize },
+        range: tags.length === 0 ? undefined : { start: 0, end: expandedPoolSize },
         languages: languageTokens,
         isSearch: tags.length > 0,
       });
@@ -4017,17 +3712,14 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         this.randomDiscoverSessionIds = Array.from(new Set(selectedIds));
         for (let i = this.randomDiscoverSessionIds.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [this.randomDiscoverSessionIds[i], this.randomDiscoverSessionIds[j]] =
-            [
-              this.randomDiscoverSessionIds[j],
-              this.randomDiscoverSessionIds[i],
-            ];
+          [this.randomDiscoverSessionIds[i], this.randomDiscoverSessionIds[j]] = [
+            this.randomDiscoverSessionIds[j],
+            this.randomDiscoverSessionIds[i],
+          ];
         }
       } else {
         const existing = new Set(this.randomDiscoverSessionIds);
-        const additions = Array.from(new Set(selectedIds)).filter(
-          (id) => !existing.has(id),
-        );
+        const additions = Array.from(new Set(selectedIds)).filter((id) => !existing.has(id));
         for (let i = additions.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [additions[i], additions[j]] = [additions[j], additions[i]];
@@ -4041,8 +3733,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
       if (this.randomDiscoverSessionIds.length > offset) break;
 
-      const canExpand =
-        rawIds.length >= expandedPoolSize && expansionPass < maxExpansionPasses;
+      const canExpand = rawIds.length >= expandedPoolSize && expansionPass < maxExpansionPasses;
       if (!canExpand) {
         return { items: [], metadata: undefined };
       }
@@ -4061,17 +3752,16 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       return { items: [], metadata: undefined };
     }
 
-    let { items, consumed, diagnostics } =
-      await this.getGalleryDetailsIncremental(
-        candidateIds,
-        offset,
-        limit,
-        pageFilter,
-        {
-          skipHideRead: true,
-          maxScanIds: pageFilterActive ? limit * 40 : limit * 24,
-        },
-      );
+    let { items, consumed, diagnostics } = await this.getGalleryDetailsIncremental(
+      candidateIds,
+      offset,
+      limit,
+      pageFilter,
+      {
+        skipHideRead: true,
+        maxScanIds: pageFilterActive ? limit * 40 : limit * 24,
+      },
+    );
 
     if (items.length === 0 && offset < candidateIds.length) {
       const retry = await this.getGalleryDetailsIncremental(
@@ -4092,9 +3782,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     }
 
     const servedItems = items.filter(
-      (
-        item,
-      ): item is Extract<DiscoverSectionItem, { type: "simpleCarouselItem" }> =>
+      (item): item is Extract<DiscoverSectionItem, { type: "simpleCarouselItem" }> =>
         item.type === "simpleCarouselItem",
     );
     for (const item of servedItems) {
@@ -4117,12 +3805,8 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
           },
         );
         const topUpItems = topUp.items.filter(
-          (
-            item,
-          ): item is Extract<
-            DiscoverSectionItem,
-            { type: "simpleCarouselItem" }
-          > => item.type === "simpleCarouselItem",
+          (item): item is Extract<DiscoverSectionItem, { type: "simpleCarouselItem" }> =>
+            item.type === "simpleCarouselItem",
         );
         const seenMangaIds = new Set(servedItems.map((item) => item.mangaId));
         for (const topUpItem of topUpItems) {
@@ -4130,8 +3814,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
           items.push(topUpItem);
           seenMangaIds.add(topUpItem.mangaId);
           const parsedId = Number.parseInt(topUpItem.mangaId, 10);
-          if (Number.isFinite(parsedId))
-            this.randomDiscoverServedIds.add(parsedId);
+          if (Number.isFinite(parsedId)) this.randomDiscoverServedIds.add(parsedId);
           if (items.length >= limit) break;
         }
       }
@@ -4143,7 +3826,6 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       nextScanOffset < candidateIds.length ||
       this.randomDiscoverServedIds.size < candidateIds.length;
 
-
     logHitomiDebug(
       "random:return",
       `items=${items.length}`,
@@ -4153,9 +3835,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     );
     return {
       items,
-      metadata: hasMore
-        ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset)
-        : undefined,
+      metadata: hasMore ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset) : undefined,
       filteredSkipped: diagnostics.filteredByPage,
       readSkipped: diagnostics.skippedRead,
     } as PagedResults<DiscoverSectionItem> & {
@@ -4171,9 +3851,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     try {
       const offset = getEffectiveScanOffset(metadata, getDiscoverPageSize());
       const limit =
-        options?.carousel === false || offset > 0
-          ? getDiscoverPageSize()
-          : getCarouselTiles();
+        options?.carousel === false || offset > 0 ? getDiscoverPageSize() : getCarouselTiles();
 
       // Get ordered read history (newest first)
       const history = getReadCache().ordered;
@@ -4191,10 +3869,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const BATCH_SIZE = Math.max(1, Math.min(4, limit));
       let cursor = offset;
       while (cursor < history.length && items.length < limit) {
-        const batch = history.slice(
-          cursor,
-          Math.min(cursor + BATCH_SIZE, history.length),
-        );
+        const batch = history.slice(cursor, Math.min(cursor + BATCH_SIZE, history.length));
         cursor += batch.length;
         const batchResults = await Promise.all(
           batch.map(async (id): Promise<DiscoverSectionItem | null> => {
@@ -4202,17 +3877,10 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
               const gallery = await this.loadGalleryForBackground(id);
               if (!gallery) return null;
               const isRead = getReadCache().has(id);
-              const subtitle = generateSubtitle(
-                gallery,
-                isRead,
-                getRereadCount(id),
-              );
+              const subtitle = generateSubtitle(gallery, isRead, getRereadCount(id));
               return {
                 mangaId: gallery.id.toString(),
-                title:
-                  gallery.title?.display ||
-                  gallery.title?.japanese ||
-                  `Gallery ${id}`,
+                title: gallery.title?.display || gallery.title?.japanese || `Gallery ${id}`,
                 subtitle,
                 imageUrl: this.getCoverImageSync(gallery),
                 metadata: undefined,
@@ -4235,9 +3903,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       recordDisplayedTiles(items);
       return {
         items,
-        metadata: hasMore
-          ? buildOffsetMetadata(offset + items.length, limit, cursor)
-          : undefined,
+        metadata: hasMore ? buildOffsetMetadata(offset + items.length, limit, cursor) : undefined,
       };
     } catch (e) {
       console.error("[Hitomi Last Read] Failed", e);
@@ -4251,9 +3917,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   ): Promise<PagedResults<DiscoverSectionItem>> {
     const offset = getEffectiveScanOffset(metadata, getDiscoverPageSize());
     const limit =
-      options?.carousel === false || offset > 0
-        ? getDiscoverPageSize()
-        : getCarouselTiles();
+      options?.carousel === false || offset > 0 ? getDiscoverPageSize() : getCarouselTiles();
     const pageFilter = parsePagesExpression(getPagesExpressionSetting());
     const hideRead = getHideReadSetting();
 
@@ -4262,10 +3926,9 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     const idWindowRange =
       tags.length === 0
         ? buildIndexNozomiRange(offset, limit, {
-          hideRead,
-          filtered:
-            pageFilter.min !== undefined || pageFilter.max !== undefined,
-        })
+            hideRead,
+            filtered: pageFilter.min !== undefined || pageFilter.max !== undefined,
+          })
         : undefined;
 
     const rawIds = await this.getGalleryIdsCached({
@@ -4291,34 +3954,30 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     // Incrementally resolve gallery details — stops as soon as we have `limit`
     // items that pass page/date filters. No more wasted gallery fetches.
-    const { items, consumed, diagnostics } =
-      await this.getGalleryDetailsIncremental(
-        uniqueIds,
-        offset,
-        limit,
-        pageFilter,
-        {
-          skipHideRead: true,
-          maxScanIds:
-            pageFilter.exact !== undefined ||
-              pageFilter.min !== undefined ||
-              pageFilter.max !== undefined
-              ? limit * 12
-              : limit * 8,
-        },
-      );
+    const { items, consumed, diagnostics } = await this.getGalleryDetailsIncremental(
+      uniqueIds,
+      offset,
+      limit,
+      pageFilter,
+      {
+        skipHideRead: true,
+        maxScanIds:
+          pageFilter.exact !== undefined ||
+          pageFilter.min !== undefined ||
+          pageFilter.max !== undefined
+            ? limit * 12
+            : limit * 8,
+      },
+    );
     const nextScanOffset = offset + consumed;
     const nextDisplayOffset = offset + items.length;
     const hasMore =
       nextScanOffset < uniqueIds.length ||
-      (idWindowRange !== undefined &&
-        rawIds.length >= idWindowRange.end - idWindowRange.start);
+      (idWindowRange !== undefined && rawIds.length >= idWindowRange.end - idWindowRange.start);
     recordDisplayedTiles(items);
     return {
       items,
-      metadata: hasMore
-        ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset)
-        : undefined,
+      metadata: hasMore ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset) : undefined,
       filteredSkipped: diagnostics.filteredByPage,
       readSkipped: diagnostics.skippedRead,
     } as PagedResults<DiscoverSectionItem> & {
@@ -4333,9 +3992,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   ): Promise<PagedResults<DiscoverSectionItem>> {
     const offset = getEffectiveScanOffset(metadata, getDiscoverPageSize());
     const limit =
-      options?.carousel === false || offset > 0
-        ? getDiscoverPageSize()
-        : getCarouselTiles();
+      options?.carousel === false || offset > 0 ? getDiscoverPageSize() : getCarouselTiles();
 
     const languageTokens = mapLanguageTokens();
     const tags: HitomiTag[] = parseTagsFromQuery(getExtraArgsSetting());
@@ -4344,10 +4001,9 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     const idWindowRange =
       tags.length === 0
         ? buildIndexNozomiRange(offset, limit, {
-          hideRead,
-          filtered:
-            pageFilter.min !== undefined || pageFilter.max !== undefined,
-        })
+            hideRead,
+            filtered: pageFilter.min !== undefined || pageFilter.max !== undefined,
+          })
         : undefined;
 
     const rawIds = await this.getGalleryIdsCached({
@@ -4369,10 +4025,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       pageFilter.max !== undefined;
     const lookaheadEnd = Math.min(
       rawIds.length,
-      Math.max(
-        desiredCount,
-        desiredCount * (pageFilterActive ? 2 : 1) + (hideRead ? limit : 0),
-      ),
+      Math.max(desiredCount, desiredCount * (pageFilterActive ? 2 : 1) + (hideRead ? limit : 0)),
     );
     let candidateIds: number[] = [];
     const galleriesById = new Map<number, HitomiGallery>();
@@ -4406,36 +4059,26 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       items: sorted,
       consumed,
       diagnostics,
-    } = await this.getGalleryDetailsIncremental(
-      candidateIds,
-      offset,
-      limit,
-      pageFilter,
-      {
-        skipHideRead: true,
-        maxScanIds:
-          pageFilter.exact !== undefined ||
-            pageFilter.min !== undefined ||
-            pageFilter.max !== undefined
-            ? limit * 12
-            : limit * 8,
-      },
-    );
-
+    } = await this.getGalleryDetailsIncremental(candidateIds, offset, limit, pageFilter, {
+      skipHideRead: true,
+      maxScanIds:
+        pageFilter.exact !== undefined ||
+        pageFilter.min !== undefined ||
+        pageFilter.max !== undefined
+          ? limit * 12
+          : limit * 8,
+    });
 
     const nextScanOffset = offset + consumed;
     const nextDisplayOffset = offset + sorted.length;
     const hasMore =
       nextScanOffset < candidateIds.length ||
       rawIds.length > lookaheadEnd ||
-      (idWindowRange !== undefined &&
-        rawIds.length >= idWindowRange.end - idWindowRange.start);
+      (idWindowRange !== undefined && rawIds.length >= idWindowRange.end - idWindowRange.start);
     recordDisplayedTiles(sorted);
     return {
       items: sorted,
-      metadata: hasMore
-        ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset)
-        : undefined,
+      metadata: hasMore ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset) : undefined,
       filteredSkipped: diagnostics.filteredByPage,
       readSkipped: diagnostics.skippedRead,
     } as PagedResults<DiscoverSectionItem> & {
@@ -4451,9 +4094,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
   ): Promise<PagedResults<DiscoverSectionItem>> {
     const offset = getEffectiveScanOffset(metadata, getDiscoverPageSize());
     const limit =
-      options?.carousel === false || offset > 0
-        ? getDiscoverPageSize()
-        : getCarouselTiles();
+      options?.carousel === false || offset > 0 ? getDiscoverPageSize() : getCarouselTiles();
     const hideRead = getHideReadSetting();
 
     const languageTokens = mapLanguageTokens();
@@ -4486,22 +4127,21 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     }
 
     // Incrementally resolve details — stops at `limit` passing items
-    const { items, consumed } =
-      await this.getGalleryDetailsIncremental(
-        candidateIds,
-        offset,
-        limit,
-        pageFilter,
-        {
-          skipHideRead: true,
-          maxScanIds:
-            pageFilter.exact !== undefined ||
-              pageFilter.min !== undefined ||
-              pageFilter.max !== undefined
-              ? limit * 30
-              : limit * 20,
-        },
-      );
+    const { items, consumed } = await this.getGalleryDetailsIncremental(
+      candidateIds,
+      offset,
+      limit,
+      pageFilter,
+      {
+        skipHideRead: true,
+        maxScanIds:
+          pageFilter.exact !== undefined ||
+          pageFilter.min !== undefined ||
+          pageFilter.max !== undefined
+            ? limit * 30
+            : limit * 20,
+      },
+    );
     const nextScanOffset = offset + consumed;
     const nextDisplayOffset = offset + items.length;
     const hasMore =
@@ -4511,9 +4151,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     return {
       items,
-      metadata: hasMore
-        ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset)
-        : undefined,
+      metadata: hasMore ? buildOffsetMetadata(nextDisplayOffset, limit, nextScanOffset) : undefined,
     };
   }
 
@@ -4521,8 +4159,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     options: GalleryIdOptions & { forceRefresh?: boolean },
   ): Promise<number[]> {
     try {
-      const canUseRangedWindowFetch =
-        !!options.range && (options.tags?.length ?? 0) === 0;
+      const canUseRangedWindowFetch = !!options.range && (options.tags?.length ?? 0) === 0;
       const key = JSON.stringify({
         tags: (options.tags ?? []).map((t) => ({
           type: t.type,
@@ -4611,9 +4248,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         // historyIdSet is used separately to prevent base manga from appearing via relatedIds
         this.relatedPoolSeenIds = new Set<number>();
         this.relatedPoolHistoryIds = new Set<number>(
-          history
-            .map((hid) => parseInt(hid, 10))
-            .filter((id) => !Number.isNaN(id)),
+          history.map((hid) => parseInt(hid, 10)).filter((id) => !Number.isNaN(id)),
         );
       }
 
@@ -4632,9 +4267,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     }
   }
 
-  private sanitizeRelatedPool(
-    value: unknown,
-  ): { id: number; tag: string; cycleIndex: number }[] {
+  private sanitizeRelatedPool(value: unknown): { id: number; tag: string; cycleIndex: number }[] {
     if (!Array.isArray(value)) return [];
 
     const sanitized: { id: number; tag: string; cycleIndex: number }[] = [];
@@ -4664,7 +4297,9 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
           ? tagValue
           : tagValue === undefined || tagValue === null
             ? ""
-            : String(tagValue);
+            : typeof tagValue === "object"
+              ? JSON.stringify(tagValue)
+              : String(tagValue as number | boolean | bigint | symbol);
 
       sanitized.push({
         id: idNum,
@@ -4678,17 +4313,12 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
   private async expandRelatedPool(history: string[]): Promise<void> {
     const startIndex = this.relatedPoolLastHistoryIndex;
-    const endIndex = Math.min(
-      startIndex + this.LAZY_BATCH_SIZE,
-      history.length,
-    );
+    const endIndex = Math.min(startIndex + this.LAZY_BATCH_SIZE, history.length);
 
     if (startIndex >= history.length) {
       console.log("[Hitomi Related] All history processed");
       return;
     }
-
-
 
     const batch = history.slice(startIndex, endIndex);
 
@@ -4728,11 +4358,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const cycleIndex = startIndex + g.batchIndex + 1;
 
       // Add the read manga as [rN]
-      if (
-        Number.isFinite(g.id) &&
-        g.id > 0 &&
-        !this.relatedPoolSeenIds.has(g.id)
-      ) {
+      if (Number.isFinite(g.id) && g.id > 0 && !this.relatedPoolSeenIds.has(g.id)) {
         this.relatedPoolCache!.push({
           id: g.id,
           tag: `[r${cycleIndex}]`,
@@ -4773,14 +4399,8 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const sanitizedPool = this.sanitizeRelatedPool(this.relatedPoolCache);
       this.relatedPoolCache = sanitizedPool;
       Application.setState(sanitizedPool, this.RELATED_POOL_STATE_KEY);
-      Application.setState(
-        this.relatedPoolLastHistoryIndex,
-        this.RELATED_POOL_HISTORY_INDEX_KEY,
-      );
-      Application.setState(
-        Array.from(this.relatedPoolSeenIds),
-        this.RELATED_POOL_SEEN_IDS_KEY,
-      );
+      Application.setState(this.relatedPoolLastHistoryIndex, this.RELATED_POOL_HISTORY_INDEX_KEY);
+      Application.setState(Array.from(this.relatedPoolSeenIds), this.RELATED_POOL_SEEN_IDS_KEY);
     } catch {
       // Ignore state errors
     }
@@ -4836,9 +4456,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const prefetchBuffer = options?.carousel === false ? 24 : 8;
       const expandStep = options?.carousel === false ? 24 : 12;
       let neededItems = offset + limit + prefetchBuffer;
-      let pool = this.sanitizeRelatedPool(
-        await this.fetchRelatedPool(neededItems),
-      );
+      let pool = this.sanitizeRelatedPool(await this.fetchRelatedPool(neededItems));
 
       if (pool.length === 0) {
         console.log("[Hitomi Related] Empty pool");
@@ -4850,9 +4468,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const readCacheLocal = hideReadInRelated ? getReadCache() : null;
       // When mark-read-on-desc is ON, exclude those manga from Related (they go to Last Read only)
       const descMarkedIds =
-        getHideReadSetting() && getMarkReadOnViewSetting()
-          ? getDescMarkedReadIds()
-          : null;
+        getHideReadSetting() && getMarkReadOnViewSetting() ? getDescMarkedReadIds() : null;
 
       // Filter pool: remove over-viewed items, session-aged items, AND optionally read items
       const filterPool = (p: typeof pool) => {
@@ -4871,26 +4487,16 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             readCacheLocal.has(item.id.toString())
           )
             return false;
-          if (
-            !isBaseCycle &&
-            descMarkedIds &&
-            descMarkedIds.has(item.id.toString())
-          )
-            return false;
+          if (!isBaseCycle && descMarkedIds && descMarkedIds.has(item.id.toString())) return false;
           const cycleEndIndex = cycleLastIndex.get(item.cycleIndex);
-          if (
-            cycleEndIndex !== undefined &&
-            offset >= cycleEndIndex + RELATED_AGE_WINDOW_TILES
-          )
+          if (cycleEndIndex !== undefined && offset >= cycleEndIndex + RELATED_AGE_WINDOW_TILES)
             return false;
           return true;
         });
       };
       pool = filterPool(pool);
 
-      const reindexBaseTags = (
-        value: { id: number; tag: string; cycleIndex: number }[],
-      ) => {
+      const reindexBaseTags = (value: { id: number; tag: string; cycleIndex: number }[]) => {
         let rCounter = 0;
         for (const item of value) {
           if (normalizeBridgeString(item.tag).startsWith("[r")) {
@@ -4918,22 +4524,15 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         tries++
       ) {
         neededItems += expandStep;
-        pool = filterPool(
-          this.sanitizeRelatedPool(await this.fetchRelatedPool(neededItems)),
-        );
+        pool = filterPool(this.sanitizeRelatedPool(await this.fetchRelatedPool(neededItems)));
         reindexBaseTags(pool);
         alignPoolStart();
       }
 
-      if (
-        pool.length < offset + minItems &&
-        this.relatedPoolLastHistoryIndex < history.length
-      ) {
+      if (pool.length < offset + minItems && this.relatedPoolLastHistoryIndex < history.length) {
         pool = filterPool(
           this.sanitizeRelatedPool(
-            await this.fetchRelatedPool(
-              offset + limit + prefetchBuffer + expandStep,
-            ),
+            await this.fetchRelatedPool(offset + limit + prefetchBuffer + expandStep),
           ),
         );
         reindexBaseTags(pool);
@@ -4983,19 +4582,13 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
           if (mangaId === "0") continue;
 
           const baseSubtitle = normalizeBridgeString(
-            generateSubtitle(
-              gallery,
-              getReadCache().has(mangaId),
-              getRereadCount(mangaId),
-            ),
+            generateSubtitle(gallery, getReadCache().has(mangaId), getRereadCount(mangaId)),
           );
           const orderPrefix = normalizeBridgeString(item.tag);
           const subtitle = showRelatedOrder
             ? normalizeBridgeString(
-              orderPrefix
-                ? `${orderPrefix} ${baseSubtitle}`.trim()
-                : baseSubtitle,
-            )
+                orderPrefix ? `${orderPrefix} ${baseSubtitle}`.trim() : baseSubtitle,
+              )
             : baseSubtitle;
 
           items.push({
@@ -5003,10 +4596,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
             mangaId,
             title: normalizeBridgeString(
               gallery.title?.display,
-              normalizeBridgeString(
-                gallery.title?.japanese,
-                `Gallery ${mangaId}`,
-              ),
+              normalizeBridgeString(gallery.title?.japanese, `Gallery ${mangaId}`),
             ),
             subtitle,
             imageUrl: normalizeBridgeString(
@@ -5026,17 +4616,12 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const batchSize = Math.max(limit, relatedCarouselTiles);
       while (items.length < limit) {
         if (cursor >= pool.length) {
-          if (
-            this.relatedPoolLastHistoryIndex >= history.length ||
-            expansions >= 3
-          ) {
+          if (this.relatedPoolLastHistoryIndex >= history.length || expansions >= 3) {
             break;
           }
 
           neededItems += expandStep;
-          pool = filterPool(
-            this.sanitizeRelatedPool(await this.fetchRelatedPool(neededItems)),
-          );
+          pool = filterPool(this.sanitizeRelatedPool(await this.fetchRelatedPool(neededItems)));
           reindexBaseTags(pool);
           alignPoolStart();
           expansions++;
@@ -5063,9 +4648,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
       return {
         items,
-        metadata: hasMore
-          ? buildOffsetMetadata(offset + items.length, limit, cursor)
-          : undefined,
+        metadata: hasMore ? buildOffsetMetadata(offset + items.length, limit, cursor) : undefined,
       };
     } catch (e) {
       console.error("[Hitomi Related] Failed", e);
@@ -5080,9 +4663,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     try {
       const offset = getEffectiveScanOffset(metadata, getDiscoverPageSize());
       const limit =
-        options?.carousel === false || offset > 0
-          ? getDiscoverPageSize()
-          : getCarouselTiles();
+        options?.carousel === false || offset > 0 ? getDiscoverPageSize() : getCarouselTiles();
 
       const allReread = getAllRereadManga();
       if (allReread.length === 0) {
@@ -5099,10 +4680,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const BATCH_SIZE = Math.max(1, Math.min(4, limit));
       let cursor = offset;
       while (cursor < allReread.length && items.length < limit) {
-        const batch = allReread.slice(
-          cursor,
-          Math.min(cursor + BATCH_SIZE, allReread.length),
-        );
+        const batch = allReread.slice(cursor, Math.min(cursor + BATCH_SIZE, allReread.length));
         cursor += batch.length;
         const batchResults = await Promise.all(
           batch.map(async (entry): Promise<DiscoverSectionItem | null> => {
@@ -5139,9 +4717,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       recordDisplayedTiles(items);
       return {
         items,
-        metadata: hasMore
-          ? buildOffsetMetadata(offset + items.length, limit, cursor)
-          : undefined,
+        metadata: hasMore ? buildOffsetMetadata(offset + items.length, limit, cursor) : undefined,
       };
     } catch (e) {
       console.error("[Hitomi Top Reread] Failed", e);
@@ -5163,9 +4739,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     await this.syncGG();
 
     // Filter out read items first to reduce requests
-    const filteredIds = hideRead
-      ? ids.filter((id) => !readCacheLocal.has(id.toString()))
-      : ids;
+    const filteredIds = hideRead ? ids.filter((id) => !readCacheLocal.has(id.toString())) : ids;
 
     for (let i = 0; i < filteredIds.length; i += BATCH_SIZE) {
       const batch = filteredIds.slice(i, i + BATCH_SIZE);
@@ -5181,27 +4755,17 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
             const pages = gallery.files.length;
             if (pageFilter) {
-              if (pageFilter.exact !== undefined && pages !== pageFilter.exact)
-                return null;
-              if (pageFilter.min !== undefined && pages < pageFilter.min)
-                return null;
-              if (pageFilter.max !== undefined && pages > pageFilter.max)
-                return null;
+              if (pageFilter.exact !== undefined && pages !== pageFilter.exact) return null;
+              if (pageFilter.min !== undefined && pages < pageFilter.min) return null;
+              if (pageFilter.max !== undefined && pages > pageFilter.max) return null;
             }
 
             const isRead = readCacheLocal.has(id.toString());
             return {
               mangaId: gallery.id.toString(),
-              title:
-                gallery.title?.display ||
-                gallery.title?.japanese ||
-                `Gallery ${id}`,
+              title: gallery.title?.display || gallery.title?.japanese || `Gallery ${id}`,
               imageUrl: this.getCoverImageSync(gallery),
-              subtitle: generateSubtitle(
-                gallery,
-                isRead,
-                getRereadCount(id.toString()),
-              ),
+              subtitle: generateSubtitle(gallery, isRead, getRereadCount(id.toString())),
               type: "simpleCarouselItem",
             } satisfies DiscoverSectionItem;
           } catch (e) {
@@ -5245,13 +4809,9 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     }
   }
 
-  private async withBackgroundGallerySlot<T>(
-    job: () => Promise<T>,
-  ): Promise<T> {
+  private async withBackgroundGallerySlot<T>(job: () => Promise<T>): Promise<T> {
     await this.waitForForegroundGalleryQuiet();
-    if (
-      this.activeBackgroundGalleryLoads >= this.MAX_BACKGROUND_GALLERY_LOADS
-    ) {
+    if (this.activeBackgroundGalleryLoads >= this.MAX_BACKGROUND_GALLERY_LOADS) {
       await new Promise<void>((resolve) => {
         this.pendingBackgroundGalleryResolvers.push(resolve);
       });
@@ -5261,10 +4821,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     try {
       return await job();
     } finally {
-      this.activeBackgroundGalleryLoads = Math.max(
-        0,
-        this.activeBackgroundGalleryLoads - 1,
-      );
+      this.activeBackgroundGalleryLoads = Math.max(0, this.activeBackgroundGalleryLoads - 1);
       const next = this.pendingBackgroundGalleryResolvers.shift();
       if (next) {
         next();
@@ -5276,10 +4833,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     return this.withBackgroundGallerySlot(() => this.loadGallery(id));
   }
 
-  private async loadGalleryWithRetry(
-    id: string,
-    maxAttempts = 2,
-  ): Promise<HitomiGallery> {
+  private async loadGalleryWithRetry(id: string, maxAttempts = 2): Promise<HitomiGallery> {
     let lastError: unknown;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
@@ -5331,21 +4885,14 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     ensureTagTypeCacheInitialized();
     if (tagTypeCache) {
-      if (this.mergedMaleFemaleTagSlugs.has(slug))
-        tagTypeCache.set(slug, "ambiguous");
+      if (this.mergedMaleFemaleTagSlugs.has(slug)) tagTypeCache.set(slug, "ambiguous");
       else tagTypeCache.set(slug, type);
     }
 
     if (changed) {
       try {
-        Application.setState(
-          Array.from(this.tagData.values()),
-          TAG_CACHE_STATE_KEY,
-        );
-        Application.setState(
-          Array.from(this.mergedMaleFemaleTagSlugs),
-          MERGED_TAGS_CACHE_KEY,
-        );
+        Application.setState(Array.from(this.tagData.values()), TAG_CACHE_STATE_KEY);
+        Application.setState(Array.from(this.mergedMaleFemaleTagSlugs), MERGED_TAGS_CACHE_KEY);
       } catch {
         /* ignore */
       }
@@ -5388,19 +4935,10 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
       return Application.arrayBufferToUTF8String(data);
     } catch (e: unknown) {
-      const errorMsg =
-        e instanceof Error
-          ? e.message
-          : typeof e === "string"
-            ? e
-            : "Unknown error";
-      const isCancelled =
-        errorMsg.toLowerCase().includes("cancelled") ||
-        errorMsg.includes("-999");
-      const is503 =
-        errorMsg.includes("503") || errorMsg.includes("Service Unavailable");
-      const is429 =
-        errorMsg.includes("429") || errorMsg.includes("Too Many Requests");
+      const errorMsg = e instanceof Error ? e.message : typeof e === "string" ? e : "Unknown error";
+      const isCancelled = errorMsg.toLowerCase().includes("cancelled") || errorMsg.includes("-999");
+      const is503 = errorMsg.includes("503") || errorMsg.includes("Service Unavailable");
+      const is429 = errorMsg.includes("429") || errorMsg.includes("Too Many Requests");
       const is404 = errorMsg.includes("404") || errorMsg.includes("Not Found");
 
       if (isCancelled && retryCount < MAX_RETRIES) {
@@ -5431,11 +4969,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       }
 
       // Handle 404 - might be stale gg.js
-      if (
-        is404 &&
-        url.includes("gold-usergeneratedcontent.net") &&
-        !url.includes("gg.js")
-      ) {
+      if (is404 && url.includes("gold-usergeneratedcontent.net") && !url.includes("gg.js")) {
         logHitomiNotice(
           "fetchText:gg-refresh",
           "[Hitomi] 404 detected, forcing gg.js refresh",
@@ -5487,15 +5021,8 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       this.onRequestSuccess();
       return data;
     } catch (e: unknown) {
-      const errorMsg =
-        e instanceof Error
-          ? e.message
-          : typeof e === "string"
-            ? e
-            : "Unknown error";
-      const isCancelled =
-        errorMsg.toLowerCase().includes("cancelled") ||
-        errorMsg.includes("-999");
+      const errorMsg = e instanceof Error ? e.message : typeof e === "string" ? e : "Unknown error";
+      const isCancelled = errorMsg.toLowerCase().includes("cancelled") || errorMsg.includes("-999");
       const is503 = errorMsg.includes("503");
       const is429 = errorMsg.includes("429");
       const is404 = errorMsg.includes("404");
@@ -5526,11 +5053,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         }
       }
 
-      if (
-        is404 &&
-        url.includes("gold-usergeneratedcontent.net") &&
-        !url.includes(".nozomi")
-      ) {
+      if (is404 && url.includes("gold-usergeneratedcontent.net") && !url.includes(".nozomi")) {
         logHitomiNotice(
           "fetchBinary:gg-refresh",
           "[Hitomi] 404 on binary fetch, forcing gg.js refresh",
@@ -5557,10 +5080,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       this.currentRateMultiplier < 1.0 &&
       Date.now() - this.lastFailureTime > this.RATE_RECOVERY_DELAY
     ) {
-      this.currentRateMultiplier = Math.min(
-        1.0,
-        this.currentRateMultiplier + 0.15,
-      );
+      this.currentRateMultiplier = Math.min(1.0, this.currentRateMultiplier + 0.15);
     }
   }
 
@@ -5570,10 +5090,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     // Exponentially reduce rate on consecutive failures
     if (this.consecutiveFailures >= this.MAX_CONSECUTIVE_FAILURES) {
-      this.currentRateMultiplier = Math.max(
-        0.25,
-        this.currentRateMultiplier * 0.5,
-      );
+      this.currentRateMultiplier = Math.max(0.25, this.currentRateMultiplier * 0.5);
       logHitomiNotice(
         "hitomi:rate-limit-reduced",
         `[Hitomi] Rate limit detected, reducing rate to ${(this.currentRateMultiplier * 100).toFixed(0)}%`,
@@ -5693,8 +5210,6 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     return Application.arrayBufferToUTF8String(data);
   }
 
-
-
   // Placeholder for items where cover URL cannot be resolved yet (GG.js not synced)
   private static readonly PLACEHOLDER_COVER = "https://hitomi.la/favicon.ico";
 
@@ -5804,8 +5319,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     const regularTags: HitomiTag[] = [];
 
     {
-      const promoted =
-        this.descriptionTagMap.get(gallery.id) ?? new Set<string>();
+      const promoted = this.descriptionTagMap.get(gallery.id) ?? new Set<string>();
       const filteredTags = gallery.tags
         .filter((tag) => tag.type !== "language")
         .filter((tag) => {
@@ -5813,8 +5327,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
           if (promoted.has(slug)) return false;
           if (isUglyConventionTag(slug)) return false;
           // Only exclude series/character from tags if they're shown in description
-          if (parodiesInDesc && ["series", "character"].includes(tag.type))
-            return false;
+          if (parodiesInDesc && ["series", "character"].includes(tag.type)) return false;
           if (["group", "artist"].includes(tag.type)) return false;
           return true;
         });
@@ -5919,9 +5432,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
 
     // Keep "Original" in scroller at the end when series are shown in description
     if (parodiesInDesc) {
-      const originalSeries = gallery.series.filter(
-        (x) => x.trim().toLowerCase() === "original",
-      );
+      const originalSeries = gallery.series.filter((x) => x.trim().toLowerCase() === "original");
       if (originalSeries.length > 0) {
         sections.push({
           id: "series",
@@ -5968,9 +5479,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       const nonArtistSections = sections.filter(
         (section) => section.id !== "artist" && section.id !== "group",
       );
-      const idTarget = nonArtistSections.findIndex(
-        (section) => section.id === "gallery_id",
-      );
+      const idTarget = nonArtistSections.findIndex((section) => section.id === "gallery_id");
       if (idTarget >= 0) {
         nonArtistSections.splice(idTarget, 0, ...artistSections);
       } else {
@@ -6029,14 +5538,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     // This function now only handles other technical/meta tags
     if (name.endsWith("_censorship")) return true;
     if (name.includes("translation") || name === "translated") return true;
-    const meta = [
-      "sample",
-      "speechless",
-      "image_set",
-      "variant_set",
-      "rewrite",
-      "webtoon",
-    ];
+    const meta = ["sample", "speechless", "image_set", "variant_set", "rewrite", "webtoon"];
     return meta.includes(name);
   }
 
@@ -6078,9 +5580,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
     const removeSpaces = getRemoveSeparatorSpacesSetting();
     const headerSeparator = removeSpaces ? "|" : " | ";
     const headerLine = headerParts.join(headerSeparator);
-    const rawTags = gallery.tags.filter((t) =>
-      ["tag", "male", "female"].includes(t.type),
-    );
+    const rawTags = gallery.tags.filter((t) => ["tag", "male", "female"].includes(t.type));
     const sorted = this.sortTags(rawTags);
     const seen = new Set<string>();
     const tagObjs: { slug: string; tag: HitomiTag; count: number }[] = [];
@@ -6156,15 +5656,12 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
       parodyLines.push(`Characters: ${gallery.characters.join(", ")}`);
 
     if (promotedTags.length > 0) {
-      const promotedLine = promotedTags
-        .map((x) => formatTagTitle(x.slug))
-        .join(", ");
+      const promotedLine = promotedTags.map((x) => formatTagTitle(x.slug)).join(", ");
       lines.push(promotedLine);
     }
 
     const listParodiesInDesc = displayOptions.includes("parodies_bottom");
-    if (listParodiesInDesc && parodyLines.length > 0)
-      lines.push(...parodyLines);
+    if (listParodiesInDesc && parodyLines.length > 0) lines.push(...parodyLines);
     return lines.join("\n");
   }
 }

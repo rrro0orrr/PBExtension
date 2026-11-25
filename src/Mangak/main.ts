@@ -86,10 +86,9 @@ export class MangakExtension implements BuddyImplementation {
         id: "updated_section",
         title: "Recently Updated",
         type: DiscoverSectionType.chapterUpdates,
-      }
+      },
     ];
   }
-
 
   async getDiscoverSectionItems(
     section: DiscoverSection,
@@ -115,7 +114,8 @@ export class MangakExtension implements BuddyImplementation {
     metadata: { page?: number } | undefined,
   ): Promise<PagedResults<SearchResultItem>> {
     const page = metadata?.page ?? 1;
-    const searchMeta = (query.metadata as { searchMeta?: BuddySearchMetadata } | undefined)?.searchMeta;
+    const searchMeta = (query.metadata as { searchMeta?: BuddySearchMetadata } | undefined)
+      ?.searchMeta;
 
     const genreIncluded = searchMeta?.genreIncluded ?? [];
     const genreExcluded = searchMeta?.genreExcluded ?? [];
@@ -153,7 +153,12 @@ export class MangakExtension implements BuddyImplementation {
     const json = JSON.parse(Application.arrayBufferToUTF8String(data)) as {
       success: boolean;
       data?: {
-        items: Array<{ slug: string; name: string; cover: string; latest_chapters?: MangakChapterRef[] }>;
+        items: Array<{
+          slug: string;
+          name: string;
+          cover: string;
+          latest_chapters?: MangakChapterRef[];
+        }>;
         pagination: MangakPagination;
       };
     };
@@ -179,15 +184,17 @@ export class MangakExtension implements BuddyImplementation {
     const normalizedMangaId = normalizeMangaId(mangaId);
     const pageProps = await this.fetchNextData(`${baseUrl}/${normalizedMangaId}`);
 
-    const manga = pageProps.initialManga as {
-      name: string;
-      altNames?: { name: string }[];
-      cover: string;
-      status: string;
-      rating: number;
-      summary?: string;
-      genres?: { name: string; slug: string }[];
-    } | undefined;
+    const manga = pageProps.initialManga as
+      | {
+          name: string;
+          altNames?: { name: string }[];
+          cover: string;
+          status: string;
+          rating: number;
+          summary?: string;
+          genres?: { name: string; slug: string }[];
+        }
+      | undefined;
 
     if (!manga) throw new Error(`Manga not found: ${normalizedMangaId}`);
 
@@ -253,24 +260,29 @@ export class MangakExtension implements BuddyImplementation {
     const json = JSON.parse(Application.arrayBufferToUTF8String(data));
     if (!json.success || !Array.isArray(json.data?.chapters)) return [];
 
-    return json.data.chapters.map((ch: {
-      slug: string;
-      name: string;
-      updated_at: string;
-      chapter_number: number;
-    }, index: number): Chapter => {
-      const nameMatch = ch.name?.match(/(\d+(?:\.\d+)?)/);
-      const chapNum = nameMatch ? Number(nameMatch[1]) : (ch.chapter_number ?? index + 1);
-      return {
-        chapterId: ch.slug,
-        title: ch.name ?? "",
-        sourceManga,
-        chapNum,
-        publishDate: ch.updated_at ? new Date(ch.updated_at) : undefined,
-        volume: undefined,
-        langCode: "🇬🇧",
-      };
-    });
+    return json.data.chapters.map(
+      (
+        ch: {
+          slug: string;
+          name: string;
+          updated_at: string;
+          chapter_number: number;
+        },
+        index: number,
+      ): Chapter => {
+        const nameMatch = ch.name?.match(/(\d+(?:\.\d+)?)/);
+        const chapNum = nameMatch ? Number(nameMatch[1]) : (ch.chapter_number ?? index + 1);
+        return {
+          chapterId: ch.slug,
+          title: ch.name ?? "",
+          sourceManga,
+          chapNum,
+          publishDate: ch.updated_at ? new Date(ch.updated_at) : undefined,
+          volume: undefined,
+          langCode: "🇬🇧",
+        };
+      },
+    );
   }
 
   async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
@@ -303,9 +315,7 @@ export class MangakExtension implements BuddyImplementation {
   ): Promise<PagedResults<DiscoverSectionItem>> {
     const page = (metadata as { page?: number } | undefined)?.page ?? 1;
 
-    const pageProps = await this.fetchNextData(
-      `${baseUrl}/latest?sort=latest&page=${page}`,
-    );
+    const pageProps = await this.fetchNextData(`${baseUrl}/latest?sort=latest&page=${page}`);
 
     const rawItems = (pageProps.items as MangakItem[] | undefined) ?? [];
     const pagination = pageProps.pagination as MangakPagination | undefined;
@@ -334,7 +344,6 @@ export class MangakExtension implements BuddyImplementation {
   ): Promise<PagedResults<DiscoverSectionItem>> {
     const page = 1;
     const collectedIds: string[] = [];
-    
 
     const request = {
       url: `${baseUrl}/top/day`,
@@ -350,9 +359,7 @@ export class MangakExtension implements BuddyImplementation {
       const unit = $(element);
 
       const image =
-        unit.find("img").first().attr("data-src") ||
-        unit.find("img").first().attr("src") ||
-        "";
+        unit.find("img").first().attr("data-src") || unit.find("img").first().attr("src") || "";
 
       const hrefAnchor =
         unit.find("a[aria-label]").first().attr("href") ||
@@ -371,7 +378,7 @@ export class MangakExtension implements BuddyImplementation {
       const latestChapter =
         unit.find('a[href*="/chapter"]').first().text().trim() ||
         unit.find('a[href*="/notice"]').first().text().trim() ||
-        unit.find('.thumb .latest-chapter').text().trim() ||
+        unit.find(".thumb .latest-chapter").text().trim() ||
         "";
 
       const views =
@@ -380,7 +387,7 @@ export class MangakExtension implements BuddyImplementation {
         "";
 
       const chapterMatch = latestChapter.match(/Chapter\s*([0-9]+(?:\.[0-9]+)?)/i);
-      const supertitle = views || (chapterMatch ? `Ch. ${chapterMatch[1]}` : (latestChapter || ""));
+      const supertitle = views || (chapterMatch ? `Ch. ${chapterMatch[1]}` : latestChapter || "");
 
       if (title && mangaId) {
         items.push({
@@ -440,9 +447,7 @@ function normalizeMangaId(hrefOrId: string | undefined): string {
     const parsedUrl = new URL(hrefOrId, baseUrl);
     return parsedUrl.pathname.replace(/^\/+|\/+$/g, "");
   } catch {
-    return hrefOrId
-      .replace(/^https?:\/\/[^/]+/i, "")
-      .replace(/^\/+|\/+$/g, "");
+    return hrefOrId.replace(/^https?:\/\/[^/]+/i, "").replace(/^\/+|\/+$/g, "");
   }
 }
 

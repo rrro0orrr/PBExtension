@@ -50,8 +50,7 @@ const MAX_RETRY_WAIT_SECONDS = 30;
 const MAX_CHAPTER_PAGES = 200;
 const FALLBACK_COVER = `${baseUrl}/favicon.ico`;
 
-const VOID_ELEMENTS =
-  "area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr";
+const VOID_ELEMENTS = "area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr";
 const VOID_ELEMENT_REGEX = new RegExp(`<(${VOID_ELEMENTS})((?:\\s+[^>]*?)?)\\s*/?>`, "gi");
 
 // Turns every void element into a self-closing tag so the chapter is valid XHTML for Readium.
@@ -138,7 +137,8 @@ const ADULT_GENRES = ["adult", "smut", "ecchi", "hentai", "yaoi", "yuri", "matur
 
 function mapContentRating(genres: string[]): ContentRating {
   const lower = genres.map((g) => g.toLowerCase());
-  if (lower.some((g) => g === "adult" || g === "smut" || g === "hentai")) return ContentRating.ADULT;
+  if (lower.some((g) => g === "adult" || g === "smut" || g === "hentai"))
+    return ContentRating.ADULT;
   if (lower.some((g) => ADULT_GENRES.includes(g))) return ContentRating.MATURE;
   return ContentRating.EVERYONE;
 }
@@ -280,7 +280,10 @@ export class NovelFireExtension implements NovelFireImplementation {
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
       .join("&");
 
-    const $ = await this.fetchCheerio({ url: `${baseUrl}/search-adv?${queryString}`, method: "GET" });
+    const $ = await this.fetchCheerio({
+      url: `${baseUrl}/search-adv?${queryString}`,
+      method: "GET",
+    });
     const collectedIds: string[] = [];
     const items: SearchResultItem[] = [];
 
@@ -300,7 +303,8 @@ export class NovelFireExtension implements NovelFireImplementation {
     });
 
     const hasNextPage =
-      !!$('a[rel="next"]').length || !!$(".pagination .page-item.active + .page-item:not(.disabled)").length;
+      !!$('a[rel="next"]').length ||
+      !!$(".pagination .page-item.active + .page-item:not(.disabled)").length;
 
     return {
       items,
@@ -316,8 +320,7 @@ export class NovelFireExtension implements NovelFireImplementation {
     const $ = await this.fetchCheerio(request);
 
     const cover = $(".cover img, figure.cover img, .novel-cover img, .fixed-img img").first();
-    const title =
-      $(".novel-title").first().text().trim() || (cover.attr("alt") ?? "").trim();
+    const title = $(".novel-title").first().text().trim() || (cover.attr("alt") ?? "").trim();
     // Paperback rejects an empty thumbnailUrl ("Invalid URL"), so fall back through
     // lazy-load attributes, the og:image meta tag and finally the site's favicon.
     const coverUrl =
@@ -431,11 +434,13 @@ export class NovelFireExtension implements NovelFireImplementation {
           a.text()
         ).trim();
         const noMatch =
-          a.find(".chapter-no").text().match(/\d+(?:\.\d+)?/) ?? href.match(/chapter-(\d+(?:\.\d+)?)/);
+          a
+            .find(".chapter-no")
+            .text()
+            .match(/\d+(?:\.\d+)?/) ?? href.match(/chapter-(\d+(?:\.\d+)?)/);
         const parsedNo = noMatch ? parseFloat(noMatch[1] ?? noMatch[0]) : NaN;
         const time = a.find("time").first();
-        const publishDate =
-          parseSiteDate(time.attr("datetime")) ?? parseRelativeDate(time.text());
+        const publishDate = parseSiteDate(time.attr("datetime")) ?? parseRelativeDate(time.text());
 
         chapters.push({
           chapterId,
@@ -455,7 +460,11 @@ export class NovelFireExtension implements NovelFireImplementation {
       const lastPage = Math.max(
         0,
         ...$(".chapter-range-pager option, .chapter-range-pager a")
-          .map((_, el) => Number(($(el).attr("value") ?? $(el).attr("href") ?? "").match(/[?&]page=(\d+)/)?.[1] ?? 0))
+          .map((_, el) =>
+            Number(
+              ($(el).attr("value") ?? $(el).attr("href") ?? "").match(/[?&]page=(\d+)/)?.[1] ?? 0,
+            ),
+          )
           .get(),
       );
       const hasNextPage =
@@ -470,10 +479,7 @@ export class NovelFireExtension implements NovelFireImplementation {
   }
 
   async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
-    let url = new URLBuilder(baseUrl)
-      .addPath("novel")
-      .addPath(chapter.chapterId)
-      .build();
+    let url = new URLBuilder(baseUrl).addPath("novel").addPath(chapter.chapterId).build();
 
     const trail: string[] = [];
 
@@ -511,7 +517,13 @@ export class NovelFireExtension implements NovelFireImplementation {
   extractChapterText($: CheerioAPI): string {
     $(".nf-ads, .ads, .adsbygoogle, script, style, iframe, ins, noscript").remove();
 
-    for (const selector of ["#content", "#chapter-container", ".chapter-content", "#chapter-content", ".chapter-body"]) {
+    for (const selector of [
+      "#content",
+      "#chapter-container",
+      ".chapter-content",
+      "#chapter-content",
+      ".chapter-body",
+    ]) {
       const node = $(selector).first();
       if (node.length === 0 || node.text().trim() === "") continue;
       return (node.html() ?? "").replace(/&nbsp;/g, " ").trim();
@@ -539,14 +551,18 @@ export class NovelFireExtension implements NovelFireImplementation {
   // Turns "Weak to Strong, Cultivation" into the site's tag IDs via its autocomplete endpoint.
   async resolveTagIds(names: string): Promise<string[]> {
     const ids: string[] = [];
-    for (const name of names.split(",").map((n) => n.trim()).filter(Boolean)) {
+    for (const name of names
+      .split(",")
+      .map((n) => n.trim())
+      .filter(Boolean)) {
       const [, data] = await this.scheduleRequest({
         url: `${baseUrl}/ajax/getTags?term=${encodeURIComponent(name)}`,
         method: "GET",
       });
       let tags: NovelFireTag[] = [];
       try {
-        tags = (JSON.parse(Application.arrayBufferToUTF8String(data)) as NovelFireTagResult).data ?? [];
+        tags =
+          (JSON.parse(Application.arrayBufferToUTF8String(data)) as NovelFireTagResult).data ?? [];
       } catch {
         continue;
       }
@@ -586,13 +602,9 @@ export class NovelFireExtension implements NovelFireImplementation {
       const a = novel.find("a");
       const url = a.attr("href") || "";
       const title = a.attr("title") || "";
-      const imgurl =
-        novel.find("img").attr("data-src") ||
-        novel.find("img").attr("src") ||
-        "";
+      const imgurl = novel.find("img").attr("data-src") || novel.find("img").attr("src") || "";
       const coverUrl = absoluteUrl(imgurl) || FALLBACK_COVER;
-      const rating =
-        parseFloat(novel.find(".badge._br").text().trim()) || undefined;
+      const rating = parseFloat(novel.find(".badge._br").text().trim()) || undefined;
 
       const mangaId = toId(url);
 
@@ -612,7 +624,9 @@ export class NovelFireExtension implements NovelFireImplementation {
 
     return {
       items,
-      metadata: hasNextPage ? { page: page + 1, collectedIds } satisfies NovelFireMetadata : undefined,
+      metadata: hasNextPage
+        ? ({ page: page + 1, collectedIds } satisfies NovelFireMetadata)
+        : undefined,
     };
   }
 
@@ -642,14 +656,9 @@ export class NovelFireExtension implements NovelFireImplementation {
       const a = novel.find("a");
       const url = a.attr("href") || "";
       const title = a.attr("title") || "";
-      const imgurl =
-        novel.find("img").attr("data-src") ||
-        novel.find("img").attr("src") ||
-        "";
+      const imgurl = novel.find("img").attr("data-src") || novel.find("img").attr("src") || "";
       const coverUrl = absoluteUrl(imgurl) || FALLBACK_COVER;
-      const chapters =
-        parseInt(novel.find(".novel-stats").text().replace(/\D/g, "")) ||
-        undefined;
+      const chapters = parseInt(novel.find(".novel-stats").text().replace(/\D/g, "")) || undefined;
 
       const mangaId = toId(url);
 
@@ -670,7 +679,9 @@ export class NovelFireExtension implements NovelFireImplementation {
 
     return {
       items,
-      metadata: hasNextPage ? { page: page + 1, collectedIds } satisfies NovelFireMetadata : undefined,
+      metadata: hasNextPage
+        ? ({ page: page + 1, collectedIds } satisfies NovelFireMetadata)
+        : undefined,
     };
   }
 
@@ -700,13 +711,9 @@ export class NovelFireExtension implements NovelFireImplementation {
       const a = novel.find("a");
       const url = a.attr("href") || "";
       const title = a.attr("title") || "";
-      const imgurl =
-        novel.find("img").attr("data-src") ||
-        novel.find("img").attr("src") ||
-        "";
+      const imgurl = novel.find("img").attr("data-src") || novel.find("img").attr("src") || "";
       const coverUrl = absoluteUrl(imgurl) || FALLBACK_COVER;
-      const rating =
-        parseFloat(novel.find(".badge._br").text().trim()) || undefined;
+      const rating = parseFloat(novel.find(".badge._br").text().trim()) || undefined;
 
       const mangaId = toId(url);
 
@@ -726,7 +733,9 @@ export class NovelFireExtension implements NovelFireImplementation {
 
     return {
       items,
-      metadata: hasNextPage ? { page: page + 1, collectedIds } satisfies NovelFireMetadata : undefined,
+      metadata: hasNextPage
+        ? ({ page: page + 1, collectedIds } satisfies NovelFireMetadata)
+        : undefined,
     };
   }
 

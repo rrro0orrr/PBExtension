@@ -32,7 +32,15 @@ import * as cheerio from "cheerio";
 import * as htmlparser2 from "htmlparser2";
 
 import { MangacloudInterceptor } from "./interceptors";
-import { MostViewedMangaResponse, ApiResponse, UpdatedMangaResponse, MangaInfo, ChapterInfo, BrowseMangaResponse, SortOptions } from "./model";
+import {
+  MostViewedMangaResponse,
+  ApiResponse,
+  UpdatedMangaResponse,
+  MangaInfo,
+  ChapterInfo,
+  BrowseMangaResponse,
+  SortOptions,
+} from "./model";
 
 const baseUrl = "https://mangacloud.org/";
 
@@ -87,7 +95,8 @@ export class MangacloudExtension implements MangacloudImplementation {
   }
 
   async getAdvancedSearchForm(query: SearchQuery<Metadata>): Promise<AdvancedSearchForm> {
-    const meta = (query.metadata as { searchMeta?: MangacloudSearchMetadata } | undefined)?.searchMeta;
+    const meta = (query.metadata as { searchMeta?: MangacloudSearchMetadata } | undefined)
+      ?.searchMeta;
     return new MangacloudSearchForm(meta);
   }
 
@@ -111,7 +120,8 @@ export class MangacloudExtension implements MangacloudImplementation {
       body.sort = sortingOption.id;
     }
 
-    const searchMeta = (query.metadata as { searchMeta?: MangacloudSearchMetadata } | undefined)?.searchMeta;
+    const searchMeta = (query.metadata as { searchMeta?: MangacloudSearchMetadata } | undefined)
+      ?.searchMeta;
 
     const includes: string[] = [
       ...(searchMeta?.genreIncluded ?? []),
@@ -202,10 +212,7 @@ export class MangacloudExtension implements MangacloudImplementation {
         synopsis: info.description || "",
         rating: 0,
         contentRating: ContentRating.EVERYONE,
-        status: (info.status || "UNKNOWN") as
-          | "ONGOING"
-          | "COMPLETED"
-          | "UNKNOWN",
+        status: (info.status || "UNKNOWN") as "ONGOING" | "COMPLETED" | "UNKNOWN",
         tagGroups,
       },
     };
@@ -252,9 +259,7 @@ export class MangacloudExtension implements MangacloudImplementation {
     const pages: string[] = [];
     if (info.images && info.images.length > 0) {
       for (const img of info.images) {
-        pages.push(
-          `https://pika.mangacloud.org/${info.comic_id}/${info.id}/${img.id}.${img.f}`
-        );
+        pages.push(`https://pika.mangacloud.org/${info.comic_id}/${info.id}/${img.id}.${img.f}`);
       }
     }
 
@@ -370,7 +375,7 @@ export class MangacloudExtension implements MangacloudImplementation {
     for (const cookie of this.cookieStorageInterceptor.cookies) {
       this.cookieStorageInterceptor.deleteCookie(cookie);
     }
-  
+
     for (const cookie of cookies) {
       if (cookie.expires && cookie.expires.getTime() <= Date.now()) {
         continue;

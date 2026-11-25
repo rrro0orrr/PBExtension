@@ -1,22 +1,13 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright © 2026 Inkdex */
-import {
-  CloudflareError,
-  PaperbackInterceptor,
-  Request,
-  Response,
-} from "@paperback/types";
+import { CloudflareError, PaperbackInterceptor, Request, Response } from "@paperback/types";
 import { HitomiFile } from "./model";
 import { addDataReceived } from "./settings";
 import { ImageUriResolver } from "./utils/uri";
 
 const hitomiInterceptorNoticeTimestamps = new Map<string, number>();
 
-function logHitomiInterceptorNotice(
-  key: string,
-  message: string,
-  minimumIntervalMs = 15000,
-): void {
+function logHitomiInterceptorNotice(key: string, message: string, minimumIntervalMs = 15000): void {
   const now = Date.now();
   const last = hitomiInterceptorNoticeTimestamps.get(key) ?? 0;
   if (now - last < minimumIntervalMs) {
@@ -30,8 +21,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
   private static readonly FALLBACK_IMAGE_URL =
     "https://ltn.gold-usergeneratedcontent.net/favicon-192x192.png";
   private syncGGCallback: (() => Promise<void>) | null = null;
-  private cookieHeaderProvider: ((url: string) => string | undefined) | null =
-    null;
+  private cookieHeaderProvider: ((url: string) => string | undefined) | null = null;
   // Set to true when a CDN 404/403 signals that gg.js has rotated
   private ggRefreshNeeded = false;
   // Download pacing to avoid CDN 503/429 bursts during long chapter downloads.
@@ -60,9 +50,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
     this.syncGGCallback = fn;
   }
 
-  setCookieHeaderProvider(
-    fn: ((url: string) => string | undefined) | null,
-  ): void {
+  setCookieHeaderProvider(fn: ((url: string) => string | undefined) | null): void {
     this.cookieHeaderProvider = fn;
   }
 
@@ -105,19 +93,14 @@ export class HitomiInterceptor extends PaperbackInterceptor {
     const isImagePlaceholder = request.url.startsWith("hitomi://image/");
     const isThumbPlaceholder = request.url.startsWith("hitomi://thumb/");
     if (isImagePlaceholder || isThumbPlaceholder) {
-      if (
-        this.syncGGCallback &&
-        (this.ggRefreshNeeded || ImageUriResolver.needsSync())
-      ) {
+      if (this.syncGGCallback && (this.ggRefreshNeeded || ImageUriResolver.needsSync())) {
         if (this.ggRefreshNeeded) {
           ImageUriResolver.invalidate();
         }
         try {
           await this.syncGGCallback();
           if (ImageUriResolver.needsSync()) {
-            throw new Error(
-              "ImageUriResolver synchronization did not complete",
-            );
+            throw new Error("ImageUriResolver synchronization did not complete");
           }
           this.ggRefreshNeeded = false;
         } catch (e) {
@@ -128,16 +111,11 @@ export class HitomiInterceptor extends PaperbackInterceptor {
       }
 
       const rest = request.url.slice(
-        isImagePlaceholder
-          ? "hitomi://image/".length
-          : "hitomi://thumb/".length,
+        isImagePlaceholder ? "hitomi://image/".length : "hitomi://thumb/".length,
       );
       const parts = rest.split("/").filter((p) => p.length > 0);
       if (parts.length < 2) {
-        console.warn(
-          "[Hitomi] interceptRequest: malformed placeholder URL",
-          request.url,
-        );
+        console.warn("[Hitomi] interceptRequest: malformed placeholder URL", request.url);
         request.url = HitomiInterceptor.FALLBACK_IMAGE_URL;
         return request;
       }
@@ -150,10 +128,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
 
       // Validate hash is not empty
       if (!hash || hash.length < 3) {
-        console.warn(
-          "[Hitomi] interceptRequest: invalid hash in placeholder",
-          hash,
-        );
+        console.warn("[Hitomi] interceptRequest: invalid hash in placeholder", hash);
         request.url = HitomiInterceptor.FALLBACK_IMAGE_URL;
         return request;
       }
@@ -177,19 +152,11 @@ export class HitomiInterceptor extends PaperbackInterceptor {
         if (resolvedUrl && resolvedUrl.startsWith("https://")) {
           request.url = resolvedUrl;
         } else {
-          console.warn(
-            "[Hitomi] interceptRequest: getImageUri returned invalid URL",
-            resolvedUrl,
-          );
+          console.warn("[Hitomi] interceptRequest: getImageUri returned invalid URL", resolvedUrl);
           request.url = HitomiInterceptor.FALLBACK_IMAGE_URL;
         }
       } catch (e) {
-        console.warn(
-          "[Hitomi] interceptRequest: getImageUri failed for",
-          hash,
-          ext,
-          e,
-        );
+        console.warn("[Hitomi] interceptRequest: getImageUri failed for", hash, ext, e);
         request.url = HitomiInterceptor.FALLBACK_IMAGE_URL;
       }
     }
@@ -200,8 +167,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
 
     if (this.isFullSizeCdnImageRequest(request.url)) {
       const leaseId = await this.acquireImageRequestSlot();
-      (request as Request & { __hitomiLeaseId?: number }).__hitomiLeaseId =
-        leaseId;
+      (request as Request & { __hitomiLeaseId?: number }).__hitomiLeaseId = leaseId;
       try {
         await this.reserveImageRequestSlot();
       } catch (e) {
@@ -213,24 +179,15 @@ export class HitomiInterceptor extends PaperbackInterceptor {
     return request;
   }
 
-  override async interceptResponse(
-    request: Request,
-    response: unknown,
-    data: any,
-  ): Promise<any> {
-    const bodyBytes =
-      data && typeof data.byteLength === "number" ? Number(data.byteLength) : 0;
+  override async interceptResponse(request: Request, response: unknown, data: any): Promise<any> {
+    const bodyBytes = data && typeof data.byteLength === "number" ? Number(data.byteLength) : 0;
     const contentLengthBytes = this.extractResponseContentLength(response);
     const accountedBytes = bodyBytes > 0 ? bodyBytes : contentLengthBytes;
     if (accountedBytes > 0) {
       addDataReceived(accountedBytes);
     }
 
-    if (
-      response !== null &&
-      typeof response === "object" &&
-      "headers" in response
-    ) {
+    if (response !== null && typeof response === "object" && "headers" in response) {
       const headers = (response as Response).headers;
       if (headers?.["cf-mitigated"] === "challenge") {
         throw new CloudflareError({
@@ -255,24 +212,15 @@ export class HitomiInterceptor extends PaperbackInterceptor {
         const now = Date.now();
 
         // Decay strikes over time - if no issues for STRIKE_DECAY_MS, reduce strike count
-        if (
-          this.lastStrikeTime > 0 &&
-          now - this.lastStrikeTime > this.STRIKE_DECAY_MS
-        ) {
-          this.rateLimitStrikeCount = Math.max(
-            0,
-            this.rateLimitStrikeCount - 2,
-          );
+        if (this.lastStrikeTime > 0 && now - this.lastStrikeTime > this.STRIKE_DECAY_MS) {
+          this.rateLimitStrikeCount = Math.max(0, this.rateLimitStrikeCount - 2);
           if (this.rateLimitStrikeCount === 0) {
             this.rateLimitBackoffUntil = 0; // Clear backoff when strikes cleared
           }
         }
 
         if (status === 429 || status === 503) {
-          this.rateLimitStrikeCount = Math.min(
-            4,
-            this.rateLimitStrikeCount + 1,
-          ); // Max 4 strikes
+          this.rateLimitStrikeCount = Math.min(4, this.rateLimitStrikeCount + 1); // Max 4 strikes
           this.lastStrikeTime = now;
           const cooldownMs = Math.min(
             this.MAX_BACKOFF_MS,
@@ -286,10 +234,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
           );
         } else if (status >= 200 && status < 300) {
           // Successful request - decay strikes faster
-          this.rateLimitStrikeCount = Math.max(
-            0,
-            this.rateLimitStrikeCount - 1,
-          );
+          this.rateLimitStrikeCount = Math.max(0, this.rateLimitStrikeCount - 1);
           if (this.rateLimitStrikeCount === 0) {
             this.rateLimitBackoffUntil = 0;
           }
@@ -312,8 +257,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
     }
 
     if (this.isFullSizeCdnImageRequest(request.url)) {
-      const leaseId = (request as Request & { __hitomiLeaseId?: number })
-        .__hitomiLeaseId;
+      const leaseId = (request as Request & { __hitomiLeaseId?: number }).__hitomiLeaseId;
       if (leaseId !== undefined) {
         this.releaseImageRequestLease(leaseId);
       }
@@ -414,8 +358,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
         this.activeImageRequests >= this.MAX_CONCURRENT_IMAGE_REQUESTS - 2
           ? this.IMAGE_DOWNLOAD_EXTRA_INTERVAL_MS
           : 0;
-      this.imageNextAllowedAt =
-        Date.now() + this.IMAGE_MIN_INTERVAL_MS + extraIntervalMs + jitter;
+      this.imageNextAllowedAt = Date.now() + this.IMAGE_MIN_INTERVAL_MS + extraIntervalMs + jitter;
     });
   }
 
@@ -441,13 +384,8 @@ export class HitomiInterceptor extends PaperbackInterceptor {
     return Application.sleep(ms / 1000);
   }
 
-  private async refreshResolvedImageRequestUrl(
-    request: Request,
-  ): Promise<void> {
-    if (
-      !(this.ggRefreshNeeded || ImageUriResolver.needsSync()) ||
-      !this.syncGGCallback
-    ) {
+  private async refreshResolvedImageRequestUrl(request: Request): Promise<void> {
+    if (!(this.ggRefreshNeeded || ImageUriResolver.needsSync()) || !this.syncGGCallback) {
       return;
     }
 
@@ -465,23 +403,16 @@ export class HitomiInterceptor extends PaperbackInterceptor {
       if (ImageUriResolver.needsSync()) {
         throw new Error("ImageUriResolver synchronization did not complete");
       }
-      const refreshedUrl = ImageUriResolver.getImageUri(
-        parsed.file,
-        parsed.extension,
-        {
-          isThumbnail: parsed.isThumbnail,
-          isSmall: parsed.isSmall,
-        },
-      );
+      const refreshedUrl = ImageUriResolver.getImageUri(parsed.file, parsed.extension, {
+        isThumbnail: parsed.isThumbnail,
+        isSmall: parsed.isSmall,
+      });
       if (refreshedUrl.startsWith("https://")) {
         request.url = refreshedUrl;
         this.ggRefreshNeeded = false;
       }
     } catch (e) {
-      console.warn(
-        "[Hitomi] interceptRequest: failed to refresh stale image URL",
-        e,
-      );
+      console.warn("[Hitomi] interceptRequest: failed to refresh stale image URL", e);
     }
   }
 
@@ -491,9 +422,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
     isThumbnail: boolean;
     isSmall: boolean;
   } | null {
-    const match = url.match(
-      /^(?:https?:\/\/)?[^/]+\/(.+?)\.(webp|avif)(?:\?.*)?$/i,
-    );
+    const match = url.match(/^(?:https?:\/\/)?[^/]+\/(.+?)\.(webp|avif)(?:\?.*)?$/i);
     if (!match) {
       return null;
     }
@@ -535,8 +464,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
     }
 
     const map = headers as Record<string, unknown>;
-    const value =
-      map["Content-Length"] ?? map["content-length"] ?? map["CONTENT-LENGTH"];
+    const value = map["Content-Length"] ?? map["content-length"] ?? map["CONTENT-LENGTH"];
     if (typeof value === "number" && Number.isFinite(value) && value > 0) {
       return Math.floor(value);
     }

@@ -1,15 +1,5 @@
-import {
-  Form,
-  FormSectionElement,
-  LabelRow,
-  Section,
-  SelectRow,
-} from "@paperback/types";
-import {
-  LANGUAGE_OPTIONS,
-  getLanguageSetting,
-  setLanguageSetting,
-} from "../settings";
+import { Form, FormSectionElement, LabelRow, Section, SelectRow } from "@paperback/types";
+import { LANGUAGE_OPTIONS, getLanguageSetting, setLanguageSetting } from "../settings";
 
 export class MangaballSettingsForm extends Form {
   private languageSetting = getLanguageSetting();
@@ -31,8 +21,7 @@ export class MangaballSettingsForm extends Form {
   }
 
   override getSections(): FormSectionElement<unknown>[] {
-    const multiple =
-      this.languageSetting.includes("all") || this.languageSetting.length !== 1;
+    const multiple = this.languageSetting.includes("all") || this.languageSetting.length !== 1;
     return [
       Section("mangaballLanguage", [
         LabelRow("languageLabel", {
@@ -47,10 +36,7 @@ export class MangaballSettingsForm extends Form {
             id: option.id,
             title: option.label,
           })),
-          onValueChange: Application.Selector(
-            this as MangaballSettingsForm,
-            "updateLanguage",
-          ),
+          onValueChange: Application.Selector(this as MangaballSettingsForm, "updateLanguage"),
           minItemCount: 1,
           maxItemCount: LANGUAGE_OPTIONS.length,
         }),

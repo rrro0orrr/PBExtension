@@ -32,7 +32,7 @@ export async function runTests(logger: TestLogger) {
     const error = await extension.getChapters(manga).catch((error: Error) => error);
     expect(error).to.be.instanceOf(Error);
     expect(error).to.have.property("message").that.includes("could not find the comic id");
-    expect(chapterRequest).to.be.undefined;
+    expect(chapterRequest).to.equal(undefined);
   });
 
   suite.test("loads chapter images from HTML after an RSC request is rejected", async () => {
@@ -70,7 +70,7 @@ export async function runTests(logger: TestLogger) {
     const search = () => extension.getSearchResults({ title: "" }, undefined, undefined);
     const first = await search();
     expect(first.items).to.have.length(1);
-    expect(first.metadata).to.be.undefined;
+    expect(first.metadata).to.equal(undefined);
 
     links += '<a href="?sort=popular&amp;page=2#results">Next</a>';
     expect((await search()).metadata).to.deep.equal({ page: 2 });

@@ -266,7 +266,8 @@ export class MangaballExtension implements MangaballImplementation {
     const page = paginationMeta?.page ?? 1;
     const collectedIds = paginationMeta?.searchCollectedIds ?? [];
 
-    const searchMeta = (query.metadata as { searchMeta?: MangaballMetadata } | undefined)?.searchMeta;
+    const searchMeta = (query.metadata as { searchMeta?: MangaballMetadata } | undefined)
+      ?.searchMeta;
     const nsfw = searchMeta?.nsfw ?? false;
     const tag_included_ids = searchMeta?.tagIncluded ?? [];
     const tag_excluded_ids = searchMeta?.tagExcluded ?? [];

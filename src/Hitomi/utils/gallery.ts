@@ -32,8 +32,7 @@ export async function getGallery(
   } else {
     const first = raw.indexOf("{");
     const last = raw.lastIndexOf("}");
-    if (first !== -1 && last !== -1 && last > first)
-      jsonStr = raw.slice(first, last + 1);
+    if (first !== -1 && last !== -1 && last > first) jsonStr = raw.slice(first, last + 1);
   }
   if (!jsonStr) {
     throw new Error("Gallery JSON not found");
@@ -45,16 +44,11 @@ export async function getGallery(
     title: {
       display: responseJson["title"],
       japanese:
-        typeof responseJson["japanese_title"] === "string"
-          ? responseJson["japanese_title"]
-          : null,
+        typeof responseJson["japanese_title"] === "string" ? responseJson["japanese_title"] : null,
     },
     type: responseJson["type"],
     languageName: {
-      english:
-        typeof responseJson["language"] === "string"
-          ? responseJson["language"]
-          : null,
+      english: typeof responseJson["language"] === "string" ? responseJson["language"] : null,
       local:
         typeof responseJson["language_localname"] === "string"
           ? responseJson["language_localname"]
@@ -76,9 +70,7 @@ export async function getGallery(
     const plural = `${key}s`;
     const arr = responseJson[plural];
     if (!arr) continue;
-    const target = (
-      !plural.startsWith("p") ? plural : "series"
-    ) as GalleryArrayKey;
+    const target = (!plural.startsWith("p") ? plural : "series") as GalleryArrayKey;
     for (const entry of arr) {
       if (!entry) continue;
       gallery[target].push(entry[key]);
@@ -141,8 +133,7 @@ export async function getGalleryIds(
 ): Promise<number[]> {
   const tags = options.tags ?? [];
   const languageTags =
-    options.languages ??
-    tags.filter((t) => t.type === "language").map((t) => t.name);
+    options.languages ?? tags.filter((t) => t.type === "language").map((t) => t.name);
   const nonLanguageTags = tags.filter((t) => t.type !== "language");
 
   const languages = languageTags.length > 0 ? languageTags : ["all"];
@@ -152,10 +143,7 @@ export async function getGalleryIds(
   const hasFuzzyTags = nonLanguageTags.some((t) => t.isFuzzy);
   const remoteRangeApplied = !hasTags && hasRange;
   const remoteRangeHeaders = remoteRangeApplied
-    ? buildNozomiRangeHeaders(
-        options.range?.start ?? 0,
-        options.range?.end ?? 0,
-      )
+    ? buildNozomiRangeHeaders(options.range?.start ?? 0, options.range?.end ?? 0)
     : undefined;
 
   // For unfiltered popular browsing, limit download to the first 5000 IDs
@@ -163,8 +151,7 @@ export async function getGalleryIds(
   // must use the full popular file as an ordering/base set; truncating it
   // before intersecting with B-tree quick-search results drops valid matches.
   const MAX_POPULAR_IDS = 5000;
-  const canRangePopularBase =
-    typeof options.popularityOrderBy === "string" && !hasTags;
+  const canRangePopularBase = typeof options.popularityOrderBy === "string" && !hasTags;
   const popularRangeHeaders = canRangePopularBase
     ? (buildNozomiRangeHeaders(
         options.range?.start ?? 0,
@@ -178,15 +165,10 @@ export async function getGalleryIds(
    * 2. Ambiguous: fetch female:, male:, tag: nozomi → union
    * 3. Standard: single nozomi fetch
    */
-  const fetchTagIds = async (
-    tag: HitomiTag,
-    lang: string,
-  ): Promise<Set<number>> => {
+  const fetchTagIds = async (tag: HitomiTag, lang: string): Promise<Set<number>> => {
     if (tag.isFuzzy) {
       try {
-        const btreeIds = new Set(
-          await searchGalleryIdsByTerm(tag.name, fetcher),
-        );
+        const btreeIds = new Set(await searchGalleryIdsByTerm(tag.name, fetcher));
         if (btreeIds.size > 0) {
           return btreeIds;
         }
@@ -215,10 +197,7 @@ export async function getGalleryIds(
       .catch(() => new Set<number>());
   };
 
-  const fetchPreciseTagIds = async (
-    tag: HitomiTag,
-    lang: string,
-  ): Promise<Set<number>> => {
+  const fetchPreciseTagIds = async (tag: HitomiTag, lang: string): Promise<Set<number>> => {
     if (tag.type === "ambiguous") {
       return fetchNozomiExpansion(tag.name, lang);
     }
@@ -237,10 +216,7 @@ export async function getGalleryIds(
    * Nozomi expansion: fetch female:, male:, and neutral tag: variants → union.
    * Used for ambiguous tags and as fuzzy search fallback.
    */
-  const fetchNozomiExpansion = async (
-    name: string,
-    lang: string,
-  ): Promise<Set<number>> => {
+  const fetchNozomiExpansion = async (name: string, lang: string): Promise<Set<number>> => {
     const variants: { type: string; name: string }[] = [
       { type: "female", name },
       { type: "male", name },
@@ -275,9 +251,7 @@ export async function getGalleryIds(
             popularityOrderBy: options.popularityOrderBy,
             language: lang,
           }),
-          typeof options.popularityOrderBy === "string"
-            ? popularRangeHeaders
-            : remoteRangeHeaders,
+          typeof options.popularityOrderBy === "string" ? popularRangeHeaders : remoteRangeHeaders,
         ).then((buffer) => getIdSet(buffer))
       : null;
 
@@ -327,8 +301,8 @@ export async function getGalleryIds(
       groupSets.unshift(await basePromise);
     } else if (groupSets.length === 0) {
       // No tags, no base — fetch all language IDs
-      const baseSet = await fetcher(getNozomiUri({ language: lang }), {}).then(
-        (buffer) => getIdSet(buffer),
+      const baseSet = await fetcher(getNozomiUri({ language: lang }), {}).then((buffer) =>
+        getIdSet(buffer),
       );
       groupSets.push(baseSet);
     }
@@ -364,9 +338,7 @@ export async function getGalleryIds(
     return new Set<number>(finalIds);
   };
 
-  const languageResults = await Promise.all(
-    languages.map((lang) => fetchByLanguage(lang)),
-  );
+  const languageResults = await Promise.all(languages.map((lang) => fetchByLanguage(lang)));
   const union = new Set<number>();
   for (const set of languageResults) {
     for (const id of set) union.add(id);

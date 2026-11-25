@@ -35,8 +35,7 @@ export function getNozomiUri(
   }
 
   if (typeof options.popularityOrderBy === "string") {
-    path =
-      options.popularityOrderBy !== "day" ? options.popularityOrderBy : "today";
+    path = options.popularityOrderBy !== "day" ? options.popularityOrderBy : "today";
     return `${RESOURCE_DOMAIN}/popular/${path}-${language}.nozomi`;
   }
 
@@ -55,8 +54,7 @@ export class ImageUriResolver {
   static needsSync(): boolean {
     return (
       IMAGE_URI_PARTS[2].size === 0 ||
-      Date.now() - ImageUriResolver.lastSyncedAt >
-        ImageUriResolver.GG_CACHE_TTL_MS
+      Date.now() - ImageUriResolver.lastSyncedAt > ImageUriResolver.GG_CACHE_TTL_MS
     );
   }
 
@@ -139,11 +137,7 @@ export class ImageUriResolver {
     if (requested === "avif") {
       resolvedExtension = image.hasAvif ? "avif" : "webp";
     } else if (requested === "webp") {
-      resolvedExtension = image.hasWebp
-        ? "webp"
-        : image.hasAvif
-          ? "avif"
-          : "webp";
+      resolvedExtension = image.hasWebp ? "webp" : image.hasAvif ? "avif" : "webp";
     } else {
       resolvedExtension = image.hasAvif ? "avif" : "webp";
     }
@@ -159,26 +153,14 @@ export class ImageUriResolver {
           "be used with options['isThumbnail']",
         );
       }
-      const imageHashCode = Number.parseInt(
-        image.hash.slice(-1) + image.hash.slice(-3, -1),
-        16,
-      );
+      const imageHashCode = Number.parseInt(image.hash.slice(-1) + image.hash.slice(-3, -1), 16);
       subdomain = resolvedExtension[0];
       path = `${IMAGE_URI_PARTS[0]}/${imageHashCode}/${image.hash}`;
-      subdomain +=
-        IMAGE_URI_PARTS[2].has(imageHashCode) === IMAGE_URI_PARTS[1]
-          ? "2"
-          : "1";
+      subdomain += IMAGE_URI_PARTS[2].has(imageHashCode) === IMAGE_URI_PARTS[1] ? "2" : "1";
     } else {
       path = `${resolvedExtension}${options.isSmall ? "small" : "big"}tn/${image.hash.slice(-1)}/${image.hash.slice(-3, -1)}/${image.hash}`;
-      const imageHashCode = Number.parseInt(
-        image.hash.slice(-1) + image.hash.slice(-3, -1),
-        16,
-      );
-      const prefix =
-        IMAGE_URI_PARTS[2].has(imageHashCode) === IMAGE_URI_PARTS[1]
-          ? "b"
-          : "a";
+      const imageHashCode = Number.parseInt(image.hash.slice(-1) + image.hash.slice(-3, -1), 16);
+      const prefix = IMAGE_URI_PARTS[2].has(imageHashCode) === IMAGE_URI_PARTS[1] ? "b" : "a";
       subdomain = `${prefix}tn`;
     }
 

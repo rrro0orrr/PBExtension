@@ -7,9 +7,7 @@ export default {
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.EVERYONE,
-  badges: [
-    { label: "Aggregator", textColor: "#FFFFFF", backgroundColor: "#800080" },
-  ],
+  badges: [{ label: "Aggregator", textColor: "#FFFFFF", backgroundColor: "#800080" }],
   capabilities: [
     SourceIntents.DISCOVER_SECTION_PROVIDING,
     SourceIntents.SEARCH_RESULT_PROVIDING,

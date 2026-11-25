@@ -23,12 +23,13 @@ import {
   TagSection,
 } from "@paperback/types";
 import * as cheerio from "cheerio";
-import * as htmlparser2 from "htmlparser2";
+import type { CheerioAPI } from "cheerio";
 import { render as renderDom } from "dom-serializer";
+import * as htmlparser2 from "htmlparser2";
+
+import { ScribbleHubSearchForm } from "./forms/SearchForm";
 import { ScribbleHubInterceptor } from "./interceptors";
 import { type ScribbleHubMetadata, type ScribbleHubSearchMeta, SORTS } from "./model";
-import { ScribbleHubSearchForm } from "./forms/SearchForm";
-import type { CheerioAPI } from "cheerio";
 
 const baseUrl = "https://www.scribblehub.com";
 

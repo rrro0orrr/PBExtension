@@ -13,5 +13,6 @@
   "endOfLine": "lf",
   "embeddedLanguageFormatting": "auto",
   "sortPackageJson": false,
+  "sortImports": true,
   "ignorePatterns": ["/bundles", "/tools"]
 }

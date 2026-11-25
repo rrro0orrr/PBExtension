@@ -1,5 +1,6 @@
 import { type TestLogger } from "@paperback/types";
 import { expect } from "chai";
+
 import { NovelCool } from "../NovelCool/main.js";
 import { TestSuite } from "./suite.js";
 

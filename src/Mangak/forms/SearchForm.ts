@@ -1,5 +1,6 @@
 import { AdvancedSearchForm, NavigationRow, Section, SelectRow } from "@paperback/types";
 import type { JSONObject } from "@paperback/types";
+
 import { TagFilterForm, type TagFilterState } from "./TagFilterForm";
 
 export interface BuddySearchMetadata extends JSONObject {

@@ -32,9 +32,10 @@ import {
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 import { CheerioAPI, Cheerio } from "cheerio";
-import type { AnyNode } from "domhandler";
 import { render as renderDom } from "dom-serializer";
+import type { AnyNode } from "domhandler";
 import * as htmlparser2 from "htmlparser2";
+
 import { URLBuilder } from "../url-builder/base";
 import { decryptChapterProtector } from "./chapter-protector";
 import { MadaraSearchForm, MadaraSearchMeta } from "./forms";

@@ -25,12 +25,11 @@ import {
   TagSection,
   CloudflareBypassRequestProviding,
 } from "@paperback/types";
-import { MangacloudSearchForm, type MangacloudSearchMetadata } from "./forms/SearchForm";
-
 import { CheerioAPI } from "cheerio";
 import * as cheerio from "cheerio";
 import * as htmlparser2 from "htmlparser2";
 
+import { MangacloudSearchForm, type MangacloudSearchMetadata } from "./forms/SearchForm";
 import { MangacloudInterceptor } from "./interceptors";
 import {
   MostViewedMangaResponse,

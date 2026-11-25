@@ -1,7 +1,8 @@
 import { type TestLogger } from "@paperback/types";
-import { TestSuite, registerDefaultTests } from "./suite.js";
+
 import { NHentai } from "../NHentai/main.js";
 import sourceInfo from "../NHentai/pbconfig.js";
+import { TestSuite, registerDefaultTests } from "./suite.js";
 
 export async function runTests(logger: TestLogger) {
   const suite = new TestSuite("NHentai tests", logger);

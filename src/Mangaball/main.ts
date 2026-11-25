@@ -34,6 +34,8 @@ import * as cheerio from "cheerio";
 import { type CheerioAPI } from "cheerio";
 import * as htmlparser2 from "htmlparser2";
 
+import { MangaballSearchForm } from "./forms/SearchForm";
+import { MangaballSettingsForm } from "./forms/SettingsForm";
 import {
   type SearchAPIResponse,
   STATIC_SEARCH_DETAILS,
@@ -41,8 +43,6 @@ import {
   type ChapterApiResponse,
   type Metadata as MangaballMetadata,
 } from "./models";
-import { MangaballSearchForm } from "./forms/SearchForm";
-import { MangaballSettingsForm } from "./forms/SettingsForm";
 import { MainInterceptor } from "./network";
 import { parseApiItemsToDiscoverItems } from "./parsers";
 import { isLanguageAllowed } from "./settings";

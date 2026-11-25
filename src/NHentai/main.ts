@@ -33,11 +33,11 @@ import {
   type SearchFilterValue,
 } from "@paperback/types/lib/compat/0.8/searchFilters";
 import { closureSelector } from "@paperback/types/lib/impl/Selector.js";
+
 import { SettingsForm } from "./forms";
-import * as NHentaiSettings from "./settings";
-import NHentaiConfig from "./pbconfig";
 import { NHentaiInterceptor } from "./interceptors";
-import { parseRetryAfterMs } from "./utils/http";
+import NHentaiConfig from "./pbconfig";
+import * as NHentaiSettings from "./settings";
 import {
   addDescMarkedReadId,
   ALL_DISCOVER_SECTIONS,
@@ -99,6 +99,7 @@ import {
   setSearchFilterTags,
   SORT_OPTIONS,
 } from "./settings";
+import { parseRetryAfterMs } from "./utils/http";
 
 class InlineSearchFilterForm extends SearchFilterForm {
   override getSections() {

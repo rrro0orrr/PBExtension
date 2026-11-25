@@ -32,7 +32,7 @@ export class HitomiError extends Error {
         break;
       }
       case HitomiErrorCode.REQEUST_REJECTED: {
-        super(`Request to '${values[0].replace(/'/g, "\\'")}' was rejected`);
+        super(`Request to '${values[0].replace(/\\/g, "\\\\").replace(/'/g, "\\'")}' was rejected`);
         this.name = "REQEUST_REJECTED";
         break;
       }

@@ -29,7 +29,7 @@ jobs:
         with:
           token: ${{ secrets.extension_repositories }}
       - name: Template Sync
-        uses: AndreasAugustin/actions-template-sync@v2
+        uses: AndreasAugustin/actions-template-sync@6e1d0089686f8940604fc15baae62367bf6ee860 # v2.6.0
         with:
           source_repo_path: paperback-community/template-extensions
           upstream_branch: master

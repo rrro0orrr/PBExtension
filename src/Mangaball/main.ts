@@ -34,6 +34,7 @@ import * as cheerio from "cheerio";
 import { type CheerioAPI } from "cheerio";
 import * as htmlparser2 from "htmlparser2";
 
+import { stripTags } from "../utils/html/strip-tags";
 import { MangaballSearchForm } from "./forms/SearchForm";
 import { MangaballSettingsForm } from "./forms/SettingsForm";
 import {
@@ -400,9 +401,7 @@ export class MangaballExtension implements MangaballImplementation {
               latestChapter = $lc.root().text().trim();
             }
           } catch {
-            latestChapter = String(raw.last_chapter)
-              .replace(/<[^>]*>?/gm, "")
-              .trim();
+            latestChapter = stripTags(String(raw.last_chapter)).trim();
           }
         }
 

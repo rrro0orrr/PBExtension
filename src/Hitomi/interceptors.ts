@@ -6,6 +6,19 @@ import { HitomiFile } from "./model";
 import { addDataReceived } from "./settings";
 import { ImageUriResolver } from "./utils/uri";
 
+const CONTENT_HOST = "gold-usergeneratedcontent.net";
+
+// Compare the parsed hostname rather than a substring of the whole URL, so
+// e.g. "https://evil.example/?gold-usergeneratedcontent.net" does not match.
+export function isContentHostUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host === CONTENT_HOST || host.endsWith(`.${CONTENT_HOST}`);
+  } catch {
+    return false;
+  }
+}
+
 const hitomiInterceptorNoticeTimestamps = new Map<string, number>();
 
 function logHitomiInterceptorNotice(key: string, message: string, minimumIntervalMs = 15000): void {
@@ -244,7 +257,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
 
       if (
         (status === 404 || status === 403) &&
-        request.url.includes("gold-usergeneratedcontent.net") &&
+        isContentHostUrl(request.url) &&
         !request.url.includes("gg.js") &&
         !request.url.includes(".nozomi")
       ) {
@@ -268,7 +281,7 @@ export class HitomiInterceptor extends PaperbackInterceptor {
   }
 
   private isCdnImageRequest(url: string): boolean {
-    if (!url.includes("gold-usergeneratedcontent.net")) return false;
+    if (!isContentHostUrl(url)) return false;
     if (url.includes("gg.js") || url.includes(".nozomi")) return false;
     // Only pace real image payload requests. Do not classify gallery JS or index files as image traffic.
     return /\.(?:webp|avif)(?:\?|$)/i.test(url);

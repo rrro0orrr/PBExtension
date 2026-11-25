@@ -32,8 +32,9 @@ import {
 } from "@paperback/types/lib/compat/0.8/searchFilters";
 import { closureSelector } from "@paperback/types/lib/impl/Selector.js";
 
+import { stripTags } from "../utils/html/strip-tags";
 import { HitomiSettingsForm } from "./forms";
-import { HitomiInterceptor } from "./interceptors";
+import { HitomiInterceptor, isContentHostUrl } from "./interceptors";
 import { GalleryIdOptions, HitomiFile, HitomiGallery, HitomiTag } from "./model";
 import hitomiInfo from "./pbconfig";
 import {
@@ -90,17 +91,6 @@ import {
 } from "./settings";
 import { getGallery, getGalleryIds } from "./utils/gallery";
 import { ImageUriResolver } from "./utils/uri";
-
-const CONTENT_HOST = "gold-usergeneratedcontent.net";
-
-function isContentHostUrl(url: string): boolean {
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    return host === CONTENT_HOST || host.endsWith(`.${CONTENT_HOST}`);
-  } catch {
-    return false;
-  }
-}
 
 class ReadHistory {
   private _ordered: string[];
@@ -2244,7 +2234,7 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         >();
         while ((match = regex.exec(html)) !== null) {
           const rawRef = decodeURIComponent(match[1]);
-          const displayText = match[2].replace(/<[^>]+>/g, "").trim();
+          const displayText = stripTags(match[2]).trim();
           const cleaned = cleanTagName(rawRef);
           const slug = normalizeTagSlug(cleaned);
           if (!slug) continue;

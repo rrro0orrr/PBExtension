@@ -32,10 +32,10 @@ export class ScribbleHubSearchForm extends AdvancedSearchForm {
           items: GENRES.filter((g) => g.id !== "0").map((g) => ({ id: g.id, title: g.label })),
           allowExclusion: true,
           allowEmptySelection: true,
-          onValueChange: Application.Selector<ScribbleHubSearchForm, (value: Record<string, "included" | "excluded">) => Promise<void>>(
-            this,
-            "updateGenres",
-          ),
+          onValueChange: Application.Selector<
+            ScribbleHubSearchForm,
+            (value: Record<string, "included" | "excluded">) => Promise<void>
+          >(this, "updateGenres"),
         }),
       ]),
     ];

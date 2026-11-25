@@ -1,9 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright © 2026 Inkdex */
 
-export function parseRetryAfterMs(
-  headers: Record<string, string>,
-): number | undefined {
+export function parseRetryAfterMs(headers: Record<string, string>): number | undefined {
   const retryAfter = headers["retry-after"] ?? headers["Retry-After"];
   if (!retryAfter) return undefined;
   const numericSeconds = Number.parseInt(retryAfter, 10);

@@ -134,18 +134,12 @@ function moveDisplayLimit(
 
 /** Parse stored date strings, handling YYYY-MM-DD as local time. */
 function parseStoredDate(value: string): Date {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value)
-    ? parseLocalDateKey(value)
-    : new Date(value);
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseLocalDateKey(value) : new Date(value);
 }
 
 function formatDate(isoDate: string): string {
   const d = parseStoredDate(isoDate);
-  return formatDateByPattern(
-    d,
-    getDateFormatSetting(),
-    getDateSeparatorSetting(),
-  );
+  return formatDateByPattern(d, getDateFormatSetting(), getDateSeparatorSetting());
 }
 
 /** Format a date for screen time display, ensuring the day is always visible.
@@ -172,15 +166,12 @@ function formatScreenTimeDate(date: Date): string {
 function getTodayScreenTimeMinutes(): number {
   const today = new Date();
   const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const todayEntry = getScreenTimeLastNDays(7, 0).find(
-    (entry) => entry.date === key,
-  );
+  const todayEntry = getScreenTimeLastNDays(7, 0).find((entry) => entry.date === key);
   return safeMinutes(todayEntry?.minutes);
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes >= 1073741824)
-    return `${parseFloat((bytes / 1073741824).toFixed(2))} GB`;
+  if (bytes >= 1073741824) return `${parseFloat((bytes / 1073741824).toFixed(2))} GB`;
   if (bytes >= 1048576) return `${parseFloat((bytes / 1048576).toFixed(2))} MB`;
   if (bytes >= 1024) return `${parseFloat((bytes / 1024).toFixed(2))} KB`;
   return `${bytes} B`;
@@ -223,9 +214,7 @@ function countDaySpan(startKey: string, endKey: string): number {
   if (!startKey || !endKey) return 0;
   const start = parseLocalDateKey(startKey);
   const end = parseLocalDateKey(endKey);
-  const diffDays = Math.round(
-    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const diffDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   return diffDays >= 0 ? diffDays + 1 : 0;
 }
 
@@ -250,9 +239,7 @@ function getStreak(
       currentEnd: "",
     };
 
-  const dateSet = new Set(
-    sessions.map((s) => toLocalDateKey(parseStoredDate(String(s.date)))),
-  );
+  const dateSet = new Set(sessions.map((s) => toLocalDateKey(parseStoredDate(String(s.date)))));
 
   // Current streak: walk backwards from today, allowing up to graceDays consecutive misses
   let current = 0;
@@ -304,9 +291,7 @@ function getStreak(
     if (graceDays > 0 && !dateSet.has(todayKey) && currentEnd !== todayKey) {
       const lastRead = parseLocalDateKey(currentEnd);
       const now = parseLocalDateKey(todayKey);
-      const gapDays = Math.round(
-        (now.getTime() - lastRead.getTime()) / (1000 * 60 * 60 * 24),
-      );
+      const gapDays = Math.round((now.getTime() - lastRead.getTime()) / (1000 * 60 * 60 * 24));
       if (gapDays <= graceDays) {
         currentEnd = todayKey;
       }
@@ -325,9 +310,7 @@ function getStreak(
   for (let i = 1; i < sortedDates.length; i++) {
     const prev = parseLocalDateKey(sortedDates[i - 1]);
     const curr = parseLocalDateKey(sortedDates[i]);
-    const diffDays = Math.round(
-      (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
     if (diffDays <= 1 + graceDays) {
       streakEnd = sortedDates[i];
     } else {
@@ -377,9 +360,9 @@ export class StatisticsForm extends Form {
     const earliestSessionDate =
       sessions.length > 0
         ? sessions
-          .map((s) => s.date)
-          .filter((d): d is string => typeof d === "string" && d.length > 0)
-          .sort()[0]
+            .map((s) => s.date)
+            .filter((d): d is string => typeof d === "string" && d.length > 0)
+            .sort()[0]
         : undefined;
     const effectiveInstallDate = earliestSessionDate
       ? !installDate || earliestSessionDate < installDate
@@ -396,23 +379,19 @@ export class StatisticsForm extends Form {
 
     const daysActive = effectiveInstallDate
       ? Math.max(
-        1,
-        Math.floor(
-          (Date.now() - parseStoredDate(effectiveInstallDate).getTime()) /
-          (1000 * 60 * 60 * 24),
-        ),
-      )
+          1,
+          Math.floor(
+            (Date.now() - parseStoredDate(effectiveInstallDate).getTime()) / (1000 * 60 * 60 * 24),
+          ),
+        )
       : 1;
     const markOnDescCount = getDescMarkedReadIds().size;
     const chapterReadCount = totalRead;
     const totalIncludingMarkOnDesc = chapterReadCount + markOnDescCount;
     const avgPerDay = chapterReadCount / daysActive;
-    const totalIncludingMarkOnDescPerDay =
-      totalIncludingMarkOnDesc / daysActive;
+    const totalIncludingMarkOnDescPerDay = totalIncludingMarkOnDesc / daysActive;
 
-    const sinceStr = effectiveInstallDate
-      ? formatDate(effectiveInstallDate)
-      : "Unknown";
+    const sinceStr = effectiveInstallDate ? formatDate(effectiveInstallDate) : "Unknown";
 
     const currentStreakTitle = `Current Streak: ${streakInfo.current} day${streakInfo.current !== 1 ? "s" : ""}`;
     const currentStreakSubtitle =
@@ -470,19 +449,18 @@ export class StatisticsForm extends Form {
       ]),
       ...(rawStreak.current === 0 && graceDays < 5 && !this.streakSaveDismissed
         ? [
-          Section({ id: "streak" }, [
-            ButtonRow("saveStreak", {
-              title: `Save Streak (${graceDays + 1} day${graceDays + 1 !== 1 ? "s" : ""})`,
-              onSelect: Application.Selector(this as any, "handleSaveStreak"),
-            }),
-          ]),
-        ]
+            Section({ id: "streak" }, [
+              ButtonRow("saveStreak", {
+                title: `Save Streak (${graceDays + 1} day${graceDays + 1 !== 1 ? "s" : ""})`,
+                onSelect: Application.Selector(this as any, "handleSaveStreak"),
+              }),
+            ]),
+          ]
         : []),
       Section(
         {
           id: "details",
-          footer:
-            "Report bugs and suggestions at github.com/rrro0orrr/PBExtension/issues.",
+          footer: "Report bugs and suggestions at github.com/rrro0orrr/PBExtension/issues.",
         },
         [
           NavigationRow("contentStats", {
@@ -504,51 +482,36 @@ export class StatisticsForm extends Form {
           title: "Disable All Stat Tracking",
           subtitle: "Stop Tracking Statistics & Screen Time",
           value: !this.statsTrackingEnabled,
-          onValueChange: Application.Selector(
-            this as any,
-            "handleStatsTrackingToggle",
-          ),
+          onValueChange: Application.Selector(this as any, "handleStatsTrackingToggle"),
         }),
         ...(this.resetStep === 0
           ? [
-            ButtonRow("resetStats", {
-              title: "Reset All Statistics",
-              onSelect: Application.Selector(this as any, "handleReset"),
-            }),
-          ]
-          : this.resetStep === 1
-            ? [
-              ButtonRow("areYouSure", {
-                title: "Are You Sure?",
-                onSelect: Application.Selector(
-                  this as any,
-                  "handleConfirmStep",
-                ),
-              }),
-              ButtonRow("cancelReset", {
-                title: "Cancel",
-                onSelect: Application.Selector(
-                  this as any,
-                  "handleCancelReset",
-                ),
+              ButtonRow("resetStats", {
+                title: "Reset All Statistics",
+                onSelect: Application.Selector(this as any, "handleReset"),
               }),
             ]
+          : this.resetStep === 1
+            ? [
+                ButtonRow("areYouSure", {
+                  title: "Are You Sure?",
+                  onSelect: Application.Selector(this as any, "handleConfirmStep"),
+                }),
+                ButtonRow("cancelReset", {
+                  title: "Cancel",
+                  onSelect: Application.Selector(this as any, "handleCancelReset"),
+                }),
+              ]
             : [
-              ButtonRow("finalResetStats", {
-                title: "FINAL CLICK TO RESET ALL STATS",
-                onSelect: Application.Selector(
-                  this as any,
-                  "handleConfirmReset",
-                ),
-              }),
-              ButtonRow("cancelResetFinal", {
-                title: "Cancel",
-                onSelect: Application.Selector(
-                  this as any,
-                  "handleCancelReset",
-                ),
-              }),
-            ]),
+                ButtonRow("finalResetStats", {
+                  title: "FINAL CLICK TO RESET ALL STATS",
+                  onSelect: Application.Selector(this as any, "handleConfirmReset"),
+                }),
+                ButtonRow("cancelResetFinal", {
+                  title: "Cancel",
+                  onSelect: Application.Selector(this as any, "handleCancelReset"),
+                }),
+              ]),
       ]),
     ];
   }
@@ -615,10 +578,7 @@ class RemoveSpecificStatsForm extends Form {
     }
   }
 
-  private getCategoryDisplayTitle(category: {
-    id: string;
-    title: string;
-  }): string {
+  private getCategoryDisplayTitle(category: { id: string; title: string }): string {
     this.ensureCache();
     const sessions = this._sessions!;
     const streak = this._streak!;
@@ -643,12 +603,9 @@ class RemoveSpecificStatsForm extends Form {
         const totalViews = sessions.reduce((sum, s) => sum + s.count, 0);
         const daysActive = installDate
           ? Math.max(
-            1,
-            Math.floor(
-              (Date.now() - new Date(installDate).getTime()) /
-              (1000 * 60 * 60 * 24),
-            ),
-          )
+              1,
+              Math.floor((Date.now() - new Date(installDate).getTime()) / (1000 * 60 * 60 * 24)),
+            )
           : 1;
         return `${category.title}: ${formatStatValue(totalViews / daysActive, false)}`;
       }
@@ -685,9 +642,7 @@ class RemoveSpecificStatsForm extends Form {
       const clean = tag.replace(/^(?:female|male|tag):/i, "");
       mergedTagCounts[clean] = (mergedTagCounts[clean] ?? 0) + count;
     }
-    const sortedTags = Object.entries(mergedTagCounts).sort(
-      (a, b) => b[1] - a[1],
-    );
+    const sortedTags = Object.entries(mergedTagCounts).sort((a, b) => b[1] - a[1]);
     const tagTotal = sortedTags.reduce((sum, [, c]) => sum + c, 0);
 
     const rereadStats = getRereadStats();
@@ -696,16 +651,13 @@ class RemoveSpecificStatsForm extends Form {
       // Show double-confirm warning at top when first confirm was clicked
       ...(this.confirmingReset
         ? [
-          Section("doubleConfirm", [
-            ButtonRow("areYouSure", {
-              title: "ARE YOU VERY SURE?",
-              onSelect: Application.Selector(
-                this as any,
-                "handleFinalConfirm",
-              ),
-            }),
-          ]),
-        ]
+            Section("doubleConfirm", [
+              ButtonRow("areYouSure", {
+                title: "ARE YOU VERY SURE?",
+                onSelect: Application.Selector(this as any, "handleFinalConfirm"),
+              }),
+            ]),
+          ]
         : []),
       Section({ id: "select" }, [
         SelectRow("categories", {
@@ -716,10 +668,7 @@ class RemoveSpecificStatsForm extends Form {
             id: c.id,
             title: this.getCategoryDisplayTitle(c),
           })),
-          onValueChange: Application.Selector(
-            this as any,
-            "handleCategoryChange",
-          ),
+          onValueChange: Application.Selector(this as any, "handleCategoryChange"),
           minItemCount: 0,
           maxItemCount: STAT_CATEGORIES.length,
         }),
@@ -758,10 +707,7 @@ class RemoveSpecificStatsForm extends Form {
             layout: "list",
             value: this.selectedRereads,
             items: rereadStats.top.map((entry, idx) => {
-              const rawTags =
-                entry.tags && entry.tags.length > 0
-                  ? entry.tags.slice(0, 10)
-                  : [];
+              const rawTags = entry.tags && entry.tags.length > 0 ? entry.tags.slice(0, 10) : [];
               const seen = new Set<string>();
               const cleanedTags: string[] = [];
               for (const t of rawTags) {
@@ -780,10 +726,7 @@ class RemoveSpecificStatsForm extends Form {
                 title: `${idx + 1}.) ${entry.title ?? entry.mangaId} — ${subtitle}`,
               };
             }),
-            onValueChange: Application.Selector(
-              this as any,
-              "handleRereadChange",
-            ),
+            onValueChange: Application.Selector(this as any, "handleRereadChange"),
             minItemCount: 0,
             maxItemCount: Math.max(1, rereadStats.top.length),
           }),
@@ -857,10 +800,7 @@ class ContentStatsForm extends Form {
     const pageCounts = getPageCounts();
     const avgPageCount = getAveragePageCount();
     const buckets = ["1-20", "21-50", "51-100", "101-200", "200+"];
-    const totalPages = Object.values(pageCounts).reduce(
-      (a, b) => a + Number(b ?? 0),
-      0,
-    );
+    const totalPages = Object.values(pageCounts).reduce((a, b) => a + Number(b ?? 0), 0);
 
     const pageRows = buckets.map((bucket) => {
       const count = Number(pageCounts[bucket] ?? 0);
@@ -876,14 +816,10 @@ class ContentStatsForm extends Form {
     // -- Reread Stats --
     const rereadStats = getRereadStats();
     const rereadLimit = getRereadDisplayLimit();
-    const displayRereadLimit = normalizeDisplayLimit(
-      rereadStats.top.length,
-      rereadLimit,
-    );
+    const displayRereadLimit = normalizeDisplayLimit(rereadStats.top.length, rereadLimit);
     const displayedRereads = rereadStats.top.slice(0, displayRereadLimit);
     const rereadRows = displayedRereads.map((entry, idx) => {
-      const rawTags =
-        entry.tags && entry.tags.length > 0 ? entry.tags.slice(0, 10) : [];
+      const rawTags = entry.tags && entry.tags.length > 0 ? entry.tags.slice(0, 10) : [];
       // Strip male:/female:/tag: prefixes and deduplicate
       const seen = new Set<string>();
       const cleanedTags: string[] = [];
@@ -909,10 +845,7 @@ class ContentStatsForm extends Form {
     const rereadCurrentIdx = effectiveRereadSteps.indexOf(displayRereadLimit);
     const rereadButtons: ReturnType<typeof ButtonRow>[] = [];
     // Show More only if there are actually more items beyond the current limit
-    if (
-      rereadCurrentIdx < effectiveRereadSteps.length - 1 &&
-      totalRereads > displayRereadLimit
-    ) {
+    if (rereadCurrentIdx < effectiveRereadSteps.length - 1 && totalRereads > displayRereadLimit) {
       rereadButtons.push(
         ButtonRow("showMoreRereads", {
           title: "Show More",
@@ -1034,10 +967,7 @@ class ContentStatsForm extends Form {
           footer: "Swipe To Remove.",
           items: [...rereadButtons, ...rereadRows],
           allowDeletion: true,
-          onDeletion: Application.Selector(
-            this as any,
-            "handleDeleteTopReread",
-          ),
+          onDeletion: Application.Selector(this as any, "handleDeleteTopReread"),
         }),
       );
     }
@@ -1045,9 +975,7 @@ class ContentStatsForm extends Form {
     // Fallback if no data
     if (totalRereads === 0 && totalTags === 0 && totalPages === 0) {
       return [
-        Section("emptyStats", [
-          LabelRow("noData", { title: "No statistics data available yet." }),
-        ]),
+        Section("emptyStats", [LabelRow("noData", { title: "No statistics data available yet." })]),
       ];
     }
 
@@ -1225,10 +1153,7 @@ class ScreenTimeForm extends Form {
 
     // Compare current week's avg/day to previous week's avg/day
     const prevDaily = getScreenTimeLastNDays(7, this.weekOffset + 1);
-    const prevWeekTotal = prevDaily.reduce(
-      (sum, d) => sum + safeMinutes(d.minutes),
-      0,
-    );
+    const prevWeekTotal = prevDaily.reduce((sum, d) => sum + safeMinutes(d.minutes), 0);
     const prevWeekAvg = prevWeekTotal / Math.max(1, prevDaily.length);
 
     // Sort days Monday first, Sunday last.
@@ -1242,19 +1167,14 @@ class ScreenTimeForm extends Form {
       return dayA - dayB;
     });
 
-    const maxMinutes = Math.max(
-      ...sorted.map((d) => safeMinutes(d.minutes)),
-      1,
-    );
+    const maxMinutes = Math.max(...sorted.map((d) => safeMinutes(d.minutes)), 1);
 
     const rows = sorted.map((d) => {
       const mins = safeMinutes(d.minutes);
       // Parse as local date to avoid UTC offset jumbling weekdays
       const [yyyy, mm, dd] = d.date.split("-").map(Number);
       const date = new Date(yyyy, mm - 1, dd);
-      const shortDay = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
-        date.getDay()
-      ];
+      const shortDay = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
       const dateLabel = formatScreenTimeDate(date);
       const dayLabel = `${shortDay} of ${dateLabel}`;
       const pct = Math.round((mins / maxMinutes) * 20);
@@ -1271,9 +1191,7 @@ class ScreenTimeForm extends Form {
     const atFarthest = this.weekOffset >= maxOffset;
 
     // Always render Next Week first so Previous Week stays anchored in position 2
-    const weekNav: Array<
-      ReturnType<typeof ButtonRow> | ReturnType<typeof LabelRow>
-    > = [];
+    const weekNav: Array<ReturnType<typeof ButtonRow> | ReturnType<typeof LabelRow>> = [];
     if (this.weekOffset > 0) {
       weekNav.push(
         ButtonRow("nextWeek", {
@@ -1322,13 +1240,8 @@ class ScreenTimeForm extends Form {
     }
     const current = safeMinutes(nonZeroWeeks[nonZeroWeeks.length - 1]?.minutes);
     const prev =
-      nonZeroWeeks.length > 1
-        ? safeMinutes(nonZeroWeeks[nonZeroWeeks.length - 2].minutes)
-        : 0;
-    const maxMinutes = Math.max(
-      ...nonZeroWeeks.map((w) => safeMinutes(w.minutes)),
-      1,
-    );
+      nonZeroWeeks.length > 1 ? safeMinutes(nonZeroWeeks[nonZeroWeeks.length - 2].minutes) : 0;
+    const maxMinutes = Math.max(...nonZeroWeeks.map((w) => safeMinutes(w.minutes)), 1);
     const rows = nonZeroWeeks.map((w, idx) => {
       const mins = safeMinutes(w.minutes);
       const start = parseStoredDate(w.weekStart);
@@ -1357,10 +1270,7 @@ class ScreenTimeForm extends Form {
         Section("enableScreenTime", [
           ButtonRow("enableScreenTimeBtn", {
             title: "Enable Screen Time",
-            onSelect: Application.Selector(
-              this as any,
-              "handleEnableScreenTime",
-            ),
+            onSelect: Application.Selector(this as any, "handleEnableScreenTime"),
           }),
         ]),
       ];
@@ -1376,8 +1286,7 @@ class ScreenTimeForm extends Form {
       }),
     ]);
 
-    const body =
-      this.mode === "week" ? this.renderWeekly() : this.renderDaily();
+    const body = this.mode === "week" ? this.renderWeekly() : this.renderDaily();
     const statsTrackingEnabled = getStatsTrackingEnabledSetting();
     const disableSection = Section("disableScreenTime", [
       ButtonRow("disableScreenTimeBtn", {
@@ -1385,8 +1294,6 @@ class ScreenTimeForm extends Form {
         onSelect: Application.Selector(this as any, "handleDisableScreenTime"),
       }),
     ]);
-    return statsTrackingEnabled
-      ? [toggle, ...body, disableSection]
-      : [toggle, ...body];
+    return statsTrackingEnabled ? [toggle, ...body, disableSection] : [toggle, ...body];
   }
 }

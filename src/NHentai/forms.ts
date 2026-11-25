@@ -25,7 +25,6 @@ import {
   getApiKeyAuthorizedSetting,
   getDateFormatOptionsWithSeparator,
   getDisplayOptionsSetting,
-
   getDaysOldFilterSetting,
   getDiscoverCarouselTilesSetting,
   getDiscoverPageTilesSetting,
@@ -142,8 +141,7 @@ function getDisplayOptionLabel(
   dateSeparator: string,
   removeSpaces: boolean,
 ): string {
-  const sep =
-    DATE_SEPARATOR_OPTIONS.find((s) => s.id === dateSeparator)?.char ?? ".";
+  const sep = DATE_SEPARATOR_OPTIONS.find((s) => s.id === dateSeparator)?.char ?? ".";
   const dateExample = getDateExampleFor(dateFormat, sep);
   // Calculate relative date example - for display, use current values
   const relativeExample = "9d"; // Example: 9 days ago
@@ -154,9 +152,7 @@ function getDisplayOptionLabel(
   const favEx = removeSpaces ? '("15114|")' : '("15114 | ")';
   const favAbbrEx = removeSpaces ? '("15.1k|")' : '("15.1k | ")';
   const dateEx = removeSpaces ? `("${dateExample}|")` : `("${dateExample} | ")`;
-  const relEx = removeSpaces
-    ? `("${relativeExample}|")`
-    : `("${relativeExample} | ")`;
+  const relEx = removeSpaces ? `("${relativeExample}|")` : `("${relativeExample} | ")`;
 
   const labels: Record<DisplayOptionId, string> = {
     hide_read_letter: "Show Read Indicator 'r'",
@@ -341,13 +337,13 @@ export class SettingsForm extends Form {
     const militarySelected = selectedIds.includes("military_time");
     const dateFormatIds = selectedIds.filter((id) => id !== "military_time");
 
-    const availableDateFormats = getDateFormatOptionsWithSeparator(
-      this.dateSeparator,
-    ).map((opt) => opt.id);
+    const availableDateFormats = getDateFormatOptionsWithSeparator(this.dateSeparator).map(
+      (opt) => opt.id,
+    );
 
     let selectedDateFormat = this.dateFormat;
-    const validDateFormatIds = dateFormatIds.filter(
-      (id): id is DateFormatId => availableDateFormats.includes(id),
+    const validDateFormatIds = dateFormatIds.filter((id): id is DateFormatId =>
+      availableDateFormats.includes(id),
     );
     if (validDateFormatIds.length > 0) {
       selectedDateFormat = validDateFormatIds[0];
@@ -361,8 +357,7 @@ export class SettingsForm extends Form {
   }
 
   async updateDateSeparator(value: string[]): Promise<void> {
-    const selected =
-      (value?.[0] as typeof this.dateSeparator) ?? this.dateSeparator;
+    const selected = (value?.[0] as typeof this.dateSeparator) ?? this.dateSeparator;
     this.dateSeparator = selected;
     setDateSeparatorSetting(selected);
     this.reloadForm();
@@ -389,8 +384,7 @@ export class SettingsForm extends Form {
   async updateRelatedLanguage(value: boolean): Promise<void> {
     // When toggle is on, use the main preferred language (first one); when off, use "all"
     const langs = getLanguageSetting();
-    this.relatedLanguage =
-      value && langs.length === 1 && langs[0] !== "all" ? langs[0] : "all";
+    this.relatedLanguage = value && langs.length === 1 && langs[0] !== "all" ? langs[0] : "all";
     setRelatedLanguageSetting(this.relatedLanguage);
     this.reloadForm();
   }
@@ -461,25 +455,16 @@ export class SettingsForm extends Form {
     if (this.displayOptions.includes("show_lang_tip")) parts.push("EN");
     if (this.displayOptions.includes("show_page_count")) parts.push("67p");
     if (this.displayOptions.includes("show_favorite_count")) {
-      parts.push(
-        this.displayOptions.includes("abbreviate_favorites")
-          ? "15.1k"
-          : "15114",
-      );
+      parts.push(this.displayOptions.includes("abbreviate_favorites") ? "15.1k" : "15114");
     }
     if (this.displayOptions.includes("subtitle_relative")) parts.push("5h");
     if (this.displayOptions.includes("subtitle_date")) {
       const dateSep =
-        DATE_SEPARATOR_OPTIONS.find((s) => s.id === (this.dateSeparator as any))
-          ?.char ?? ".";
+        DATE_SEPARATOR_OPTIONS.find((s) => s.id === (this.dateSeparator as any))?.char ?? ".";
       parts.push(getDateExampleFor(this.dateFormat, dateSep));
     }
     const subtitleExample =
-      parts.length > 0
-        ? parts.join(sep)
-        : this.removeSpaces
-          ? "EN|67p"
-          : "EN | 67p";
+      parts.length > 0 ? parts.join(sep) : this.removeSpaces ? "EN|67p" : "EN | 67p";
 
     return [
       // Main settings section - NHentai Settings header + Language + Manga Filters nav
@@ -490,8 +475,7 @@ export class SettingsForm extends Form {
         }),
         SelectRow("languageNav", {
           title:
-            this.languageSetting.includes("all") ||
-              this.languageSetting.length !== 1
+            this.languageSetting.includes("all") || this.languageSetting.length !== 1
               ? "Preferred Languages"
               : "Preferred Language",
           layout: "list",
@@ -506,9 +490,7 @@ export class SettingsForm extends Form {
         }),
         NavigationRow("apiKeyNav", {
           title: "NHentai API Key",
-          value: getApiKeyAuthorizedSetting()
-            ? "Status: Authenticated"
-            : "Status: Unauthenticated",
+          value: getApiKeyAuthorizedSetting() ? "Status: Authenticated" : "Status: Unauthenticated",
           form: new NHentaiApiKeyForm(this),
         }),
       ]),
@@ -528,10 +510,7 @@ export class SettingsForm extends Form {
               this.removeSpaces,
             ),
           })),
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDisplayOptions",
-          ),
+          onValueChange: Application.Selector(this as any, "updateDisplayOptions"),
           minItemCount: 0,
           maxItemCount: DISPLAY_OPTION_IDS.length,
         }),
@@ -543,10 +522,7 @@ export class SettingsForm extends Form {
             id: opt.id,
             title: opt.label,
           })),
-          onValueChange: Application.Selector(
-            this as any,
-            "updateThumbnailQuality",
-          ),
+          onValueChange: Application.Selector(this as any, "updateThumbnailQuality"),
           minItemCount: 1,
           maxItemCount: 1,
         }),
@@ -554,10 +530,7 @@ export class SettingsForm extends Form {
         ToggleRow("removeSpaces", {
           title: "Remove Spaces From Separators",
           value: this.removeSpaces,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateRemoveSpaces",
-          ),
+          onValueChange: Application.Selector(this as any, "updateRemoveSpaces"),
         }),
       ]),
       // Statistics section
@@ -573,9 +546,7 @@ export class SettingsForm extends Form {
           form: new DiscoverOrderForm(),
         }),
         NavigationRow("statisticsNav", {
-          title: getScreenTimeEnabledSetting()
-            ? "Statistics & Screen Time"
-            : "Statistics",
+          title: getScreenTimeEnabledSetting() ? "Statistics & Screen Time" : "Statistics",
           form: new StatisticsForm(),
         }),
       ]),
@@ -584,10 +555,7 @@ export class SettingsForm extends Form {
         SelectRow("dateFormatNav", {
           title: "Date & Time Format",
           layout: "list",
-          value: [
-            this.dateFormat,
-            ...(this.useMilitaryTime ? ["military_time"] : []),
-          ],
+          value: [this.dateFormat, ...(this.useMilitaryTime ? ["military_time"] : [])],
           options: [
             ...getDateFormatOptionsWithSeparator(this.dateSeparator),
             { id: "military_time", label: "16:07 - Military Time" } as const,
@@ -603,16 +571,11 @@ export class SettingsForm extends Form {
           title: "Date Separator",
           layout: "list",
           value: [this.dateSeparator],
-          options: getDateSeparatorOptionsWithFormat(this.dateFormat).map(
-            (opt) => ({
-              id: opt.id,
-              title: opt.label,
-            }),
-          ),
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDateSeparator",
-          ),
+          options: getDateSeparatorOptionsWithFormat(this.dateFormat).map((opt) => ({
+            id: opt.id,
+            title: opt.label,
+          })),
+          onValueChange: Application.Selector(this as any, "updateDateSeparator"),
           minItemCount: 1,
           maxItemCount: 1,
         }),
@@ -698,9 +661,7 @@ class MangaFiltersForm extends Form {
     fallback: number,
   ): number {
     const normalized: unknown =
-      Array.isArray(value) && value.length > 0
-        ? (value as unknown[])[0]
-        : value;
+      Array.isArray(value) && value.length > 0 ? (value as unknown[])[0] : value;
     let parsed = NaN;
     if (typeof normalized === "number") {
       parsed = normalized;
@@ -720,16 +681,13 @@ class MangaFiltersForm extends Form {
       Section("tileLayoutSection", [
         ...(showHydrationToggle
           ? [
-            ToggleRow("rateLimitLiteFallback", {
-              title: "Dynamic Rate Limit Fallback",
-              subtitle: `After the ${getNHentaiApiKey() ? "45" : "20"} manga/min limit is reached, remove dates in subtitles to display more manga.`,
-              value: this.rateLimitLiteFallback,
-              onValueChange: Application.Selector(
-                this as any,
-                "updateRateLimitLiteFallback",
-              ),
-            }),
-          ]
+              ToggleRow("rateLimitLiteFallback", {
+                title: "Dynamic Rate Limit Fallback",
+                subtitle: `After the ${getNHentaiApiKey() ? "45" : "20"} manga/min limit is reached, remove dates in subtitles to display more manga.`,
+                value: this.rateLimitLiteFallback,
+                onValueChange: Application.Selector(this as any, "updateRateLimitLiteFallback"),
+              }),
+            ]
           : []),
         StepperRow("discoverCarouselTiles", {
           title: "Tiles on Carousel",
@@ -738,10 +696,7 @@ class MangaFiltersForm extends Form {
           maxValue: 6,
           stepValue: 1,
           loopOver: false,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDiscoverCarouselTiles",
-          ),
+          onValueChange: Application.Selector(this as any, "updateDiscoverCarouselTiles"),
         }),
         StepperRow("discoverPageTiles", {
           title: "Tiles on Discover",
@@ -750,10 +705,7 @@ class MangaFiltersForm extends Form {
           maxValue: 12,
           stepValue: 1,
           loopOver: false,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDiscoverPageTiles",
-          ),
+          onValueChange: Application.Selector(this as any, "updateDiscoverPageTiles"),
         }),
         StepperRow("searchPageTiles", {
           title: "Tiles on Search",
@@ -762,10 +714,7 @@ class MangaFiltersForm extends Form {
           maxValue: 16,
           stepValue: 1,
           loopOver: false,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateSearchPageTiles",
-          ),
+          onValueChange: Application.Selector(this as any, "updateSearchPageTiles"),
         }),
       ]),
       // Section 1: Tags and filters
@@ -788,32 +737,22 @@ class MangaFiltersForm extends Form {
         InputRow("favoritesFilter", {
           title: "Favorites (e.g. >500, 1000+, 69<)",
           value: this.formatFavoritesThreshold(),
-          onValueChange: Application.Selector(
-            this as any,
-            "updateFavoritesThreshold",
-          ),
+          onValueChange: Application.Selector(this as any, "updateFavoritesThreshold"),
         }),
-        ...(this.favoritesThreshold !== undefined ||
-          this.favoritesThresholdMax !== undefined
+        ...(this.favoritesThreshold !== undefined || this.favoritesThresholdMax !== undefined
           ? [
-            ToggleRow("strictFavorites", {
-              title: "Strict Client-side Favorites Filtering",
-              subtitle: "Lowers Rate Limits. Not Recommended.",
-              value: this.strictFavorites,
-              onValueChange: Application.Selector(
-                this as any,
-                "updateStrictFavorites",
-              ),
-            }),
-          ]
+              ToggleRow("strictFavorites", {
+                title: "Strict Client-side Favorites Filtering",
+                subtitle: "Lowers Rate Limits. Not Recommended.",
+                value: this.strictFavorites,
+                onValueChange: Application.Selector(this as any, "updateStrictFavorites"),
+              }),
+            ]
           : []),
         InputRow("daysOldFilter", {
           title: "Date Added (e.g. 7+, <7d, 1w-3y, 14-)",
           value: this.formatDaysOldFilter(),
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDaysOldFilter",
-          ),
+          onValueChange: Application.Selector(this as any, "updateDaysOldFilter"),
         }),
       ]),
       // Section 2: Behavior toggles — single section, reordered
@@ -828,19 +767,13 @@ class MangaFiltersForm extends Form {
           title: "Apply Preferred Language to Related Section",
           subtitle: "Related Manga Will Follow Preferred Langugage Setting",
           value: this.relatedLanguage !== "all",
-          onValueChange: Application.Selector(
-            this as any,
-            "updateRelatedLanguage",
-          ),
+          onValueChange: Application.Selector(this as any, "updateRelatedLanguage"),
         }),
         ToggleRow("hideReadInRelated", {
           title: "Hide Read Manga in Related",
           subtitle: "Applies To Related Manga Section",
           value: this.hideReadInRelated,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateHideReadInRelated",
-          ),
+          onValueChange: Application.Selector(this as any, "updateHideReadInRelated"),
         }),
         ToggleRow("hideRead", {
           title: "Hide Read Manga",
@@ -852,10 +785,7 @@ class MangaFiltersForm extends Form {
           title: "Mark As Read On Description",
           subtitle: "Mark Manga as Read When Viewing Their Description",
           value: this.markReadOnView,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateMarkReadOnView",
-          ),
+          onValueChange: Application.Selector(this as any, "updateMarkReadOnView"),
         }),
       ]),
     ];
@@ -898,8 +828,7 @@ class MangaFiltersForm extends Form {
 
   async updateRelatedLanguage(value: boolean): Promise<void> {
     const langs = getLanguageSetting();
-    this.relatedLanguage =
-      value && langs.length === 1 && langs[0] !== "all" ? langs[0] : "all";
+    this.relatedLanguage = value && langs.length === 1 && langs[0] !== "all" ? langs[0] : "all";
     setRelatedLanguageSetting(this.relatedLanguage);
     this.reloadForm();
   }
@@ -1031,23 +960,13 @@ class MangaFiltersForm extends Form {
   }
 
   async updateDiscoverPageTiles(value: unknown): Promise<void> {
-    this.discoverPageTiles = this.normalizeStepperValue(
-      value,
-      1,
-      12,
-      this.discoverPageTiles,
-    );
+    this.discoverPageTiles = this.normalizeStepperValue(value, 1, 12, this.discoverPageTiles);
     setDiscoverPageTilesSetting(this.discoverPageTiles);
     this.reloadForm();
   }
 
   async updateSearchPageTiles(value: unknown): Promise<void> {
-    this.searchPageTiles = this.normalizeStepperValue(
-      value,
-      1,
-      16,
-      this.searchPageTiles,
-    );
+    this.searchPageTiles = this.normalizeStepperValue(value, 1, 16, this.searchPageTiles);
     setSearchPageTilesSetting(this.searchPageTiles);
     this.reloadForm();
   }
@@ -1075,10 +994,7 @@ class MangaFiltersForm extends Form {
   }
 
   private formatFavoritesThreshold(): string {
-    if (
-      this.favoritesThreshold !== undefined &&
-      this.favoritesThresholdMax !== undefined
-    ) {
+    if (this.favoritesThreshold !== undefined && this.favoritesThresholdMax !== undefined) {
       return `${this.favoritesThreshold}-${this.favoritesThresholdMax}`;
     }
     if (this.favoritesThreshold !== undefined) {
@@ -1095,10 +1011,8 @@ class MangaFiltersForm extends Form {
     const newest = this.daysOldFilter?.newest;
     // Use formatRelativeDays for values >= 365 days (1 year)
     if (oldest !== undefined && newest !== undefined) {
-      const oldestStr =
-        oldest >= 365 ? formatRelativeDays(oldest) : `${oldest}d`;
-      const newestStr =
-        newest >= 365 ? formatRelativeDays(newest) : `${newest}d`;
+      const oldestStr = oldest >= 365 ? formatRelativeDays(oldest) : `${oldest}d`;
+      const newestStr = newest >= 365 ? formatRelativeDays(newest) : `${newest}d`;
       return `${oldestStr}<x<${newestStr}`;
     }
     if (oldest !== undefined) {
@@ -1136,9 +1050,7 @@ class MangaFiltersForm extends Form {
     }
 
     // Range: 7-30 or 1w-30d means between those values
-    const rangeMatch = trimmed.match(
-      new RegExp(`^(${numPat})\\s*-\\s*(${numPat})$`),
-    );
+    const rangeMatch = trimmed.match(new RegExp(`^(${numPat})\\s*-\\s*(${numPat})$`));
     if (rangeMatch) {
       const a = this.parseDaysValue(rangeMatch[1]);
       const b = this.parseDaysValue(rangeMatch[2]);
@@ -1146,28 +1058,20 @@ class MangaFiltersForm extends Form {
     }
 
     // Suffix: 30+ or 1y+ means that many days or more old (older)
-    const olderMatch = trimmed.match(
-      new RegExp(`^(${numPat})\\s*\\+$|^>=?(${numPat})$`),
-    );
-    if (olderMatch)
-      return { oldest: this.parseDaysValue(olderMatch[1] || olderMatch[2]) };
+    const olderMatch = trimmed.match(new RegExp(`^(${numPat})\\s*\\+$|^>=?(${numPat})$`));
+    if (olderMatch) return { oldest: this.parseDaysValue(olderMatch[1] || olderMatch[2]) };
 
     // Postfix >: 5000> means older than 5000 days
     const postfixOlderMatch = trimmed.match(new RegExp(`^(${numPat})\\s*>=?$`));
-    if (postfixOlderMatch)
-      return { oldest: this.parseDaysValue(postfixOlderMatch[1]) };
+    if (postfixOlderMatch) return { oldest: this.parseDaysValue(postfixOlderMatch[1]) };
 
     // Prefix: <7d means less than 7 days old (newer)
-    const newerMatch = trimmed.match(
-      new RegExp(`^(${numPat})\\s*-$|^<=?(${numPat})$`),
-    );
-    if (newerMatch)
-      return { newest: this.parseDaysValue(newerMatch[1] || newerMatch[2]) };
+    const newerMatch = trimmed.match(new RegExp(`^(${numPat})\\s*-$|^<=?(${numPat})$`));
+    if (newerMatch) return { newest: this.parseDaysValue(newerMatch[1] || newerMatch[2]) };
 
     // Postfix <: 5000< means newer than 5000 days
     const postfixNewerMatch = trimmed.match(new RegExp(`^(${numPat})\\s*<=?$`));
-    if (postfixNewerMatch)
-      return { newest: this.parseDaysValue(postfixNewerMatch[1]) };
+    if (postfixNewerMatch) return { newest: this.parseDaysValue(postfixNewerMatch[1]) };
 
     // Plain number or number+unit: treat as "newer than X days" (e.g. "7" or "7d" → newer than 7 days)
     const exactMatch = trimmed.match(new RegExp(`^(${numPat})$`));
@@ -1245,19 +1149,12 @@ class DiscoverOrderForm extends Form {
     setHiddenSections(this.hidden);
   }
 
-  private reorderListByIndices(
-    list: string[],
-    srcIndex: number,
-    destIndex: number,
-  ): string[] {
+  private reorderListByIndices(list: string[], srcIndex: number, destIndex: number): string[] {
     const length = list.length;
     if (length < 2) return list;
     const normalizedSrc = Math.trunc(Number(srcIndex));
     const normalizedDestInput = Math.trunc(Number(destIndex));
-    if (
-      !Number.isFinite(normalizedSrc) ||
-      !Number.isFinite(normalizedDestInput)
-    ) {
+    if (!Number.isFinite(normalizedSrc) || !Number.isFinite(normalizedDestInput)) {
       return list;
     }
     if (normalizedSrc < 0 || normalizedSrc >= length) return list;
@@ -1275,10 +1172,7 @@ class DiscoverOrderForm extends Form {
     return next;
   }
 
-  async rowDidReorderVisible(
-    srcIndex: number,
-    destIndex: number,
-  ): Promise<void> {
+  async rowDidReorderVisible(srcIndex: number, destIndex: number): Promise<void> {
     const visible = this.getVisibleIds();
     const hidden = this.getHiddenIds();
     const nextVisible = this.reorderListByIndices(visible, srcIndex, destIndex);
@@ -1292,10 +1186,7 @@ class DiscoverOrderForm extends Form {
     this.reloadForm();
   }
 
-  async rowDidReorderHidden(
-    srcIndex: number,
-    destIndex: number,
-  ): Promise<void> {
+  async rowDidReorderHidden(srcIndex: number, destIndex: number): Promise<void> {
     const visible = this.getVisibleIds();
     const hidden = this.getHiddenIds();
     const nextHidden = this.reorderListByIndices(hidden, srcIndex, destIndex);
@@ -1365,22 +1256,10 @@ class DiscoverOrderForm extends Form {
       })
       .filter((row): row is NonNullable<typeof row> => row !== undefined);
 
-    const visibleReorderSelectorId = Application.Selector(
-      this as any,
-      "rowDidReorderVisible",
-    );
-    const visibleDeletionSelectorId = Application.Selector(
-      this as any,
-      "rowDidDeleteVisible",
-    );
-    const hiddenReorderSelectorId = Application.Selector(
-      this as any,
-      "rowDidReorderHidden",
-    );
-    const hiddenDeletionSelectorId = Application.Selector(
-      this as any,
-      "rowDidDeleteHidden",
-    );
+    const visibleReorderSelectorId = Application.Selector(this as any, "rowDidReorderVisible");
+    const visibleDeletionSelectorId = Application.Selector(this as any, "rowDidDeleteVisible");
+    const hiddenReorderSelectorId = Application.Selector(this as any, "rowDidReorderHidden");
+    const hiddenDeletionSelectorId = Application.Selector(this as any, "rowDidDeleteHidden");
 
     return [
       EditSection("visibleOrdering", {

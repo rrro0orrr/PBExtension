@@ -1,17 +1,11 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright © 2026 Inkdex */
-import {
-  CloudflareError,
-  PaperbackInterceptor,
-  Request,
-  Response,
-} from "@paperback/types";
+import { CloudflareError, PaperbackInterceptor, Request, Response } from "@paperback/types";
 import { addDataReceived } from "./settings";
 import { parseRetryAfterMs } from "./utils/http";
 
 export class NHentaiInterceptor extends PaperbackInterceptor {
-  private cookieHeaderProvider: ((url: string) => string | undefined) | null =
-    null;
+  private cookieHeaderProvider: ((url: string) => string | undefined) | null = null;
   private cachedUserAgent: string | null = null;
   private imageThrottleChain: Promise<void> = Promise.resolve();
   private imageNextAllowedAt = 0;
@@ -29,9 +23,7 @@ export class NHentaiInterceptor extends PaperbackInterceptor {
   private readonly MAX_BACKOFF_MS = 2500;
   private readonly STRIKE_DECAY_MS = 45000;
 
-  setCookieHeaderProvider(
-    fn: ((url: string) => string | undefined) | null,
-  ): void {
+  setCookieHeaderProvider(fn: ((url: string) => string | undefined) | null): void {
     this.cookieHeaderProvider = fn;
   }
 
@@ -99,10 +91,7 @@ export class NHentaiInterceptor extends PaperbackInterceptor {
       const status = response.status;
       const now = Date.now();
 
-      if (
-        this.lastStrikeTime > 0 &&
-        now - this.lastStrikeTime > this.STRIKE_DECAY_MS
-      ) {
+      if (this.lastStrikeTime > 0 && now - this.lastStrikeTime > this.STRIKE_DECAY_MS) {
         this.rateLimitStrikeCount = Math.max(0, this.rateLimitStrikeCount - 1);
         if (this.rateLimitStrikeCount === 0) {
           this.rateLimitBackoffUntil = 0;
@@ -117,13 +106,8 @@ export class NHentaiInterceptor extends PaperbackInterceptor {
           this.MAX_BACKOFF_MS,
           retryAfterMs ?? 650 * 2 ** (this.rateLimitStrikeCount - 1),
         );
-        this.rateLimitBackoffUntil = Math.max(
-          this.rateLimitBackoffUntil,
-          now + cooldownMs,
-        );
-        console.log(
-          `[NHentai] CDN ${status} detected - applying ${cooldownMs}ms image cooldown`,
-        );
+        this.rateLimitBackoffUntil = Math.max(this.rateLimitBackoffUntil, now + cooldownMs);
+        console.log(`[NHentai] CDN ${status} detected - applying ${cooldownMs}ms image cooldown`);
       } else if (status >= 200 && status < 300) {
         this.rateLimitStrikeCount = Math.max(0, this.rateLimitStrikeCount - 1);
         if (this.rateLimitStrikeCount === 0) {
@@ -139,9 +123,7 @@ export class NHentaiInterceptor extends PaperbackInterceptor {
     return this.getFullSizeCdnImageMatch(url) !== null;
   }
 
-  private getFullSizeCdnImageMatch(
-    url: string,
-  ): { galleryId: string; pageNumber: number } | null {
+  private getFullSizeCdnImageMatch(url: string): { galleryId: string; pageNumber: number } | null {
     const match = url.match(
       /^https?:\/\/i\d*\.nhentai\.net\/galleries\/(\d+)\/(\d+)\.(?:jpg|jpeg|png|gif|webp)(?:\?|$)/i,
     );
@@ -201,8 +183,7 @@ export class NHentaiInterceptor extends PaperbackInterceptor {
       };
     }
 
-    const usedFastSlots =
-      this.galleryFastWindowCounts.get(match.galleryId) ?? 0;
+    const usedFastSlots = this.galleryFastWindowCounts.get(match.galleryId) ?? 0;
     this.galleryFastWindowCounts.set(match.galleryId, usedFastSlots + 1);
 
     if (usedFastSlots < this.FAST_WINDOW_IMAGE_COUNT) {
@@ -232,7 +213,6 @@ export class NHentaiInterceptor extends PaperbackInterceptor {
       release();
     }
   }
-
 
   private sleep(ms: number): Promise<void> {
     if (ms <= 0) {

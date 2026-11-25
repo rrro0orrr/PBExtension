@@ -96,9 +96,7 @@ export const LANGUAGE_OPTIONS: { id: string; label: string }[] = [
 export function getLanguageSetting(): string[] {
   const value = Application.getState(LANGUAGE_STATE_KEY);
   if (Array.isArray(value)) {
-    const langs = value.filter(
-      (v): v is string => typeof v === "string" && v.length > 0,
-    );
+    const langs = value.filter((v): v is string => typeof v === "string" && v.length > 0);
     return langs.length > 0 ? langs : ["all"];
   }
   if (typeof value === "string" && value) {

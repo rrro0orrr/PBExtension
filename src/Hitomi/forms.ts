@@ -143,24 +143,16 @@ function getSelectedOptionTitle(
 
 function _getLanguageSummary(values: string[]): string {
   if (values.includes("all")) return "All Languages";
-  return values
-    .map((id) => getSelectedOptionTitle(LANGUAGE_OPTIONS, id))
-    .join(", ");
+  return values.map((id) => getSelectedOptionTitle(LANGUAGE_OPTIONS, id)).join(", ");
 }
 
-function _getDateFormatDisplayValue(
-  dateFormat: string,
-  dateSeparator: string,
-): string {
-  const sep =
-    DATE_SEPARATOR_OPTIONS.find((s) => s.id === dateSeparator)?.char ?? ".";
+function _getDateFormatDisplayValue(dateFormat: string, dateSeparator: string): string {
+  const sep = DATE_SEPARATOR_OPTIONS.find((s) => s.id === dateSeparator)?.char ?? ".";
   return getDateExampleFor(dateFormat, sep);
 }
 
 function _getDateSeparatorDisplayValue(dateSeparator: string): string {
-  const option = DATE_SEPARATOR_OPTIONS.find(
-    (entry) => entry.id === dateSeparator,
-  );
+  const option = DATE_SEPARATOR_OPTIONS.find((entry) => entry.id === dateSeparator);
   return option ? `${option.id} (${option.char})` : dateSeparator;
 }
 
@@ -168,8 +160,7 @@ class _HitomiLanguageSettingsForm extends Form {
   private languageSetting = getLanguageSetting();
 
   async updateLanguage(value: string[]): Promise<void> {
-    const selected =
-      Array.isArray(value) && value.length > 0 ? value : this.languageSetting;
+    const selected = Array.isArray(value) && value.length > 0 ? value : this.languageSetting;
     this.languageSetting = selected as typeof this.languageSetting;
     setLanguageSetting(this.languageSetting);
     this.reloadForm();
@@ -199,8 +190,7 @@ class _HitomiImageFormatSettingsForm extends Form {
   private preferredImageFormat = getPreferredImageFormatSetting();
 
   async updatePreferredImageFormat(value: string[]): Promise<void> {
-    const selected =
-      (value?.[0] as "webp" | "avif") ?? this.preferredImageFormat;
+    const selected = (value?.[0] as "webp" | "avif") ?? this.preferredImageFormat;
     this.preferredImageFormat = selected;
     setPreferredImageFormatSetting(selected);
     this.reloadForm();
@@ -219,10 +209,7 @@ class _HitomiImageFormatSettingsForm extends Form {
           })),
           minItemCount: 1,
           maxItemCount: 1,
-          onValueChange: Application.Selector(
-            this as any,
-            "updatePreferredImageFormat",
-          ),
+          onValueChange: Application.Selector(this as any, "updatePreferredImageFormat"),
         }),
       ]),
     ];
@@ -236,8 +223,7 @@ function getDisplayOptionLabel(
   dateSeparator: string,
   removeSpaces: boolean,
 ): string {
-  const sep =
-    DATE_SEPARATOR_OPTIONS.find((s) => s.id === dateSeparator)?.char ?? ".";
+  const sep = DATE_SEPARATOR_OPTIONS.find((s) => s.id === dateSeparator)?.char ?? ".";
   const dateExample = getDateExampleFor(dateFormat, sep);
   const relativeExample = "9d"; // Example: 9 days ago
 
@@ -245,9 +231,7 @@ function getDisplayOptionLabel(
   const langEx = removeSpaces ? '("EN|")' : '("EN | ")';
   const pageEx = removeSpaces ? '("67p|")' : '("67p | ")';
   const dateEx = removeSpaces ? `("${dateExample}|")` : `("${dateExample} | ")`;
-  const relEx = removeSpaces
-    ? `("${relativeExample}|")`
-    : `("${relativeExample} | ")`;
+  const relEx = removeSpaces ? `("${relativeExample}|")` : `("${relativeExample} | ")`;
 
   const labels: Record<DisplayOptionId, string> = {
     hide_read: "Hide Read Manga",
@@ -282,8 +266,7 @@ export class HitomiSettingsForm extends Form {
   private _statisticsForm?: StatisticsForm;
 
   private getMangaFiltersForm(): MangaFiltersForm {
-    if (!this._mangaFiltersForm)
-      this._mangaFiltersForm = new MangaFiltersForm();
+    if (!this._mangaFiltersForm) this._mangaFiltersForm = new MangaFiltersForm();
     return this._mangaFiltersForm;
   }
 
@@ -302,17 +285,11 @@ export class HitomiSettingsForm extends Form {
     if (this.displayOptions.includes("show_page_count")) parts.push("67p");
     if (this.displayOptions.includes("subtitle_relative")) parts.push("5h");
     if (this.displayOptions.includes("subtitle_date")) {
-      const dateSep =
-        DATE_SEPARATOR_OPTIONS.find((s) => s.id === this.dateSeparator)?.char ??
-        ".";
+      const dateSep = DATE_SEPARATOR_OPTIONS.find((s) => s.id === this.dateSeparator)?.char ?? ".";
       parts.push(getDateExampleFor(this.dateFormat, dateSep));
     }
     const subtitleExample =
-      parts.length > 0
-        ? parts.join(sep)
-        : this.removeSpaces
-          ? "EN|67p"
-          : "EN | 67p";
+      parts.length > 0 ? parts.join(sep) : this.removeSpaces ? "EN|67p" : "EN | 67p";
 
     return [
       // Main settings section
@@ -323,8 +300,7 @@ export class HitomiSettingsForm extends Form {
         }),
         SelectRow("languageNav", {
           title:
-            this.languageSetting.length === 1 &&
-              this.languageSetting[0] !== "all"
+            this.languageSetting.length === 1 && this.languageSetting[0] !== "all"
               ? "Preferred Language"
               : "Preferred Languages",
           layout: "list",
@@ -354,10 +330,7 @@ export class HitomiSettingsForm extends Form {
               this.removeSpaces,
             ),
           })),
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDisplayOptions",
-          ),
+          onValueChange: Application.Selector(this as any, "updateDisplayOptions"),
           minItemCount: 0,
           maxItemCount: DISPLAY_OPTION_IDS.length,
         }),
@@ -369,28 +342,19 @@ export class HitomiSettingsForm extends Form {
             id: opt.id,
             title: opt.label,
           })),
-          onValueChange: Application.Selector(
-            this as any,
-            "updatePreferredImageFormat",
-          ),
+          onValueChange: Application.Selector(this as any, "updatePreferredImageFormat"),
           minItemCount: 1,
           maxItemCount: 1,
         }),
         ToggleRow("highQualityThumbnails", {
           title: "High Quality Thumbnails",
           value: this.thumbnailQuality === "high",
-          onValueChange: Application.Selector(
-            this as any,
-            "updateHighQualityThumbnails",
-          ),
+          onValueChange: Application.Selector(this as any, "updateHighQualityThumbnails"),
         }),
         ToggleRow("removeSpaces", {
           title: "Remove Spaces From Separators",
           value: this.removeSpaces,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateRemoveSpaces",
-          ),
+          onValueChange: Application.Selector(this as any, "updateRemoveSpaces"),
         }),
       ]),
       // Statistics section
@@ -406,9 +370,7 @@ export class HitomiSettingsForm extends Form {
           form: new DiscoverOrderForm(),
         }),
         NavigationRow("statisticsNav", {
-          title: getScreenTimeEnabledSetting()
-            ? "Statistics & Screen Time"
-            : "Statistics",
+          title: getScreenTimeEnabledSetting() ? "Statistics & Screen Time" : "Statistics",
           form: this.getStatisticsForm(),
         }),
       ]),
@@ -424,16 +386,11 @@ export class HitomiSettingsForm extends Form {
             title: "Date Format",
             layout: "list",
             value: [this.dateFormat],
-            options: getDateFormatOptionsWithSeparator(this.dateSeparator).map(
-              (opt) => ({
-                id: opt.id,
-                title: opt.label,
-              }),
-            ),
-            onValueChange: Application.Selector(
-              this as any,
-              "updateDateFormat",
-            ),
+            options: getDateFormatOptionsWithSeparator(this.dateSeparator).map((opt) => ({
+              id: opt.id,
+              title: opt.label,
+            })),
+            onValueChange: Application.Selector(this as any, "updateDateFormat"),
             minItemCount: 1,
             maxItemCount: 1,
           }),
@@ -441,16 +398,11 @@ export class HitomiSettingsForm extends Form {
             title: "Date Separator",
             layout: "list",
             value: [this.dateSeparator],
-            options: getDateSeparatorOptionsWithFormat(this.dateFormat).map(
-              (opt) => ({
-                id: opt.id,
-                title: opt.label,
-              }),
-            ),
-            onValueChange: Application.Selector(
-              this as any,
-              "updateDateSeparator",
-            ),
+            options: getDateSeparatorOptionsWithFormat(this.dateFormat).map((opt) => ({
+              id: opt.id,
+              title: opt.label,
+            })),
+            onValueChange: Application.Selector(this as any, "updateDateSeparator"),
             minItemCount: 1,
             maxItemCount: 1,
           }),
@@ -467,8 +419,7 @@ export class HitomiSettingsForm extends Form {
   }
 
   async updateLanguage(value: string[]) {
-    const selected =
-      Array.isArray(value) && value.length > 0 ? value : this.languageSetting;
+    const selected = Array.isArray(value) && value.length > 0 ? value : this.languageSetting;
     this.languageSetting = selected as typeof this.languageSetting;
     setLanguageSetting(this.languageSetting);
   }
@@ -479,8 +430,7 @@ export class HitomiSettingsForm extends Form {
   }
 
   async updatePreferredImageFormat(value: string[]) {
-    const selected =
-      (value?.[0] as "webp" | "avif") ?? this.preferredImageFormat;
+    const selected = (value?.[0] as "webp" | "avif") ?? this.preferredImageFormat;
     this.preferredImageFormat = selected;
     setPreferredImageFormatSetting(selected);
     this.reloadForm();
@@ -501,8 +451,7 @@ export class HitomiSettingsForm extends Form {
   }
 
   async updateDateSeparator(value: string[]) {
-    const selected =
-      (value?.[0] as typeof this.dateSeparator) ?? this.dateSeparator;
+    const selected = (value?.[0] as typeof this.dateSeparator) ?? this.dateSeparator;
     this.dateSeparator = selected;
     setDateSeparatorSetting(selected);
     this.reloadForm();
@@ -579,19 +528,12 @@ class DiscoverOrderForm extends Form {
     setHiddenSections(this.hidden);
   }
 
-  private reorderListByIndices(
-    list: string[],
-    srcIndex: number,
-    destIndex: number,
-  ): string[] {
+  private reorderListByIndices(list: string[], srcIndex: number, destIndex: number): string[] {
     const length = list.length;
     if (length < 2) return list;
     const normalizedSrc = Math.trunc(Number(srcIndex));
     const normalizedDestInput = Math.trunc(Number(destIndex));
-    if (
-      !Number.isFinite(normalizedSrc) ||
-      !Number.isFinite(normalizedDestInput)
-    ) {
+    if (!Number.isFinite(normalizedSrc) || !Number.isFinite(normalizedDestInput)) {
       return list;
     }
     if (normalizedSrc < 0 || normalizedSrc >= length) return list;
@@ -609,10 +551,7 @@ class DiscoverOrderForm extends Form {
     return next;
   }
 
-  async rowDidReorderVisible(
-    srcIndex: number,
-    destIndex: number,
-  ): Promise<void> {
+  async rowDidReorderVisible(srcIndex: number, destIndex: number): Promise<void> {
     const visible = this.getVisibleIds();
     const hidden = this.getHiddenIds();
     const nextVisible = this.reorderListByIndices(visible, srcIndex, destIndex);
@@ -626,10 +565,7 @@ class DiscoverOrderForm extends Form {
     this.reloadForm();
   }
 
-  async rowDidReorderHidden(
-    srcIndex: number,
-    destIndex: number,
-  ): Promise<void> {
+  async rowDidReorderHidden(srcIndex: number, destIndex: number): Promise<void> {
     const visible = this.getVisibleIds();
     const hidden = this.getHiddenIds();
     const nextHidden = this.reorderListByIndices(hidden, srcIndex, destIndex);
@@ -809,8 +745,7 @@ class MangaFiltersForm extends Form {
     max: number,
     fallback: number,
   ): number {
-    const normalized =
-      Array.isArray(value) && value.length > 0 ? (value[0] as unknown) : value;
+    const normalized = Array.isArray(value) && value.length > 0 ? (value[0] as unknown) : value;
     let parsed = NaN;
     if (typeof normalized === "number") {
       parsed = normalized;
@@ -833,10 +768,7 @@ class MangaFiltersForm extends Form {
           maxValue: 16,
           stepValue: 1,
           loopOver: false,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDiscoverCarouselTiles",
-          ),
+          onValueChange: Application.Selector(this as any, "updateDiscoverCarouselTiles"),
         }),
         StepperRow("discoverPageTiles", {
           title: "Tiles on Discover",
@@ -845,10 +777,7 @@ class MangaFiltersForm extends Form {
           maxValue: 48,
           stepValue: 1,
           loopOver: false,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateDiscoverPageTiles",
-          ),
+          onValueChange: Application.Selector(this as any, "updateDiscoverPageTiles"),
         }),
         StepperRow("searchPageTiles", {
           title: "Tiles on Search",
@@ -857,10 +786,7 @@ class MangaFiltersForm extends Form {
           maxValue: 48,
           stepValue: 1,
           loopOver: false,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateSearchPageTiles",
-          ),
+          onValueChange: Application.Selector(this as any, "updateSearchPageTiles"),
         }),
       ]),
       // Section 1: Tags, filters, and fuzzy toggle
@@ -871,23 +797,17 @@ class MangaFiltersForm extends Form {
             ? "Use 'uf!' for exact tag searches (e.g., 'uf!sole female, ana')."
             : "Use 'f!' for fuzzy searches (e.g., 'f!ana' matches 'anal birth', 'mana', 'anal').",
           value: this.fuzzySearchTags,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateFuzzySearchTags",
-          ),
+          onValueChange: Application.Selector(this as any, "updateFuzzySearchTags"),
         }),
         ...(!this.fuzzySearchTags
           ? [
-            ToggleRow("onlyFuzzyUnknown", {
-              title: "Fuzzy Search Unknown Tags",
-              subtitle: "Always Fuzzy Nonexistent Tags",
-              value: this.onlyFuzzyUnknown,
-              onValueChange: Application.Selector(
-                this as any,
-                "updateOnlyFuzzyUnknown",
-              ),
-            }),
-          ]
+              ToggleRow("onlyFuzzyUnknown", {
+                title: "Fuzzy Search Unknown Tags",
+                subtitle: "Always Fuzzy Nonexistent Tags",
+                value: this.onlyFuzzyUnknown,
+                onValueChange: Application.Selector(this as any, "updateOnlyFuzzyUnknown"),
+              }),
+            ]
           : []),
         InputRow("includeTags", {
           title: this.fuzzySearchTags
@@ -921,10 +841,7 @@ class MangaFiltersForm extends Form {
           title: "Hide Read Manga in Related",
           subtitle: "Applies To Related Manga Section",
           value: this.hideReadInRelated,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateHideReadInRelated",
-          ),
+          onValueChange: Application.Selector(this as any, "updateHideReadInRelated"),
         }),
         ToggleRow("hideRead", {
           title: "Hide Read Manga",
@@ -936,10 +853,7 @@ class MangaFiltersForm extends Form {
           title: "Mark As Read On Description",
           subtitle: "Mark Manga as Read When Viewing Their Description",
           value: this.markReadOnView,
-          onValueChange: Application.Selector(
-            this as any,
-            "updateMarkReadOnView",
-          ),
+          onValueChange: Application.Selector(this as any, "updateMarkReadOnView"),
         }),
       ]),
     ];
@@ -951,9 +865,7 @@ class MangaFiltersForm extends Form {
     this.includeTags = getIncludeTagsSetting();
     this.reloadForm();
     try {
-      (
-        globalThis as { __hitomiClearSearchCaches?: () => void }
-      ).__hitomiClearSearchCaches?.();
+      (globalThis as { __hitomiClearSearchCaches?: () => void }).__hitomiClearSearchCaches?.();
     } catch {
       /* ignore */
     }
@@ -965,9 +877,7 @@ class MangaFiltersForm extends Form {
     this.excludeTags = getExcludeTagsSetting();
     this.reloadForm();
     try {
-      (
-        globalThis as { __hitomiClearSearchCaches?: () => void }
-      ).__hitomiClearSearchCaches?.();
+      (globalThis as { __hitomiClearSearchCaches?: () => void }).__hitomiClearSearchCaches?.();
     } catch {
       /* ignore */
     }
@@ -992,23 +902,13 @@ class MangaFiltersForm extends Form {
   }
 
   async updateDiscoverPageTiles(value: unknown): Promise<void> {
-    this.discoverPageTiles = this.normalizeStepperValue(
-      value,
-      1,
-      48,
-      this.discoverPageTiles,
-    );
+    this.discoverPageTiles = this.normalizeStepperValue(value, 1, 48, this.discoverPageTiles);
     setDiscoverPageTilesSetting(this.discoverPageTiles);
     this.reloadForm();
   }
 
   async updateSearchPageTiles(value: unknown): Promise<void> {
-    this.searchPageTiles = this.normalizeStepperValue(
-      value,
-      1,
-      48,
-      this.searchPageTiles,
-    );
+    this.searchPageTiles = this.normalizeStepperValue(value, 1, 48, this.searchPageTiles);
     setSearchPageTilesSetting(this.searchPageTiles);
     this.reloadForm();
   }

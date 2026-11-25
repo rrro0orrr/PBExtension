@@ -12,9 +12,7 @@ export class HitomiError extends Error {
   constructor(code: HitomiErrorCode, ...values: string[]) {
     switch (code) {
       case HitomiErrorCode.INVALID_VALUE: {
-        super(
-          `${values[0]} must ${values.length === 1 ? "be valid" : values[1]}`,
-        );
+        super(`${values[0]} must ${values.length === 1 ? "be valid" : values[1]}`);
         this.name = "INVALID_VALUE";
         break;
       }

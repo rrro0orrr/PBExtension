@@ -28,7 +28,7 @@ export type DisplayOptionId =
   | "show_tag_counts"
   | "show_manga_id_in_description"
   | "show_reread_count"
-  | "show_tags_alpha"
+  | "show_tags_alpha";
 
 const LANGUAGE_STATE_KEY = "hitomi.settings.language";
 const HIDE_READ_STATE_KEY = "hitomi.settings.hideRead";
@@ -61,8 +61,7 @@ const ONLY_FUZZY_UNKNOWN_TAGS_KEY = "hitomi.onlyFuzzyUnknownTags";
 const ENABLE_REREAD_SECTION_KEY = "hitomi.settings.enableRereadSection";
 const DISCOVER_SECTION_ORDER_KEY = "hitomi.settings.discoverSectionOrder.v2";
 const DISCOVER_SECTION_HIDDEN_KEY = "hitomi.settings.discoverSectionHidden.v2";
-const DISCOVER_SECTION_ORDER_RESET_FLAG_KEY =
-  "hitomi.settings.discoverSectionOrder.reset.v2";
+const DISCOVER_SECTION_ORDER_RESET_FLAG_KEY = "hitomi.settings.discoverSectionOrder.reset.v2";
 const LEGACY_DISCOVER_SECTION_ORDER_KEYS = [
   "hitomi.settings.discoverSectionOrder",
   "hitomi.settings.discoverSectionOrder.v1",
@@ -94,8 +93,7 @@ const STATS_TRACKING_ENABLED_KEY = "hitomi.stats.trackingEnabled";
 const STATS_STREAK_GRACE_KEY = "hitomi.stats.streakGrace";
 const STATS_MARK_READ_ON_DESC_COUNT_KEY = "hitomi.stats.markReadOnDescCount";
 const STATS_REREAD_TIMESTAMPS_KEY = "hitomi.stats.rereadTimestamps";
-const STATS_SCREEN_TIME_SESSION_TIMESTAMPS_KEY =
-  "hitomi.stats.screenTimeSessionTimestamps";
+const STATS_SCREEN_TIME_SESSION_TIMESTAMPS_KEY = "hitomi.stats.screenTimeSessionTimestamps";
 const SCREEN_TIME_SESSION_COOLDOWN_MS = 60 * 1000; // 1 minute
 
 type ReadCountEntry = { count: number; title?: string; tags?: string[] };
@@ -107,8 +105,7 @@ type DataReceivedMap = Record<string, number>; // YYYY-MM-DD -> bytes
 const SEARCH_FILTER_LENGTH_KEY = "hitomi.searchFilter.length";
 const SEARCH_FILTER_DATE_KEY = "hitomi.searchFilter.date";
 const SEARCH_FILTER_TAGS_KEY = "hitomi.searchFilter.tags";
-const SEARCH_FILTER_MANGA_SYNCED_TAGS_KEY =
-  "hitomi.searchFilter.mangaSyncedTags";
+const SEARCH_FILTER_MANGA_SYNCED_TAGS_KEY = "hitomi.searchFilter.mangaSyncedTags";
 
 export const DEFAULT_MARK_READ_ON_VIEW = false;
 export const DEFAULT_MAX_PAGINATION = false;
@@ -118,15 +115,15 @@ export const LANGUAGE_OPTIONS: {
   label: string;
   token?: string;
 }[] = [
-    { id: "all", label: "All Languages" },
-    { id: "english", label: "English", token: "english" },
-    { id: "japanese", label: "Japanese", token: "japanese" },
-    { id: "korean", label: "Korean", token: "korean" },
-    { id: "chinese", label: "Chinese", token: "chinese" },
-    { id: "spanish", label: "Spanish", token: "spanish" },
-    { id: "thai", label: "Thai", token: "thai" },
-    { id: "vietnamese", label: "Vietnamese", token: "vietnamese" },
-  ];
+  { id: "all", label: "All Languages" },
+  { id: "english", label: "English", token: "english" },
+  { id: "japanese", label: "Japanese", token: "japanese" },
+  { id: "korean", label: "Korean", token: "korean" },
+  { id: "chinese", label: "Chinese", token: "chinese" },
+  { id: "spanish", label: "Spanish", token: "spanish" },
+  { id: "thai", label: "Thai", token: "thai" },
+  { id: "vietnamese", label: "Vietnamese", token: "vietnamese" },
+];
 
 // Helper to get current date example with separator
 function getCurrentDateExampleFull(format: string, char: string): string {
@@ -156,9 +153,8 @@ export function getDateFormatOptionsWithSeparator(
   separatorId?: DateSeparatorId,
 ): { id: string; label: string }[] {
   const sep =
-    DATE_SEPARATOR_OPTIONS.find(
-      (s) => s.id === (separatorId ?? getDateSeparatorSetting()),
-    )?.char ?? ".";
+    DATE_SEPARATOR_OPTIONS.find((s) => s.id === (separatorId ?? getDateSeparatorSetting()))?.char ??
+    ".";
   return [
     {
       id: "mm_dd_yy",
@@ -222,12 +218,12 @@ export const DATE_SEPARATOR_OPTIONS: {
   label: string;
   char: string;
 }[] = [
-    { id: "period", label: `${getCurrentDateExample(".")} - Period`, char: "." },
-    { id: "dash", label: `${getCurrentDateExample("-")} - Dash`, char: "-" },
-    { id: "slash", label: `${getCurrentDateExample("/")} - Slash`, char: "/" },
-    { id: "comma", label: `${getCurrentDateExample(",")} - Comma`, char: "," },
-    { id: "space", label: `${getCurrentDateExample(" ")} - Space`, char: " " },
-  ];
+  { id: "period", label: `${getCurrentDateExample(".")} - Period`, char: "." },
+  { id: "dash", label: `${getCurrentDateExample("-")} - Dash`, char: "-" },
+  { id: "slash", label: `${getCurrentDateExample("/")} - Slash`, char: "/" },
+  { id: "comma", label: `${getCurrentDateExample(",")} - Comma`, char: "," },
+  { id: "space", label: `${getCurrentDateExample(" ")} - Space`, char: " " },
+];
 
 export type ThumbnailQuality = "low" | "high";
 
@@ -235,9 +231,9 @@ export const THUMBNAIL_QUALITY_OPTIONS: {
   id: ThumbnailQuality;
   label: string;
 }[] = [
-    { id: "low", label: "Low" },
-    { id: "high", label: "High" },
-  ];
+  { id: "low", label: "Low" },
+  { id: "high", label: "High" },
+];
 
 export type PreferredImageFormat = "webp" | "avif";
 
@@ -245,9 +241,9 @@ export const PREFERRED_IMAGE_FORMAT_OPTIONS: {
   id: PreferredImageFormat;
   label: string;
 }[] = [
-    { id: "webp", label: "WebP (Lower Crash Risk)" },
-    { id: "avif", label: "AVIF (Higher Quality)" },
-  ];
+  { id: "webp", label: "WebP (Lower Crash Risk)" },
+  { id: "avif", label: "AVIF (Higher Quality)" },
+];
 
 export const DISPLAY_OPTION_VALUES: { id: DisplayOptionId; label: string }[] = [
   { id: "hide_read_letter", label: "Hide 'r' Read Indicator" },
@@ -262,7 +258,7 @@ export const DISPLAY_OPTION_VALUES: { id: DisplayOptionId; label: string }[] = [
   { id: "show_tags_in_desc", label: "Show Tags in Description" },
   { id: "show_tags_alpha", label: "Show Tags by Alphabet in Search" },
   { id: "show_tag_counts", label: "Show Tag Counts in Search Filters" },
-  { id: "abbreviate_tag_counts", label: 'Show Tag Count Abbreviations ("11k")', },
+  { id: "abbreviate_tag_counts", label: 'Show Tag Count Abbreviations ("11k")' },
   { id: "show_related_order", label: "Show Related Order ([1], [2], etc.)" },
   { id: "show_reread_count", label: "Show Reread Count Everywhere" },
 ];
@@ -283,31 +279,31 @@ export const HITOMI_SEARCH_SORT_OPTIONS: {
   id: HitomiSearchSortId;
   label: string;
 }[] = [
-    { id: "date_added", label: "Date Added" },
-    { id: "date_published", label: "Date Published" },
-    { id: "popular_today", label: "Popular Today" },
-    { id: "popular_week", label: "Popular Week" },
-    { id: "popular_month", label: "Popular Month" },
-    { id: "popular_year", label: "Popular Year" },
-    { id: "random", label: "Random" },
-    { id: "last_read", label: "Last Read" },
-    { id: "related", label: "Related" },
-    { id: "top_reread", label: "Top Reread" },
-  ];
+  { id: "date_added", label: "Date Added" },
+  { id: "date_published", label: "Date Published" },
+  { id: "popular_today", label: "Popular Today" },
+  { id: "popular_week", label: "Popular Week" },
+  { id: "popular_month", label: "Popular Month" },
+  { id: "popular_year", label: "Popular Year" },
+  { id: "random", label: "Random" },
+  { id: "last_read", label: "Last Read" },
+  { id: "related", label: "Related" },
+  { id: "top_reread", label: "Top Reread" },
+];
 
 export const DATE_FILTER_PRESETS: {
   id: string;
   label: string;
   days?: number;
 }[] = [
-    { id: "all", label: "All Time" },
-    { id: "30", label: "< 30 days", days: 30 },
-    { id: "90", label: "< 90 days", days: 90 },
-    { id: "180", label: "< 180 days", days: 180 },
-    { id: "365", label: "< 1 year", days: 365 },
-    { id: "730", label: "< 2 years", days: 730 },
-    { id: "1460", label: "< 4 years", days: 1460 },
-  ];
+  { id: "all", label: "All Time" },
+  { id: "30", label: "< 30 days", days: 30 },
+  { id: "90", label: "< 90 days", days: 90 },
+  { id: "180", label: "< 180 days", days: 180 },
+  { id: "365", label: "< 1 year", days: 365 },
+  { id: "730", label: "< 2 years", days: 730 },
+  { id: "1460", label: "< 4 years", days: 1460 },
+];
 
 export const DATE_FILTER_OPTIONS: { id: string; label: string }[] = [
   { id: "all", label: "All Time" },
@@ -369,9 +365,7 @@ export function getLanguageToken(id: LanguageId): string | undefined {
 }
 
 export function getHideReadSetting(): boolean {
-  const stored = Application.getState(HIDE_READ_STATE_KEY) as
-    | boolean
-    | undefined;
+  const stored = Application.getState(HIDE_READ_STATE_KEY) as boolean | undefined;
   return typeof stored === "boolean" ? stored : DEFAULT_HIDE_READ;
 }
 
@@ -381,8 +375,7 @@ export function setHideReadSetting(value: boolean) {
 
 export function getMarkReadOnViewSetting(): boolean {
   return (
-    (Application.getState(MARK_READ_ON_VIEW_STATE_KEY) as boolean) ??
-    DEFAULT_MARK_READ_ON_VIEW
+    (Application.getState(MARK_READ_ON_VIEW_STATE_KEY) as boolean) ?? DEFAULT_MARK_READ_ON_VIEW
   );
 }
 
@@ -394,9 +387,7 @@ let descMarkedReadIds: Set<string> | undefined;
 
 export function getDescMarkedReadIds(): Set<string> {
   if (!descMarkedReadIds) {
-    const stored = Application.getState(DESC_MARKED_READ_IDS_KEY) as
-      | string[]
-      | undefined;
+    const stored = Application.getState(DESC_MARKED_READ_IDS_KEY) as string[] | undefined;
     descMarkedReadIds = new Set(stored ?? []);
   }
   return descMarkedReadIds;
@@ -417,22 +408,14 @@ export function removeDescMarkedReadId(mangaId: string): void {
 }
 
 export function getMaxPaginationSetting(): boolean {
-  return (
-    (Application.getState(MAX_PAGINATION_STATE_KEY) as boolean) ??
-    DEFAULT_MAX_PAGINATION
-  );
+  return (Application.getState(MAX_PAGINATION_STATE_KEY) as boolean) ?? DEFAULT_MAX_PAGINATION;
 }
 
 export function setMaxPaginationSetting(value: boolean): void {
   Application.setState(value, MAX_PAGINATION_STATE_KEY);
 }
 
-function clampStepperValue(
-  value: unknown,
-  min: number,
-  max: number,
-  fallback: number,
-): number {
+function clampStepperValue(value: unknown, min: number, max: number, fallback: number): number {
   const normalized: unknown =
     Array.isArray(value) && value.length > 0 ? (value as unknown[])[0] : value;
   let parsed = NaN;
@@ -544,9 +527,7 @@ export function getSearchFilterTags(): Record<string, "included" | "excluded"> {
   return tags;
 }
 
-export function setSearchFilterTags(
-  value: Record<string, "included" | "excluded">,
-): void {
+export function setSearchFilterTags(value: Record<string, "included" | "excluded">): void {
   Application.setState(value, SEARCH_FILTER_TAGS_KEY);
 }
 
@@ -558,16 +539,12 @@ export function getExtraArgsSetting(): string {
     return buildTagArguments(includeRaw, excludeRaw);
   }
 
-  return (
-    (Application.getState(EXTRA_ARGS_STATE_KEY) as string) ?? DEFAULT_EXTRA_ARGS
-  );
+  return (Application.getState(EXTRA_ARGS_STATE_KEY) as string) ?? DEFAULT_EXTRA_ARGS;
 }
 
 export function setExtraArgsSetting(value: string) {
   // Replace smart quotes with regular quotes for consistency
-  let sanitized = value
-    .replace(/['\u2018\u2019]/g, "'")
-    .replace(/["\u201C\u201D]/g, '"');
+  let sanitized = value.replace(/['\u2018\u2019]/g, "'").replace(/["\u201C\u201D]/g, '"');
 
   // Auto-quote multi-word tags that aren't already quoted
   // This helps users who type "-big breasts" instead of "-\"big breasts\""
@@ -593,14 +570,10 @@ export function setExtraArgsSetting(value: string) {
 }
 
 export function getIncludeTagsSetting(): string {
-  const stored = Application.getState(INCLUDE_TAGS_STATE_KEY) as
-    | string
-    | undefined;
+  const stored = Application.getState(INCLUDE_TAGS_STATE_KEY) as string | undefined;
   if (typeof stored === "string") return stored;
 
-  const legacy = Application.getState(EXTRA_ARGS_STATE_KEY) as
-    | string
-    | undefined;
+  const legacy = Application.getState(EXTRA_ARGS_STATE_KEY) as string | undefined;
   if (legacy) {
     const { include } = splitLegacyExtraArgs(legacy);
     Application.setState(include, INCLUDE_TAGS_STATE_KEY);
@@ -613,22 +586,15 @@ export function getIncludeTagsSetting(): string {
 export function setIncludeTagsSetting(value: string) {
   const sanitized = sanitizeTagList(value, { exclude: false }).raw;
   Application.setState(sanitized, INCLUDE_TAGS_STATE_KEY);
-  Application.setState(
-    buildTagArguments(sanitized, getExcludeTagsSetting()),
-    EXTRA_ARGS_STATE_KEY,
-  );
+  Application.setState(buildTagArguments(sanitized, getExcludeTagsSetting()), EXTRA_ARGS_STATE_KEY);
   syncMangaFilterTagsToSearchFilterTags();
 }
 
 export function getExcludeTagsSetting(): string {
-  const stored = Application.getState(EXCLUDE_TAGS_STATE_KEY) as
-    | string
-    | undefined;
+  const stored = Application.getState(EXCLUDE_TAGS_STATE_KEY) as string | undefined;
   if (typeof stored === "string") return stored;
 
-  const legacy = Application.getState(EXTRA_ARGS_STATE_KEY) as
-    | string
-    | undefined;
+  const legacy = Application.getState(EXTRA_ARGS_STATE_KEY) as string | undefined;
   if (legacy) {
     const { exclude } = splitLegacyExtraArgs(legacy);
     Application.setState(exclude, EXCLUDE_TAGS_STATE_KEY);
@@ -641,10 +607,7 @@ export function getExcludeTagsSetting(): string {
 export function setExcludeTagsSetting(value: string) {
   const sanitized = sanitizeTagList(value, { exclude: false }).raw;
   Application.setState(sanitized, EXCLUDE_TAGS_STATE_KEY);
-  Application.setState(
-    buildTagArguments(getIncludeTagsSetting(), sanitized),
-    EXTRA_ARGS_STATE_KEY,
-  );
+  Application.setState(buildTagArguments(getIncludeTagsSetting(), sanitized), EXTRA_ARGS_STATE_KEY);
   syncMangaFilterTagsToSearchFilterTags();
 }
 
@@ -653,9 +616,7 @@ function syncMangaFilterTagsToSearchFilterTags(): void {
 }
 
 export function getPagesExpressionSetting(): string {
-  return (
-    (Application.getState(PAGES_EXPR_STATE_KEY) as string) ?? DEFAULT_PAGES_EXPR
-  );
+  return (Application.getState(PAGES_EXPR_STATE_KEY) as string) ?? DEFAULT_PAGES_EXPR;
 }
 
 export function sanitizePagesExpressionInput(value: string): string {
@@ -697,16 +658,11 @@ function canonicalizePagesExpressionInput(value: string): string {
 }
 
 export function setPagesExpressionSetting(value: string) {
-  Application.setState(
-    sanitizePagesExpressionInput(value),
-    PAGES_EXPR_STATE_KEY,
-  );
+  Application.setState(sanitizePagesExpressionInput(value), PAGES_EXPR_STATE_KEY);
 }
 
 export function getThumbnailQualitySetting(): ThumbnailQuality {
-  const stored = Application.getState(THUMBNAIL_QUALITY_KEY) as
-    | string
-    | undefined;
+  const stored = Application.getState(THUMBNAIL_QUALITY_KEY) as string | undefined;
   if (stored === "low" || stored === "high") return stored;
   return "high";
 }
@@ -738,11 +694,8 @@ export function setPromoteTagsSetting(value: boolean) {
 }
 
 export function getDateFormatSetting(): DateFormatId {
-  const value = Application.getState(DATE_FORMAT_STATE_KEY) as
-    | DateFormatId
-    | undefined;
-  if (value && DATE_FORMAT_OPTIONS.find((opt) => opt.id === value))
-    return value;
+  const value = Application.getState(DATE_FORMAT_STATE_KEY) as DateFormatId | undefined;
+  if (value && DATE_FORMAT_OPTIONS.find((opt) => opt.id === value)) return value;
   if (value && (value.includes("_") || value.includes("."))) {
     Application.setState(DEFAULT_DATE_FORMAT, DATE_FORMAT_STATE_KEY);
   }
@@ -761,10 +714,8 @@ export function getDaysOldFilterSetting(): DaysOldRange {
       | undefined;
 
     if (stored && typeof stored === "object") {
-      const oldest =
-        typeof stored.oldest === "number" ? stored.oldest : undefined;
-      const newest =
-        typeof stored.newest === "number" ? stored.newest : undefined;
+      const oldest = typeof stored.oldest === "number" ? stored.oldest : undefined;
+      const newest = typeof stored.newest === "number" ? stored.newest : undefined;
       const cleaned = { oldest, newest };
       Application.setState(cleaned, DATE_DAYS_STATE_KEY);
       return cleaned;
@@ -805,11 +756,8 @@ export function setDateFormatSetting(value: DateFormatId) {
 }
 
 export function getDateSeparatorSetting(): DateSeparatorId {
-  const value = Application.getState(DATE_SEPARATOR_STATE_KEY) as
-    | DateSeparatorId
-    | undefined;
-  if (value && DATE_SEPARATOR_OPTIONS.find((opt) => opt.id === value))
-    return value;
+  const value = Application.getState(DATE_SEPARATOR_STATE_KEY) as DateSeparatorId | undefined;
+  if (value && DATE_SEPARATOR_OPTIONS.find((opt) => opt.id === value)) return value;
   return DEFAULT_DATE_SEPARATOR;
 }
 
@@ -818,10 +766,7 @@ export function setDateSeparatorSetting(value: DateSeparatorId) {
 }
 
 export function getViewedHistory(): string[] {
-  return (
-    (Application.getState(VIEWED_HISTORY_STATE_KEY) as string[]) ??
-    DEFAULT_VIEWED_HISTORY
-  );
+  return (Application.getState(VIEWED_HISTORY_STATE_KEY) as string[]) ?? DEFAULT_VIEWED_HISTORY;
 }
 
 export function addToViewedHistory(id: string) {
@@ -839,9 +784,7 @@ export function resetViewedHistory() {
 }
 
 export function getDisplayOptionsSetting(): DisplayOptionId[] {
-  const stored = Application.getState(DISPLAY_OPTIONS_STATE_KEY) as
-    | DisplayOptionId[]
-    | undefined;
+  const stored = Application.getState(DISPLAY_OPTIONS_STATE_KEY) as DisplayOptionId[] | undefined;
 
   // Return defaults only if nothing was ever stored
   if (!Array.isArray(stored)) return [...DEFAULT_DISPLAY_OPTIONS];
@@ -889,9 +832,7 @@ export function getDefaultSearchSortSetting(): HitomiSearchSortId {
   const valid = new Set(HITOMI_SEARCH_SORT_OPTIONS.map((option) => option.id));
   const order = getDiscoverSectionOrder();
   const hidden = getHiddenSections();
-  const firstVisible = order.find(
-    (id) => !hidden.has(id) && valid.has(id as HitomiSearchSortId),
-  );
+  const firstVisible = order.find((id) => !hidden.has(id) && valid.has(id as HitomiSearchSortId));
   if (firstVisible) return firstVisible as HitomiSearchSortId;
   return "date_added";
 }
@@ -903,9 +844,7 @@ export function getPreferredImageFormatSetting(): PreferredImageFormat {
   return DEFAULT_PREFERRED_IMAGE_FORMAT;
 }
 
-export function setPreferredImageFormatSetting(
-  value: PreferredImageFormat,
-): void {
+export function setPreferredImageFormatSetting(value: PreferredImageFormat): void {
   Application.setState(value, PREFERRED_IMAGE_FORMAT_STATE_KEY);
 }
 
@@ -925,28 +864,16 @@ export function resetHitomiSettings() {
   Application.setState(DEFAULT_DATE_SEPARATOR, DATE_SEPARATOR_STATE_KEY);
   Application.setState([...DEFAULT_DISPLAY_OPTIONS], DISPLAY_OPTIONS_STATE_KEY);
   Application.setState(DEFAULT_ENABLE_RELATED, ENABLE_RELATED_STATE_KEY);
-  Application.setState(
-    DEFAULT_PREFERRED_IMAGE_FORMAT,
-    PREFERRED_IMAGE_FORMAT_STATE_KEY,
-  );
+  Application.setState(DEFAULT_PREFERRED_IMAGE_FORMAT, PREFERRED_IMAGE_FORMAT_STATE_KEY);
   Application.setState(DEFAULT_INCOGNITO, INCOGNITO_STATE_KEY);
   Application.setState(false, FUZZY_SEARCH_TAGS_KEY);
   Application.setState(true, ONLY_FUZZY_UNKNOWN_TAGS_KEY);
-  Application.setState(
-    DEFAULT_REMOVE_SEPARATOR_SPACES,
-    REMOVE_SEPARATOR_SPACES_STATE_KEY,
-  );
+  Application.setState(DEFAULT_REMOVE_SEPARATOR_SPACES, REMOVE_SEPARATOR_SPACES_STATE_KEY);
   Application.setState(DEFAULT_MARK_READ_ON_VIEW, MARK_READ_ON_VIEW_STATE_KEY);
   Application.setState({}, DATE_DAYS_STATE_KEY);
-  Application.setState(
-    DEFAULT_HIDE_READ_IN_RELATED,
-    HIDE_READ_IN_RELATED_STATE_KEY,
-  );
+  Application.setState(DEFAULT_HIDE_READ_IN_RELATED, HIDE_READ_IN_RELATED_STATE_KEY);
   Application.setState(true, ENABLE_REREAD_SECTION_KEY);
-  Application.setState(
-    DEFAULT_DISCOVER_CAROUSEL_TILES,
-    DISCOVER_CAROUSEL_TILES_KEY,
-  );
+  Application.setState(DEFAULT_DISCOVER_CAROUSEL_TILES, DISCOVER_CAROUSEL_TILES_KEY);
   Application.setState(DEFAULT_DISCOVER_PAGE_TILES, DISCOVER_PAGE_TILES_KEY);
   Application.setState(DEFAULT_SEARCH_PAGE_TILES, SEARCH_PAGE_TILES_KEY);
   // Discover section order & visibility
@@ -966,9 +893,8 @@ export function formatDateByPattern(
   separatorId?: DateSeparatorId,
 ): string {
   const separator =
-    DATE_SEPARATOR_OPTIONS.find(
-      (opt) => opt.id === (separatorId ?? getDateSeparatorSetting()),
-    )?.char ?? ".";
+    DATE_SEPARATOR_OPTIONS.find((opt) => opt.id === (separatorId ?? getDateSeparatorSetting()))
+      ?.char ?? ".";
 
   let format = `mm${separator}dd${separator}yy`;
   switch (patternId) {
@@ -1138,10 +1064,7 @@ export function parsePagesExpression(value: string): {
   return {};
 }
 
-export function applyCheckboxValue(
-  state: { value: string[] },
-  fallback: boolean,
-): boolean {
+export function applyCheckboxValue(state: { value: string[] }, fallback: boolean): boolean {
   const selected = state.value?.[0];
   if (selected === "on") return true;
   if (selected === "off") return false;
@@ -1185,9 +1108,7 @@ function sanitizeTagList(
   raw: string,
   options: { exclude?: boolean } = {},
 ): { tokens: string[]; raw: string } {
-  const cleaned = raw
-    .replace(/['\u2018\u2019]/g, "'")
-    .replace(/["\u201C\u201D]/g, '"');
+  const cleaned = raw.replace(/['\u2018\u2019]/g, "'").replace(/["\u201C\u201D]/g, '"');
 
   const parts = cleaned
     .split(/[,\n]/)
@@ -1221,8 +1142,7 @@ function sanitizeTagList(
           }
 
           // Quote multi-word tags for proper parsing
-          const shouldQuote =
-            normalized.includes(" ") && !/^".*"$/.test(normalized);
+          const shouldQuote = normalized.includes(" ") && !/^".*"$/.test(normalized);
           return `${prefix}${shouldQuote ? `"${normalized}"` : normalized}`;
         });
         return `${options.exclude ? "-" : ""}${processed.join(" OR ")}`;
@@ -1246,8 +1166,7 @@ function sanitizeTagList(
         }
 
         // Quote multi-word tags for proper parsing
-        const shouldQuote =
-          normalized.includes(" ") && !/^".*"$/.test(normalized);
+        const shouldQuote = normalized.includes(" ") && !/^".*"$/.test(normalized);
         const finalTag = `${prefix}${shouldQuote ? `"${normalized}"` : normalized}`;
         return `${options.exclude ? "-" : ""}${finalTag}`;
       }
@@ -1263,11 +1182,8 @@ function hasSplitTagSettingsState(): boolean {
   );
 }
 
-function convertMangaFilterTokenToSearchFilterId(
-  token: string,
-): string | undefined {
-  if (!token || token.startsWith("-") || /\s+OR\s+/i.test(token))
-    return undefined;
+function convertMangaFilterTokenToSearchFilterId(token: string): string | undefined {
+  if (!token || token.startsWith("-") || /\s+OR\s+/i.test(token)) return undefined;
 
   let normalized = token.trim();
   const prefixMatch = normalized.match(
@@ -1295,9 +1211,7 @@ function buildTagArguments(include: string, exclude: string): string {
   const includeTokens = sanitizeTagList(include, { exclude: false }).tokens;
   const excludeTokens = sanitizeTagList(exclude, { exclude: true }).tokens;
   // Use comma separator to match parseTagsFromQuery which splits by comma
-  return [...includeTokens, ...excludeTokens.map((token) => `-${token}`)]
-    .join(", ")
-    .trim();
+  return [...includeTokens, ...excludeTokens.map((token) => `-${token}`)].join(", ").trim();
 }
 
 function splitLegacyExtraArgs(value: string): {
@@ -1337,49 +1251,32 @@ export interface RateLimiterSettings {
 }
 
 export function getRateLimiterSettings(): RateLimiterSettings {
-  const storedRps = Application.getState(DEV_REQUESTS_PER_SECOND_KEY) as
-    | number
-    | undefined;
-  const storedBuffer = Application.getState(DEV_BUFFER_INTERVAL_KEY) as
-    | number
-    | undefined;
+  const storedRps = Application.getState(DEV_REQUESTS_PER_SECOND_KEY) as number | undefined;
+  const storedBuffer = Application.getState(DEV_BUFFER_INTERVAL_KEY) as number | undefined;
   // Guard against stale low persisted settings which can serialize gallery
   // detail requests to ~1/sec and make sections appear stalled.
   const requestsPerSecond = Math.max(
     DEFAULT_REQUESTS_PER_SECOND,
-    Number.isFinite(storedRps)
-      ? (storedRps as number)
-      : DEFAULT_REQUESTS_PER_SECOND,
+    Number.isFinite(storedRps) ? (storedRps as number) : DEFAULT_REQUESTS_PER_SECOND,
   );
   const bufferInterval = Number.isFinite(storedBuffer)
     ? Math.max(0, Math.min(10, storedBuffer as number))
     : DEFAULT_BUFFER_INTERVAL;
-  const timeout =
-    (Application.getState(DEV_TIMEOUT_KEY) as number) ?? DEFAULT_TIMEOUT;
-  const ggTtl =
-    (Application.getState(DEV_GG_TTL_KEY) as number) ?? DEFAULT_GG_TTL;
+  const timeout = (Application.getState(DEV_TIMEOUT_KEY) as number) ?? DEFAULT_TIMEOUT;
+  const ggTtl = (Application.getState(DEV_GG_TTL_KEY) as number) ?? DEFAULT_GG_TTL;
   return { requestsPerSecond, bufferInterval, timeout, ggTtl };
 }
 
 export function setRequestsPerSecond(value: number): void {
-  Application.setState(
-    Math.max(1, Math.min(200, value)),
-    DEV_REQUESTS_PER_SECOND_KEY,
-  );
+  Application.setState(Math.max(1, Math.min(200, value)), DEV_REQUESTS_PER_SECOND_KEY);
 }
 
 export function setBufferInterval(value: number): void {
-  Application.setState(
-    Math.max(0, Math.min(10, value)),
-    DEV_BUFFER_INTERVAL_KEY,
-  );
+  Application.setState(Math.max(0, Math.min(10, value)), DEV_BUFFER_INTERVAL_KEY);
 }
 
 export function setRequestTimeout(value: number): void {
-  Application.setState(
-    Math.max(5000, Math.min(120000, value)),
-    DEV_TIMEOUT_KEY,
-  );
+  Application.setState(Math.max(5000, Math.min(120000, value)), DEV_TIMEOUT_KEY);
 }
 
 export function setGgTtl(value: number): void {
@@ -1387,10 +1284,7 @@ export function setGgTtl(value: number): void {
 }
 
 export function resetRateLimiterSettings(): void {
-  Application.setState(
-    DEFAULT_REQUESTS_PER_SECOND,
-    DEV_REQUESTS_PER_SECOND_KEY,
-  );
+  Application.setState(DEFAULT_REQUESTS_PER_SECOND, DEV_REQUESTS_PER_SECOND_KEY);
   Application.setState(DEFAULT_BUFFER_INTERVAL, DEV_BUFFER_INTERVAL_KEY);
   Application.setState(DEFAULT_TIMEOUT, DEV_TIMEOUT_KEY);
   Application.setState(DEFAULT_GG_TTL, DEV_GG_TTL_KEY);
@@ -1399,10 +1293,7 @@ export function resetRateLimiterSettings(): void {
 // ── Fuzzy Search Settings ──────────────────────────────────────────
 
 export function getFuzzySearchTagsSetting(): boolean {
-  return (
-    (Application.getState(FUZZY_SEARCH_TAGS_KEY) as boolean | undefined) ??
-    false
-  );
+  return (Application.getState(FUZZY_SEARCH_TAGS_KEY) as boolean | undefined) ?? false;
 }
 
 export function setFuzzySearchTagsSetting(value: boolean): void {
@@ -1410,11 +1301,7 @@ export function setFuzzySearchTagsSetting(value: boolean): void {
 }
 
 export function getOnlyFuzzyUnknownTagsSetting(): boolean {
-  return (
-    (Application.getState(ONLY_FUZZY_UNKNOWN_TAGS_KEY) as
-      | boolean
-      | undefined) ?? true
-  );
+  return (Application.getState(ONLY_FUZZY_UNKNOWN_TAGS_KEY) as boolean | undefined) ?? true;
 }
 
 export function setOnlyFuzzyUnknownTagsSetting(value: boolean): void {
@@ -1485,18 +1372,13 @@ export function incrementDisplayedManga(mangaId?: string): void {
   if (isNew) {
     ids.add(mangaId);
     persistDisplayedIds(ids);
-    Application.setState(
-      getDisplayedDistinctTotal() + 1,
-      STATS_DISPLAYED_TOTAL_DISTINCT_KEY,
-    );
+    Application.setState(getDisplayedDistinctTotal() + 1, STATS_DISPLAYED_TOTAL_DISTINCT_KEY);
   }
   Application.setState(getDisplayedDistinctTotal(), STATS_DISPLAYED_DISTINCT_KEY);
 }
 
 function getDisplayedIds(): Set<string> {
-  const raw = Application.getState(STATS_DISPLAYED_IDS_KEY) as
-    | string[]
-    | undefined;
+  const raw = Application.getState(STATS_DISPLAYED_IDS_KEY) as string[] | undefined;
   if (Array.isArray(raw)) return new Set(raw);
   return new Set();
 }
@@ -1523,11 +1405,7 @@ export function getDistinctDisplayedMangaCount(): number {
 }
 
 export function getReadingSessions(): ReadingSession[] {
-  return (
-    (Application.getState(STATS_SESSIONS_KEY) as
-      | ReadingSession[]
-      | undefined) ?? []
-  );
+  return (Application.getState(STATS_SESSIONS_KEY) as ReadingSession[] | undefined) ?? [];
 }
 
 function toLocalDateKey(date: Date): string {
@@ -1538,9 +1416,9 @@ let screenTimeSessionTimestamps: Map<string, number> | undefined;
 
 function getScreenTimeSessionTimestamps(): Map<string, number> {
   if (!screenTimeSessionTimestamps) {
-    const raw = Application.getState(
-      STATS_SCREEN_TIME_SESSION_TIMESTAMPS_KEY,
-    ) as Record<string, unknown> | undefined;
+    const raw = Application.getState(STATS_SCREEN_TIME_SESSION_TIMESTAMPS_KEY) as
+      | Record<string, unknown>
+      | undefined;
     screenTimeSessionTimestamps = new Map<string, number>();
     if (raw && typeof raw === "object") {
       for (const [id, ts] of Object.entries(raw)) {
@@ -1595,9 +1473,7 @@ export function recordReadingSession(sessionId?: string): void {
 // -- Streak Grace --
 
 export function getStreakGraceDays(): number {
-  return (
-    (Application.getState(STATS_STREAK_GRACE_KEY) as number | undefined) ?? 0
-  );
+  return (Application.getState(STATS_STREAK_GRACE_KEY) as number | undefined) ?? 0;
 }
 
 export function setStreakGraceDays(days: number): void {
@@ -1606,9 +1482,7 @@ export function setStreakGraceDays(days: number): void {
 
 export function getPageCounts(): Record<string, number> {
   const raw =
-    (Application.getState(STATS_PAGE_COUNTS_KEY) as
-      | Record<string, unknown>
-      | undefined) ?? {};
+    (Application.getState(STATS_PAGE_COUNTS_KEY) as Record<string, unknown> | undefined) ?? {};
   const normalized: Record<string, number> = {};
   for (const [bucket, value] of Object.entries(raw)) {
     const numeric = Number(value ?? 0);
@@ -1636,9 +1510,7 @@ export function recordPageCount(pages: number): void {
 
 export function getTagCounts(): Record<string, number> {
   const raw =
-    (Application.getState(STATS_TAG_COUNTS_KEY) as
-      | Record<string, unknown>
-      | undefined) ?? {};
+    (Application.getState(STATS_TAG_COUNTS_KEY) as Record<string, unknown> | undefined) ?? {};
   const normalized: Record<string, number> = {};
   for (const [tag, value] of Object.entries(raw)) {
     const numeric = Number(value ?? 0);
@@ -1670,9 +1542,7 @@ export function getTotalMangaRead(): number {
   if (typeof val === "boolean") return val ? 1 : 0;
   if (typeof val === "string") return parseInt(val, 10) || 0;
   // Never been set – fallback to read history array length
-  const readHistory = Application.getState("hitomi.readHistory") as
-    | string[]
-    | undefined;
+  const readHistory = Application.getState("hitomi.readHistory") as string[] | undefined;
   return Array.isArray(readHistory) ? readHistory.length : 0;
 }
 
@@ -1688,16 +1558,11 @@ export function getMarkReadOnDescCount(): number {
 
 export function incrementMarkReadOnDescCount(): void {
   if (!getStatsTrackingEnabledSetting()) return;
-  Application.setState(
-    getMarkReadOnDescCount() + 1,
-    STATS_MARK_READ_ON_DESC_COUNT_KEY,
-  );
+  Application.setState(getMarkReadOnDescCount() + 1, STATS_MARK_READ_ON_DESC_COUNT_KEY);
 }
 
 function getReadCountMap(): ReadCountMap {
-  const raw = Application.getState(STATS_READ_COUNT_MAP_KEY) as
-    | ReadCountMap
-    | undefined;
+  const raw = Application.getState(STATS_READ_COUNT_MAP_KEY) as ReadCountMap | undefined;
   if (raw && typeof raw === "object") return { ...raw };
   return {};
 }
@@ -1857,9 +1722,7 @@ export function getRereadStats(): {
     }
   }
 
-  const top = topSource.sort(
-    (a, b) => b.count - a.count || a.mangaId.localeCompare(b.mangaId),
-  );
+  const top = topSource.sort((a, b) => b.count - a.count || a.mangaId.localeCompare(b.mangaId));
 
   return { totalRereads, totalMangaReread, top };
 }
@@ -1877,9 +1740,7 @@ export function getAllRereadManga(): {
       results.push({ mangaId: id, title: entry.title, count: entry.count });
     }
   }
-  return results.sort(
-    (a, b) => b.count - a.count || a.mangaId.localeCompare(b.mangaId),
-  );
+  return results.sort((a, b) => b.count - a.count || a.mangaId.localeCompare(b.mangaId));
 }
 
 export function getRereadCount(mangaId: string): number {
@@ -1902,9 +1763,7 @@ export function getDataReceived(): number {
 }
 
 function getDataReceivedMap(): DataReceivedMap {
-  const raw = Application.getState(STATS_DATA_RECEIVED_DAILY_KEY) as
-    | DataReceivedMap
-    | undefined;
+  const raw = Application.getState(STATS_DATA_RECEIVED_DAILY_KEY) as DataReceivedMap | undefined;
   if (raw && typeof raw === "object") return { ...raw };
   return {};
 }
@@ -1920,9 +1779,7 @@ function persistDataReceivedMap(map: DataReceivedMap): void {
   cutoff.setDate(cutoff.getDate() - 90);
   const cutoffKey = toLocalStatsDateKey(cutoff);
   const trimmed: DataReceivedMap = {};
-  for (const [date, bytes] of Object.entries(map).sort(([a], [b]) =>
-    a.localeCompare(b),
-  )) {
+  for (const [date, bytes] of Object.entries(map).sort(([a], [b]) => a.localeCompare(b))) {
     if (date >= cutoffKey && Number.isFinite(bytes) && bytes > 0) {
       trimmed[date] = bytes;
     }
@@ -1952,9 +1809,7 @@ export function recordScreenTime(minutes: number): void {
 }
 
 export function getScreenTimeMap(): ScreenTimeMap {
-  const raw = Application.getState(STATS_SCREEN_TIME_KEY) as
-    | ScreenTimeMap
-    | undefined;
+  const raw = Application.getState(STATS_SCREEN_TIME_KEY) as ScreenTimeMap | undefined;
   if (raw && typeof raw === "object") return { ...raw };
   return {};
 }
@@ -2064,9 +1919,7 @@ const SCREEN_TIME_MODE_KEY = "hitomi.stats.screenTimeMode";
 const SCREEN_TIME_WEEK_OFFSET_KEY = "hitomi.stats.screenTimeWeekOffset";
 
 export function getScreenTimeEnabledSetting(): boolean {
-  const value = Application.getState(STATS_SCREEN_TIME_ENABLED_KEY) as
-    | boolean
-    | undefined;
+  const value = Application.getState(STATS_SCREEN_TIME_ENABLED_KEY) as boolean | undefined;
   return value !== false;
 }
 
@@ -2075,9 +1928,7 @@ export function setScreenTimeEnabledSetting(enabled: boolean): void {
 }
 
 export function getStatsTrackingEnabledSetting(): boolean {
-  const value = Application.getState(STATS_TRACKING_ENABLED_KEY) as
-    | boolean
-    | undefined;
+  const value = Application.getState(STATS_TRACKING_ENABLED_KEY) as boolean | undefined;
   return value !== false;
 }
 
@@ -2102,10 +1953,7 @@ export function getScreenTimeWeekOffset(): number {
 }
 
 export function setScreenTimeWeekOffset(offset: number): void {
-  Application.setState(
-    Math.max(0, Math.floor(offset)),
-    SCREEN_TIME_WEEK_OFFSET_KEY,
-  );
+  Application.setState(Math.max(0, Math.floor(offset)), SCREEN_TIME_WEEK_OFFSET_KEY);
 }
 
 // ── Tag Display Limit ──────────────────────────────────────────────
@@ -2117,11 +1965,7 @@ const REREAD_DISPLAY_LIMIT_KEY = "hitomi.stats.rereadDisplayLimit";
 const REREAD_DISPLAY_STEPS = [75, 50, 25, 15, 10, 5, 3, 1];
 
 export function getTagDisplayLimit(): number {
-  const raw = Application.getState(TAG_DISPLAY_LIMIT_KEY) as
-    | number
-    | string
-    | boolean
-    | undefined;
+  const raw = Application.getState(TAG_DISPLAY_LIMIT_KEY) as number | string | boolean | undefined;
   const val = Number(raw);
   if (Number.isFinite(val) && val > 0) return Math.max(1, Math.trunc(val));
   return 75;
@@ -2147,10 +1991,7 @@ export function getRereadDisplayLimit(): number {
 }
 
 export function setRereadDisplayLimit(limit: number): void {
-  Application.setState(
-    Math.max(1, Math.trunc(limit)),
-    REREAD_DISPLAY_LIMIT_KEY,
-  );
+  Application.setState(Math.max(1, Math.trunc(limit)), REREAD_DISPLAY_LIMIT_KEY);
 }
 
 export function getRereadDisplaySteps(): number[] {
@@ -2353,9 +2194,9 @@ export const ALL_DISCOVER_SECTIONS: DiscoverSectionDef[] = [
 export const DEFAULT_SECTION_ORDER = ALL_DISCOVER_SECTIONS.map((s) => s.id);
 
 function ensureDiscoverSectionOrderingReset(): void {
-  const hasReset = Application.getState(
-    DISCOVER_SECTION_ORDER_RESET_FLAG_KEY,
-  ) as boolean | undefined;
+  const hasReset = Application.getState(DISCOVER_SECTION_ORDER_RESET_FLAG_KEY) as
+    | boolean
+    | undefined;
   if (hasReset) return;
 
   for (const key of LEGACY_DISCOVER_SECTION_ORDER_KEYS) {
@@ -2369,11 +2210,8 @@ function ensureDiscoverSectionOrderingReset(): void {
 
 export function getDiscoverSectionOrder(): string[] {
   ensureDiscoverSectionOrderingReset();
-  const stored = Application.getState(DISCOVER_SECTION_ORDER_KEY) as
-    | string[]
-    | undefined;
-  if (!Array.isArray(stored) || stored.length === 0)
-    return [...DEFAULT_SECTION_ORDER];
+  const stored = Application.getState(DISCOVER_SECTION_ORDER_KEY) as string[] | undefined;
+  if (!Array.isArray(stored) || stored.length === 0) return [...DEFAULT_SECTION_ORDER];
   const knownIds = new Set(ALL_DISCOVER_SECTIONS.map((s) => s.id));
   const valid = stored.filter((id) => knownIds.has(id));
   for (const def of ALL_DISCOVER_SECTIONS) {
@@ -2388,9 +2226,7 @@ export function setDiscoverSectionOrder(order: string[]): void {
 
 export function getHiddenSections(): Set<string> {
   ensureDiscoverSectionOrderingReset();
-  const stored = Application.getState(DISCOVER_SECTION_HIDDEN_KEY) as
-    | string[]
-    | undefined;
+  const stored = Application.getState(DISCOVER_SECTION_HIDDEN_KEY) as string[] | undefined;
   return new Set(Array.isArray(stored) ? stored : []);
 }
 

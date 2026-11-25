@@ -402,6 +402,7 @@ export class MangaballExtension implements MangaballImplementation {
           } catch {
             latestChapter = String(raw.last_chapter)
               .replace(/<[^>]*>?/gm, "")
+              .replace(/[<>]/g, "")
               .trim();
           }
         }

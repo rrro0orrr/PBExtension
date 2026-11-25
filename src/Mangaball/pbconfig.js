@@ -1,0 +1,25 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* Copyright © 2026 Inkdex */
+import { ContentRating, SourceIntents } from "@paperback/types";
+export default {
+    name: "Mangaball",
+    description: "Extension that pulls content from mangaball.net.",
+    version: "1.1",
+    icon: "icon.png",
+    language: "multi",
+    contentRating: ContentRating.ADULT,
+    capabilities: [
+        SourceIntents.CHAPTER_PROVIDING,
+        SourceIntents.DISCOVER_SECTION_PROVIDING,
+        SourceIntents.SEARCH_RESULT_PROVIDING,
+        SourceIntents.CLOUDFLARE_BYPASS_PROVIDING,
+        SourceIntents.SETTINGS_FORM_PROVIDING,
+    ],
+    badges: [],
+    developers: [
+        {
+            name: "Karrot",
+            github: "https://github.com/karrot0",
+        },
+    ],
+};

@@ -2244,7 +2244,10 @@ export class HitomiExtension implements ExtensionImpl<typeof hitomiInfo> {
         >();
         while ((match = regex.exec(html)) !== null) {
           const rawRef = decodeURIComponent(match[1]);
-          const displayText = match[2].replace(/<[^>]+>/g, "").trim();
+          const displayText = match[2]
+            .replace(/<[^>]+>/g, "")
+            .replace(/[<>]/g, "")
+            .trim();
           const cleaned = cleanTagName(rawRef);
           const slug = normalizeTagSlug(cleaned);
           if (!slug) continue;

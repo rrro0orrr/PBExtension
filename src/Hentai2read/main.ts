@@ -441,7 +441,8 @@ function stripHtml(html: string): string {
     html
       .replace(/<br\s*\/?>/gi, "\n")
       .replace(/<\/p>/gi, "\n\n")
-      .replace(/<[^>]+>/g, ""),
+      .replace(/<[^>]+>/g, "")
+      .replace(/[<>]/g, ""),
   ).trim();
 }
 

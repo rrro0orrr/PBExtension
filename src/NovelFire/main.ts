@@ -542,7 +542,9 @@ export class NovelFireExtension implements NovelFireImplementation {
     )?.[1];
 
     const target = (fromMeta ?? fromScript)?.replace(/\\\//g, "/");
-    if (!target || target.startsWith("#") || target.startsWith("javascript:")) return undefined;
+    if (!target || target.startsWith("#") || /^\s*(?:javascript|data|vbscript):/i.test(target)) {
+      return undefined;
+    }
     if (/^https?:\/\//i.test(target)) return target;
 
     const origin = currentUrl.match(/^(https?:\/\/[^/]+)/i)?.[1] ?? baseUrl;

@@ -271,11 +271,22 @@ export class HentaiCosplayExtension implements HentaiCosplayImplementation {
 
   async fetchCheerio(request: Request): Promise<CheerioAPI> {
     const [response, data] = await Application.scheduleRequest(request);
-    await this.checkResponseError(request, response);
-    return cheerio.load(Application.arrayBufferToUTF8String(data));
+    const html = Application.arrayBufferToUTF8String(data);
+    await this.checkResponseError(request, response, html);
+    return cheerio.load(html);
   }
 
-  async checkResponseError(request: Request, response: Response): Promise<void> {
+  async checkResponseError(request: Request, response: Response, html: string): Promise<void> {
+    // Challenge pages are not always served with a 403/503 status
+    if (
+      response.headers?.["cf-mitigated"] === "challenge" ||
+      /<title>\s*Just a moment|_cf_chl_opt|cf-chl-/i.test(html)
+    ) {
+      throw new CloudflareError(
+        { url: `${HC_DOMAIN}/`, method: "GET" },
+        "Cloudflare detected!\nPlease do the Cloudflare bypass to continue!",
+      );
+    }
     switch (response.status) {
       case 403:
       case 503:

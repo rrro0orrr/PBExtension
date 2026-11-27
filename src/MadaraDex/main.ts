@@ -3,6 +3,8 @@ import {
   ChapterDetails,
   CloudflareError,
   ContentRating,
+  Cookie,
+  CookieStorageInterceptor,
   DiscoverSection,
   DiscoverSectionItem,
   Metadata,
@@ -10,6 +12,7 @@ import {
   SearchQuery,
   SearchResultItem,
   SortingOption,
+  Response,
   SourceManga,
   TagSection,
 } from "@paperback/types";
@@ -17,6 +20,39 @@ import { CheerioAPI } from "cheerio";
 
 import { MadaraSearchMeta } from "../utils/madara/forms";
 import { MadaraExtension, PLACEHOLDER_COVER } from "../utils/madara/template";
+
+/** How long a madaradex.org session cookie is kept when the site gives none. */
+const SESSION_COOKIE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Paperback's cookie store forgets session cookies (no expiry) on restart.
+ * The access MadaraDex grants after its verification check can be tied to
+ * such a cookie, which would make the reader verify again after every app
+ * restart. Keep madaradex.org session cookies for up to 30 days instead, like
+ * a browser that restores its session. The site still decides whether they
+ * are valid; anything it rejects just leads back to the verification prompt.
+ */
+export class MadaraDexCookieStore extends CookieStorageInterceptor {
+  private persist(cookie: Cookie): Cookie {
+    if (cookie.expires || !/(^|\.)madaradex\.org$/i.test(cookie.domain.replace(/^\./, ""))) {
+      return cookie;
+    }
+    return { ...cookie, expires: new Date(Date.now() + SESSION_COOKIE_TTL_MS) };
+  }
+
+  override setCookie(cookie: Cookie): void {
+    super.setCookie(this.persist(cookie));
+  }
+
+  override async interceptResponse(
+    request: Parameters<CookieStorageInterceptor["interceptResponse"]>[0],
+    response: Response,
+    data: ArrayBuffer,
+  ): Promise<ArrayBuffer> {
+    const cookies = (response.cookies ?? []).map((c) => this.persist(c));
+    return super.interceptResponse(request, { ...response, cookies }, data);
+  }
+}
 
 /**
  * MadaraDex replaced its Madara theme with a custom "madaradex-reader" theme
@@ -40,6 +76,7 @@ export class MadaraDexExtension extends MadaraExtension {
       contentRating: ContentRating.MATURE,
       langCode: "🇬🇧",
     });
+    this.cookieStorageInterceptor = new MadaraDexCookieStore({ storage: "stateManager" });
   }
 
   /** Safety cap on chapter-list pages followed per series (80 chapters each). */
@@ -341,27 +378,69 @@ export class MadaraDexExtension extends MadaraExtension {
 
   /**
    * cdn.madaradex.org only serves chapter images once the site has granted
-   * access, which needs a Cloudflare Turnstile check passed in a real browser
-   * (the site's `mdx_image_auth_refresh` flow). The extension does not solve
-   * that check. Instead, if the first page is refused, throw a CloudflareError
-   * for the chapter page: Paperback then offers its web view, the reader taps
-   * through the check on the real site, and cloudflareBypassCompleted stores
-   * the cookies the site sets so the images load.
+   * access to that chapter. The site's own reader first asks for the grant
+   * without a CAPTCHA (`mdx_image_auth_refresh` with the chapter's claim), and
+   * the server only demands a Cloudflare Turnstile check when it does not
+   * already trust the session. Do the same:
+   *   1. If the first page is refused, request the grant with an empty
+   *      Turnstile token, exactly as the site's script does first.
+   *   2. If the server still wants verification, throw a CloudflareError for
+   *      the chapter page. Paperback then offers its web view, the reader
+   *      passes the check on the real site, and cloudflareBypassCompleted
+   *      stores the cookies it sets.
+   * The extension never solves the Turnstile check itself.
    */
   override async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
     const details = await super.getChapterDetails(chapter);
     const first = "pages" in details ? details.pages[0] : undefined;
     if (!first || !/^https?:\/\/cdn\.madaradex\.org\//i.test(first)) return details;
+    if (await this.imageAllowed(first)) return details;
 
-    const [response] = await Application.scheduleRequest({ url: first, method: "GET" });
-    if (response.status === 401 || response.status === 403) {
-      throw new CloudflareError({
-        url: await this.chapterPageUrl(chapter),
-        method: "GET",
-        headers: { "user-agent": await Application.getDefaultUserAgent() },
-      });
+    const chapterUrl = await this.chapterPageUrl(chapter);
+    if ((await this.requestImageGrant(chapterUrl)) && (await this.imageAllowed(first))) {
+      return details;
     }
-    return details;
+    throw new CloudflareError({
+      url: chapterUrl,
+      method: "GET",
+      headers: { "user-agent": await Application.getDefaultUserAgent() },
+    });
+  }
+
+  private async imageAllowed(url: string): Promise<boolean> {
+    const [response] = await Application.scheduleRequest({ url, method: "GET" });
+    return response.status !== 401 && response.status !== 403;
+  }
+
+  /** Ask for this chapter's image grant without a Turnstile token. */
+  private async requestImageGrant(chapterUrl: string): Promise<boolean> {
+    try {
+      const $ = await this.fetchCheerio({ url: chapterUrl, method: "GET" });
+      const claim = $("img[data-mdx-chapter-claim]").first().attr("data-mdx-chapter-claim");
+      if (!claim) return false;
+      const body = [
+        ["action", "mdx_image_auth_refresh"],
+        ["chapter_claim", claim],
+        ["chapter_challenge", ""],
+        ["cf-turnstile-response", ""],
+        ["manual_verification", "0"],
+      ]
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join("&");
+      const [response, data] = await Application.scheduleRequest({
+        url: `${this.baseUrl}/wp-admin/admin-ajax.php`,
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body,
+      });
+      if (response.status >= 400) return false;
+      const result = JSON.parse(Application.arrayBufferToUTF8String(data)) as {
+        success?: boolean;
+      };
+      return result.success === true;
+    } catch {
+      return false;
+    }
   }
 
   private async chapterPageUrl(chapter: Chapter): Promise<string> {

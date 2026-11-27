@@ -2,6 +2,7 @@ import { type Chapter, type TestLogger } from "@paperback/types";
 import { expect } from "chai";
 
 import { applyChapterVersions, cleanTitle, MangaDistrictExtension } from "../MangaDistrict/main.js";
+import { type MadaraSearchForm } from "../utils/madara/forms.js";
 import { TestSuite } from "./suite.js";
 
 // Fixtures trimmed from live mangadistrict.com markup.
@@ -151,6 +152,30 @@ export async function runTests(logger: TestLogger) {
       expect(second.metadata).to.equal(undefined);
     },
   );
+
+  suite.test("filter form offers genres and sends them as genre[]", async () => {
+    const extension = new MangaDistrictExtension();
+    const form = (await extension.getAdvancedSearchForm({ title: "" })) as MadaraSearchForm;
+    const ids = form.getSections().map((s) => s.id);
+    expect(ids).to.include("genres");
+
+    await form.updateGenres(["romance", "school-life"]);
+    await form.updateGenreCondition(["1"]);
+    await form.updateStatus(["upcoming"]);
+    const metadata = form.getSearchQueryMetadata();
+    expect(metadata.searchMeta.genres).to.deep.equal(["romance", "school-life"]);
+
+    const urls = respond(() => listing(LAST_PAGE));
+    await extension.getSearchResults({ title: "", metadata }, undefined, undefined);
+    expect(urls[0]).to.contain("genre[]=romance&genre[]=school-life");
+    expect(urls[0]).to.contain("status[]=upcoming");
+    expect(urls[0]).to.contain("op=1");
+
+    // Unknown genres in saved metadata are dropped, not sent.
+    const bad = { searchMeta: { ...metadata.searchMeta, genres: ["../x"] } };
+    await extension.getSearchResults({ title: "", metadata: bad }, undefined, undefined);
+    expect(urls[1]).to.not.contain("genre[]");
+  });
 
   suite.test("details parse the series page", async () => {
     respond(() => details);

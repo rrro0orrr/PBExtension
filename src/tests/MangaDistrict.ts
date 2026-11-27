@@ -169,6 +169,27 @@ export async function runTests(logger: TestLogger) {
     );
   });
 
+  suite.test("Inkdex library entries (WP post ids) resolve to the series slug", async () => {
+    // Inkdex's MangaDistrict shares this source id and stores the post id;
+    // mangadistrict.com redirects /?p=<id> to the canonical /series/<slug>/.
+    const urls = respond((url) =>
+      url.includes("?p=")
+        ? '<link rel="canonical" href="https://mangadistrict.com/series/moby-dick-official/">'
+        : details,
+    );
+    const extension = new MangaDistrictExtension();
+    const manga = await extension.getMangaDetails("326799");
+    expect(manga.mangaId).to.equal("326799");
+    expect(manga.mangaInfo.primaryTitle).to.equal("Moby Dick (Official)");
+    const chapters = await extension.getChapters(manga);
+    expect(chapters[0].chapterId).to.equal("chapter-35");
+    expect(urls).to.deep.equal([
+      "https://mangadistrict.com/?p=326799",
+      "https://mangadistrict.com/series/moby-dick-official",
+      "https://mangadistrict.com/series/moby-dick-official",
+    ]);
+  });
+
   suite.test("inline chapter list keeps every version, labelled", async () => {
     const urls = respond(() => details);
     const extension = new MangaDistrictExtension();

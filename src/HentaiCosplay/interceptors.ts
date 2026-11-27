@@ -7,8 +7,9 @@ export class Interceptor extends PaperbackInterceptor {
     request.headers = {
       ...request.headers,
       referer: `${HC_DOMAIN}/`,
-      // The site serves a broken mobile layout to iPhone user agents
-      "user-agent": (await Application.getDefaultUserAgent()).replace(/iPhone/i, "iPad"),
+      // Must match the UA of the Cloudflare bypass web view exactly:
+      // cf_clearance is bound to it, so a rewritten UA gets challenged again.
+      "user-agent": await Application.getDefaultUserAgent(),
     };
     request.url = request.url.replace(/^http:/, "https:");
     return request;

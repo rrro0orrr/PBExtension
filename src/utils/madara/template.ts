@@ -47,7 +47,7 @@ import { getBaseUrlOverride, MadaraSettingsForm } from "./settings";
 // rather than an external image, so it can never 404/402/expire the way a
 // hosted placeholder can (the previous imageshack URL started returning
 // "402 Bandwidth Limit Exceeded", breaking every cover-less manga).
-const PLACEHOLDER_COVER =
+export const PLACEHOLDER_COVER =
   "data:image/svg+xml;base64," +
   "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAi" +
   "IGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgMzAwIDQ1MCI+PHJlY3Qgd2lkdGg9IjMw" +
@@ -1402,7 +1402,10 @@ export class MadaraExtension implements MadaraImplementation {
 
   protected imageFromElement(img: Cheerio<AnyNode>): string {
     if (!img || img.length === 0) return "";
-    let src = img.attr("data-src") || img.attr("data-lazy-src") || "";
+    // `data-mdx-protected-src`: MadaraDex reader images carry their real URL
+    // only in this attribute (its page JS copies it to `src` once verified).
+    let src =
+      img.attr("data-src") || img.attr("data-lazy-src") || img.attr("data-mdx-protected-src") || "";
 
     if (!src) {
       const srcset = img.attr("srcset");

@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "Manga District",
   description: "Extension that pulls content from mangadistrict.com",
-  version: "1.0.1",
+  version: "1.0.2",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.MATURE,

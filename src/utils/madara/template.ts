@@ -29,6 +29,7 @@ import {
   SortingOption,
   SourceManga,
   TagSection,
+  type Tag,
 } from "@paperback/types";
 import * as cheerio from "cheerio";
 import { CheerioAPI, Cheerio } from "cheerio";
@@ -102,6 +103,8 @@ export interface MadaraConfig {
   discoverItemSelector?: string;
   /** Anchor selector for search list items (upstream `searchMangaUrlSelector`). */
   searchMangaUrlSelector?: string;
+  /** The site's advanced-search `genre[]` options. Omit for no genre picker. */
+  searchGenres?: Tag[];
   /** Chapter `<li>` selector (upstream `chapterListSelector`). */
   chapterListSelector?: string;
   /** Suffix appended to a chapter URL. Default `?style=list`; set `""` to drop. */
@@ -288,6 +291,7 @@ export class MadaraExtension implements MadaraImplementation {
   readonly popularMangaUrlSelector: string;
   readonly discoverItemSelector: string;
   readonly searchMangaUrlSelector: string;
+  readonly searchGenres: Tag[];
   readonly chapterListSelector: string;
   readonly chapterUrlSuffix: string;
   readonly pageListSelector: string;
@@ -333,6 +337,7 @@ export class MadaraExtension implements MadaraImplementation {
     this.popularMangaUrlSelector = config.popularMangaUrlSelector ?? "div.post-title a";
     this.discoverItemSelector = config.discoverItemSelector ?? "div.page-item-detail, .manga__item";
     this.searchMangaUrlSelector = config.searchMangaUrlSelector ?? "div.post-title a";
+    this.searchGenres = config.searchGenres ?? [];
     this.chapterListSelector = config.chapterListSelector ?? "li.wp-manga-chapter";
     this.chapterUrlSuffix = config.chapterUrlSuffix ?? "?style=list";
     this.nextPageSelector =
@@ -510,7 +515,7 @@ export class MadaraExtension implements MadaraImplementation {
 
   async getAdvancedSearchForm(query: SearchQuery<Metadata>): Promise<AdvancedSearchForm> {
     const meta = query.metadata as { searchMeta?: MadaraSearchMeta } | undefined;
-    return new MadaraSearchForm(meta?.searchMeta);
+    return new MadaraSearchForm(meta?.searchMeta, this.searchGenres);
   }
 
   async getDiscoverSectionItems(
@@ -680,6 +685,7 @@ export class MadaraExtension implements MadaraImplementation {
         searchMeta.artist ||
         searchMeta.release ||
         (searchMeta.status && searchMeta.status.length > 0) ||
+        (searchMeta.genres && searchMeta.genres.length > 0) ||
         (searchMeta.orderBy && searchMeta.orderBy.length > 0 && searchMeta.orderBy[0] !== "") ||
         (searchMeta.adult && searchMeta.adult.length > 0 && searchMeta.adult[0] !== "") ||
         (searchMeta.genreCondition &&
@@ -724,6 +730,12 @@ export class MadaraExtension implements MadaraImplementation {
         }
         if (searchMeta.status && searchMeta.status.length > 0) {
           builder.addQuery("status", searchMeta.status);
+        }
+        const genres = (searchMeta.genres ?? []).filter((g) =>
+          this.searchGenres.some((o) => o.id === g),
+        );
+        if (genres.length > 0) {
+          builder.addQuery("genre", genres);
         }
         if (searchMeta.adult && searchMeta.adult.length > 0 && searchMeta.adult[0] !== "") {
           builder.addQuery("adult", searchMeta.adult[0]);

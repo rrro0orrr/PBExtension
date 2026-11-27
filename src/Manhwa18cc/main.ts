@@ -1,4 +1,5 @@
 import {
+  AdvancedSearchForm,
   BasicRateLimiter,
   Chapter,
   ChapterDetails,
@@ -29,7 +30,13 @@ import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
 import * as htmlparser2 from "htmlparser2";
 
-import { hideRaw, Manhwa18SettingsForm } from "./forms";
+import {
+  GENRES,
+  hideRaw,
+  Manhwa18SearchForm,
+  Manhwa18SettingsForm,
+  type Manhwa18SearchMetadata,
+} from "./forms";
 import { DOMAIN, isManhwa18Url, Manhwa18Interceptor } from "./interceptors";
 
 // Manhwa18.cc runs a custom "YiiMadara" theme (keiyoushi/extensions-source,
@@ -133,6 +140,10 @@ export class Manhwa18ccExtension implements Manhwa18Implementation {
     return SORT_OPTIONS;
   }
 
+  async getAdvancedSearchForm(query: SearchQuery<Metadata>): Promise<AdvancedSearchForm> {
+    return new Manhwa18SearchForm(searchMetaOf(query));
+  }
+
   async getSearchResults(
     query: SearchQuery<Metadata>,
     metadata: ListingMetadata | undefined,
@@ -160,9 +171,11 @@ export class Manhwa18ccExtension implements Manhwa18Implementation {
       first = `${DOMAIN}/search?q=${encodeURIComponent(title)}`;
     } else {
       const sort = sortingOption?.id ?? "";
-      first = sort
-        ? `${DOMAIN}/webtoons?orderby=${encodeURIComponent(sort)}`
+      const genre = searchMetaOf(query).genre;
+      const base = genre
+        ? `${DOMAIN}/webtoon-genre/${encodeURIComponent(genre)}`
         : `${DOMAIN}/webtoons`;
+      first = sort ? `${base}?orderby=${encodeURIComponent(sort)}` : base;
     }
     const { cards, next } = await this.fetchListing(metadata?.next ?? first);
     return {
@@ -439,3 +452,9 @@ export function parsePages($: CheerioAPI): string[] {
 }
 
 export const Manhwa18cc = new Manhwa18ccExtension();
+
+function searchMetaOf(query: SearchQuery<Metadata>): Manhwa18SearchMetadata {
+  const meta = (query.metadata as { searchMeta?: Manhwa18SearchMetadata } | undefined)?.searchMeta;
+  // Only accept genres we know, so stale or tampered metadata can't build odd URLs.
+  return meta?.genre && GENRES.some((g) => g.id === meta.genre) ? { genre: meta.genre } : {};
+}

@@ -1,6 +1,7 @@
 import { type TestLogger } from "@paperback/types";
 import { expect } from "chai";
 
+import { type Manhwa18SearchForm } from "../Manhwa18cc/forms.js";
 import { isRawTitle, Manhwa18ccExtension, parseDate } from "../Manhwa18cc/main.js";
 import { TestSuite } from "./suite.js";
 
@@ -140,6 +141,32 @@ export async function runTests(logger: TestLogger) {
       label: "Rating",
     });
     expect(urls[0]).to.equal("https://manhwa18.cc/webtoons?orderby=rating");
+  });
+
+  suite.test("advanced search form exists and its genre browses that genre", async () => {
+    const ext = new Manhwa18ccExtension();
+    const form = await ext.getAdvancedSearchForm({ title: "" });
+    expect(form.getSections()).to.have.length.greaterThan(0);
+    await (form as Manhwa18SearchForm).onGenreChange(["school-life"]);
+    const metadata = form.getSearchQueryMetadata();
+    expect(metadata).to.deep.equal({ searchMeta: { genre: "school-life" } });
+
+    const urls = respond(() => listing([]));
+    await ext.getSearchResults({ title: "", metadata }, undefined, {
+      id: "rating",
+      label: "Rating",
+    });
+    await ext.getSearchResults({ title: "", metadata }, undefined, undefined);
+    await ext.getSearchResults(
+      { title: "", metadata: { searchMeta: { genre: "../evil" } } },
+      undefined,
+      undefined,
+    );
+    expect(urls).to.deep.equal([
+      "https://manhwa18.cc/webtoon-genre/school-life?orderby=rating",
+      "https://manhwa18.cc/webtoon-genre/school-life",
+      "https://manhwa18.cc/webtoons",
+    ]);
   });
 
   suite.test("details parse the series page", async () => {

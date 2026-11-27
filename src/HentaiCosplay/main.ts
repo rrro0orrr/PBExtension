@@ -160,7 +160,7 @@ export class HentaiCosplayExtension implements HentaiCosplayImplementation {
       method: "GET",
     });
 
-    const items: DiscoverSectionItem[] = this.parseGalleryList($).map((item) => ({
+    const items: DiscoverSectionItem[] = this.parseGalleryList($, page).map((item) => ({
       type: "simpleCarouselItem",
       mangaId: item.mangaId,
       imageUrl: item.imageUrl,
@@ -229,7 +229,7 @@ export class HentaiCosplayExtension implements HentaiCosplayImplementation {
       url: pagedUrl(path, page),
       method: "GET",
     });
-    const items = this.parseGalleryList($);
+    const items = this.parseGalleryList($, page, !title && !tag);
 
     return {
       items,
@@ -280,7 +280,9 @@ export class HentaiCosplayExtension implements HentaiCosplayImplementation {
     // Challenge pages are not always served with a 403/503 status
     if (
       response.headers?.["cf-mitigated"] === "challenge" ||
-      /<title>\s*Just a moment|_cf_chl_opt|cf-chl-/i.test(html)
+      /<title>\s*(?:Just a moment|Attention Required)|_cf_chl_opt|cf-chl-|challenges\.cloudflare\.com\/turnstile/i.test(
+        html,
+      )
     ) {
       throw new CloudflareError(
         { url: `${HC_DOMAIN}/`, method: "GET" },
@@ -301,7 +303,9 @@ export class HentaiCosplayExtension implements HentaiCosplayImplementation {
     }
   }
 
-  parseGalleryList($: CheerioAPI): SearchResultItem[] {
+  // `expectItems`: an empty first page means the site sent something we
+  // can't read, so surface it instead of silently showing nothing.
+  parseGalleryList($: CheerioAPI, page = 1, expectItems = true): SearchResultItem[] {
     const results: SearchResultItem[] = [];
     const seen = new Set<string>();
 
@@ -311,7 +315,7 @@ export class HentaiCosplayExtension implements HentaiCosplayImplementation {
       const match = href.match(/\/image\/([^/?#]+)/);
       const id = match?.[1];
       if (!id || seen.has(id)) continue;
-      if (/^https?:\/\//.test(href) && !href.startsWith(HC_DOMAIN)) continue;
+      if (!isSiteUrl(href)) continue;
 
       const title = $("p.image-list-item-title > a", item).text().trim();
       if (!title) continue;
@@ -327,6 +331,34 @@ export class HentaiCosplayExtension implements HentaiCosplayImplementation {
         title: decode(title),
         subtitle: subtitle ? decode(subtitle) : undefined,
       });
+    }
+
+    // Fallback for a layout without the usual list markup: any gallery link
+    // wrapping a thumbnail.
+    if (!results.length) {
+      for (const link of $('a[href*="/image/"]:has(img)').toArray()) {
+        const href = $(link).attr("href") ?? "";
+        const id = href.match(/\/image\/([^/?#]+)/)?.[1];
+        if (!id || seen.has(id) || !isSiteUrl(href)) continue;
+        const img = $("img", link).first();
+        const title = (img.attr("alt") ?? $(link).attr("title") ?? "").trim();
+        if (!title) continue;
+        const image = img.attr("data-original") ?? img.attr("data-src") ?? img.attr("src") ?? "";
+        seen.add(id);
+        results.push({
+          mangaId: id,
+          imageUrl: image.includes("loading.gif") ? "" : image,
+          title: decode(title),
+        });
+      }
+    }
+
+    if (!results.length && expectItems && page === 1) {
+      const pageTitle = $("title").first().text().trim().slice(0, 100) || "(no title)";
+      const size = $.html().length;
+      throw new Error(
+        `HentaiCosplay: no galleries found on the page.\nPage title: "${pageTitle}" (${size} bytes)`,
+      );
     }
 
     return results;
@@ -348,6 +380,13 @@ function pagedUrl(path: string, page: number): string {
 
 function decode(str: string): string {
   return Application.decodeHTMLEntities(str);
+}
+
+// Relative links and any *.hentai-cosplay-xxx.com host (language subdomains)
+// belong to the site; other absolute URLs are partner sites.
+function isSiteUrl(href: string): boolean {
+  if (!/^(?:https?:)?\/\//i.test(href)) return true;
+  return /^(?:https?:)?\/\/(?:[a-z0-9-]+\.)*hentai-cosplay-xxx\.com(?:[/?#]|$)/i.test(href);
 }
 
 function idFromUrl(url: string): string {

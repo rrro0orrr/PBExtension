@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "HentaiCosplay",
   description: "Extension that pulls content from hentai-cosplay-xxx.com",
-  version: "1.2.1",
+  version: "1.2.2",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.ADULT,

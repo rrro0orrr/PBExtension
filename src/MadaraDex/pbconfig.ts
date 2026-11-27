@@ -3,7 +3,7 @@ import { ContentRating, ExtensionInfo, SourceIntents } from "@paperback/types";
 export default {
   name: "MadaraDex",
   description: "Extension that pulls content from madaradex.org",
-  version: "1.1.1",
+  version: "1.1.2",
   icon: "icon.png",
   language: "en",
   contentRating: ContentRating.MATURE,

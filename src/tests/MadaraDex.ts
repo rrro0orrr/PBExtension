@@ -1,7 +1,7 @@
 import { CloudflareError, type TestLogger } from "@paperback/types";
 import { expect } from "chai";
 
-import { MadaraDexExtension } from "../MadaraDex/main.js";
+import { MadaraDexCookieStore, MadaraDexExtension } from "../MadaraDex/main.js";
 import { TestSuite } from "./suite.js";
 
 // Trimmed from the live madaradex.org "madaradex-reader" theme markup.
@@ -176,6 +176,83 @@ export async function runTests(logger: TestLogger) {
       .catch((e: unknown) => e);
     expect(error).to.be.instanceOf(CloudflareError);
     expect(JSON.stringify(error)).to.include("https://madaradex.org/title/some-title/chapter-126/");
+  });
+
+  suite.test("a refused image first asks for the grant without a CAPTCHA", async () => {
+    let granted = false;
+    let grantBody = "";
+    Application.scheduleRequest = async ({ url, method, body }) => {
+      let status = 200;
+      let text = `<div class="reading-content"><div class="page-break"><img class="wp-manga-chapter-img" data-mdx-protected-src="https://cdn.madaradex.org/manga_x/chapter-126/0.webp" data-mdx-chapter-claim="/manga_x/chapter-126/|tok"></div></div>`;
+      if (url.startsWith("https://cdn.madaradex.org/")) status = granted ? 200 : 403;
+      if (url.endsWith("/wp-admin/admin-ajax.php") && method === "POST") {
+        grantBody = typeof body === "string" ? body : "";
+        granted = true;
+        text = '{"success":true,"data":{"scheme":6,"expiresAt":9999999999}}';
+      }
+      return [{ url, status, headers: {}, cookies: [] }, new TextEncoder().encode(text).buffer];
+    };
+    const extension = new MadaraDexExtension();
+    const details = await extension.getChapterDetails({
+      chapterId: "chapter-126",
+      sourceManga: { mangaId: "some-title" } as never,
+      chapNum: 126,
+      langCode: "🇬🇧",
+    });
+    expect(details)
+      .to.have.property("pages")
+      .that.deep.equals(["https://cdn.madaradex.org/manga_x/chapter-126/0.webp"]);
+    expect(grantBody).to.include("action=mdx_image_auth_refresh");
+    expect(grantBody).to.include(
+      `chapter_claim=${encodeURIComponent("/manga_x/chapter-126/|tok")}`,
+    );
+    expect(grantBody).to.include("cf-turnstile-response=&");
+  });
+
+  suite.test("falls back to the web view when the server wants verification", async () => {
+    Application.scheduleRequest = async ({ url, method }) => {
+      let status = 200;
+      let text = `<div class="reading-content"><div class="page-break"><img class="wp-manga-chapter-img" data-mdx-protected-src="https://cdn.madaradex.org/manga_x/chapter-126/0.webp" data-mdx-chapter-claim="/manga_x/chapter-126/|tok"></div></div>`;
+      if (url.startsWith("https://cdn.madaradex.org/")) status = 403;
+      if (method === "POST") {
+        status = 403;
+        text =
+          '{"success":false,"data":{"verificationRequired":true,"challenge":"0123456789abcdef0123456789abcdef"}}';
+      }
+      return [{ url, status, headers: {}, cookies: [] }, new TextEncoder().encode(text).buffer];
+    };
+    const extension = new MadaraDexExtension();
+    const error = await extension
+      .getChapterDetails({
+        chapterId: "chapter-126",
+        sourceManga: { mangaId: "some-title" } as never,
+        chapNum: 126,
+        langCode: "🇬🇧",
+      })
+      .catch((e: unknown) => e);
+    expect(error).to.be.instanceOf(CloudflareError);
+  });
+
+  suite.test("keeps madaradex.org session cookies with an expiry", async () => {
+    const store = new MadaraDexCookieStore({ storage: "memory" });
+    await store.interceptResponse(
+      { url: "https://madaradex.org/", method: "GET" },
+      {
+        url: "https://madaradex.org/",
+        status: 200,
+        headers: {},
+        cookies: [
+          { name: "session", value: "a", domain: ".madaradex.org", path: "/" },
+          { name: "other", value: "b", domain: "example.com", path: "/" },
+        ],
+      },
+      new ArrayBuffer(0),
+    );
+    store.setCookie({ name: "cdn", value: "c", domain: "cdn.madaradex.org", path: "/" });
+    const byName = Object.fromEntries(store.cookies.map((c) => [c.name, c]));
+    expect(byName.session.expires?.getTime()).to.be.greaterThan(Date.now() + 29 * 86400000);
+    expect(byName.cdn.expires).to.be.instanceOf(Date);
+    expect(byName.other.expires).to.equal(undefined);
   });
 
   try {

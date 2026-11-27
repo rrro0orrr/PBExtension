@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-27T20:44:44.103Z",
+  "buildTime": "2026-11-27T22:11:24.317Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
@@ -345,7 +345,7 @@
     {
       "name": "Manhwa18.cc",
       "description": "Extension that pulls adult manhwa from manhwa18.cc",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "ADULT",

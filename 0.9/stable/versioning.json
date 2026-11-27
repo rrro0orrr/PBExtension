@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-27T17:14:13.847Z",
+  "buildTime": "2026-11-27T17:14:55.578Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
@@ -66,7 +66,7 @@
     {
       "name": "HentaiCosplay",
       "description": "Extension that pulls content from hentai-cosplay-xxx.com",
-      "version": "1.2.1",
+      "version": "1.2.2",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "ADULT",

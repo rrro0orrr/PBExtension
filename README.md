@@ -12,6 +12,8 @@ This repository is a fork of [**KakarotExtension**](https://github.com/karrot0/K
 - Hitomi
 - LNORI
 - MadaraDex
+- Manga District
+- Manhwa18.cc
 - Mangak
 - MVLEMPYR
 - MangaBall

@@ -1,5 +1,7 @@
 import {
   Chapter,
+  ChapterDetails,
+  CloudflareError,
   ContentRating,
   DiscoverSection,
   DiscoverSectionItem,
@@ -32,7 +34,9 @@ export class MadaraDexExtension extends MadaraExtension {
       baseUrl: "https://madaradex.org",
       mangaSubString: "title",
       useNewChapterEndpoint: false,
-      mdxAuth: true,
+      // The old mdx_fp/mdx_auth cookie scheme is gone from the site; chapter
+      // images are now gated by a Turnstile-backed grant (see getChapterDetails).
+      mdxAuth: false,
       contentRating: ContentRating.MATURE,
       langCode: "🇬🇧",
     });
@@ -329,6 +333,42 @@ export class MadaraDexExtension extends MadaraExtension {
     }
 
     return chapters;
+  }
+
+  // ----------------------------------------------------------------
+  // Chapter pages
+  // ----------------------------------------------------------------
+
+  /**
+   * cdn.madaradex.org only serves chapter images once the site has granted
+   * access, which needs a Cloudflare Turnstile check passed in a real browser
+   * (the site's `mdx_image_auth_refresh` flow). The extension does not solve
+   * that check. Instead, if the first page is refused, throw a CloudflareError
+   * for the chapter page: Paperback then offers its web view, the reader taps
+   * through the check on the real site, and cloudflareBypassCompleted stores
+   * the cookies the site sets so the images load.
+   */
+  override async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
+    const details = await super.getChapterDetails(chapter);
+    const first = "pages" in details ? details.pages[0] : undefined;
+    if (!first || !/^https?:\/\/cdn\.madaradex\.org\//i.test(first)) return details;
+
+    const [response] = await Application.scheduleRequest({ url: first, method: "GET" });
+    if (response.status === 401 || response.status === 403) {
+      throw new CloudflareError({
+        url: await this.chapterPageUrl(chapter),
+        method: "GET",
+        headers: { "user-agent": await Application.getDefaultUserAgent() },
+      });
+    }
+    return details;
+  }
+
+  private async chapterPageUrl(chapter: Chapter): Promise<string> {
+    const id = this.safeDecode(chapter.chapterId);
+    if (id.startsWith("/")) return `${this.baseUrl}${id.replace(/\/+$/, "")}/`;
+    const mangaUrl = this.buildMangaUrl(await this.resolveMangaId(chapter.sourceManga.mangaId));
+    return `${mangaUrl.replace(/\/+$/, "")}/${id}/`;
   }
 }
 

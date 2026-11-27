@@ -1,4 +1,4 @@
-import { type TestLogger } from "@paperback/types";
+import { CloudflareError, type TestLogger } from "@paperback/types";
 import { expect } from "chai";
 
 import { MadaraDexExtension } from "../MadaraDex/main.js";
@@ -157,6 +157,25 @@ export async function runTests(logger: TestLogger) {
         "https://cdn.madaradex.org/manga_x/chapter-171/0.webp",
         "https://cdn.madaradex.org/manga_x/chapter-171/1.webp",
       ]);
+  });
+
+  suite.test("a refused CDN image asks for verification on the chapter page", async () => {
+    Application.scheduleRequest = async ({ url }) => {
+      const status = url.startsWith("https://cdn.madaradex.org/") ? 403 : 200;
+      const body = `<div class="reading-content"><div class="page-break"><img class="wp-manga-chapter-img" data-mdx-protected-src="https://cdn.madaradex.org/manga_x/chapter-126/0.webp"></div></div>`;
+      return [{ url, status, headers: {}, cookies: [] }, new TextEncoder().encode(body).buffer];
+    };
+    const extension = new MadaraDexExtension();
+    const error = await extension
+      .getChapterDetails({
+        chapterId: "chapter-126",
+        sourceManga: { mangaId: "some-title" } as never,
+        chapNum: 126,
+        langCode: "🇬🇧",
+      })
+      .catch((e: unknown) => e);
+    expect(error).to.be.instanceOf(CloudflareError);
+    expect(JSON.stringify(error)).to.include("https://madaradex.org/title/some-title/chapter-126/");
   });
 
   try {

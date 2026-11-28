@@ -1,5 +1,5 @@
 {
-  "buildTime": "2026-11-27T22:25:18.476Z",
+  "buildTime": "2026-11-28T02:18:07.481Z",
   "builtWith": {
     "toolchain": "1.0.0-alpha.92",
     "types": "1.0.0-alpha.92"
@@ -239,29 +239,6 @@
         }
       ],
       "id": "MangaDistrict"
-    },
-    {
-      "name": "Mangaball",
-      "description": "Extension that pulls content from mangaball.net.",
-      "version": "1.1",
-      "icon": "icon.png",
-      "language": "multi",
-      "contentRating": "ADULT",
-      "capabilities": [
-        1,
-        4,
-        64,
-        16,
-        32
-      ],
-      "badges": [],
-      "developers": [
-        {
-          "name": "Karrot",
-          "github": "https://github.com/karrot0"
-        }
-      ],
-      "id": "Mangaball"
     },
     {
       "name": "Mangacloud",
@@ -561,7 +538,7 @@
     {
       "name": "ScribbleHub",
       "description": "Extension that pulls content from scribblehub.com.",
-      "version": "1.0.0-alpha.5",
+      "version": "1.0.0-alpha.6",
       "icon": "icon.png",
       "language": "en",
       "contentRating": "SAFE",

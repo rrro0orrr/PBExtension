@@ -32,6 +32,7 @@ import { ScribbleHubInterceptor } from "./interceptors";
 import { type ScribbleHubMetadata, type ScribbleHubSearchMeta, SORTS } from "./model";
 
 const baseUrl = "https://www.scribblehub.com";
+const MAX_CHAPTER_PAGES = 200;
 
 type ScribbleHubImplementation = Extension &
   SearchResultsProviding &
@@ -212,9 +213,9 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
   async getChapters(sourceManga: SourceManga): Promise<Chapter[]> {
     const numericId = sourceManga.mangaId.split("/")[0];
     const chapters: Chapter[] = [];
-    let page = 1;
+    const seenChapterIds = new Set<string>();
 
-    while (true) {
+    for (let page = 1; page <= MAX_CHAPTER_PAGES; page++) {
       const $ = await this.fetchCheerio({
         url: `${baseUrl}/wp-admin/admin-ajax.php`,
         method: "POST",
@@ -226,7 +227,8 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
       });
 
       const rows = $("li.toc_w");
-      if (rows.length === 0) break;
+      if (rows.length === 0) return chapters;
+      const previousCount = chapters.length;
 
       rows.each((_, el) => {
         const li = $(el);
@@ -236,7 +238,8 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
 
         const chapterIdMatch = href.match(/\/(read\/.+\/chapter\/\d+)/);
         const chapterId = chapterIdMatch?.[1] ?? "";
-        if (!chapterId) return;
+        if (!chapterId || seenChapterIds.has(chapterId)) return;
+        seenChapterIds.add(chapterId);
 
         const chapNum = parseInt(li.attr("order") ?? "0", 10) || 0;
 
@@ -256,10 +259,10 @@ export class ScribbleHubExtension implements ScribbleHubImplementation {
         });
       });
 
-      page++;
+      if (chapters.length === previousCount) return chapters;
     }
 
-    return chapters;
+    throw new Error(`ScribbleHub chapter list exceeded ${MAX_CHAPTER_PAGES} pages.`);
   }
 
   async getChapterDetails(chapter: Chapter): Promise<ChapterDetails> {
